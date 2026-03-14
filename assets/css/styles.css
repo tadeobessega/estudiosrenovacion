@@ -14,12 +14,19 @@ a{
 }
 :root {
   /* Colores principales */
-  /*--primary-color: #3276f3;*/
-  --primary-color: #1D71A3;
+  --primary-color: #3276f3;
   --primary-dark: linear-gradient(135deg,#3A90DA 0%,#38d2f9 100%);
   /*--secondary-color: #1e40af;*/
   --secondary-color:#38B6FF;
   --accent-color: #3A90DA ;
+  --ceer:#020995;
+  --cedhys: #2850bd; 
+  --ceeir: #489bdc;
+  --oper: #780000;
+  --opal: #006D77;
+  --opsa: #a64319; 
+  --ciren: #014b3e; 
+
 
   /* Colores neutros */
   --white: #ffffff;
@@ -69,7 +76,7 @@ a{
 
   /* Transiciones */
   --transition-fast: 0.15s ease-in-out;
-  --transition-normal: 0.3s ease-in-out;
+  --transition-normal:  box-shadow 0.3s ease, border-color 0.3s ease;
   --transition-slow: 0.5s ease-in-out;
 }
 
@@ -314,9 +321,10 @@ main {
 
 
 /* Sections */
-section {
+section:not(.hero-slider) {
   padding: var(--spacing-3xl) 0;
 }
+
 
 .section-header {
   text-align: center;
@@ -338,6 +346,166 @@ section {
 }
 
 
+/*SLIDER */
+
+/* HERO SLIDER */
+.hero-slider {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 35vh; 
+  min-height: 500px;
+  margin: 0;
+  background: none;
+}
+
+/* eliminamos el padding de los contenedores internos */
+.hero-slider .container {
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+}
+
+.slider-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Slides */
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+}
+
+/* Fondos por data-center */
+.slide[data-center="ceer"]  { background-color: var(--ceer); }
+.slide[data-center="cedhys"]{ background-color: var(--cedhys); }
+.slide[data-center="oper"]  { background: linear-gradient(135deg, var(--oper, #60a5fa) 0%, #60a5fa 100%); }
+.slide[data-center="ceeir"] { background-color: var(--ceeir); }
+.slide[data-center="opal"]  { background-color: var(--opal); }
+.slide[data-center="ciren"] {background-color: var(--ciren);}
+.slide[data-center="opsa"]  { background-color: var(--opsa); }
+
+
+/* Contenido de cada slide */
+.slide-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;       /* centra verticalmente */
+  justify-content: flex-start; /* alinea a la izquierda */
+  padding-left: 8%;          /* margen interno a la izquierda */
+  box-sizing: border-box;
+}
+
+.slide-text {
+  max-width: 700px;
+  text-align: left;
+  position: relative;
+  z-index: 2;
+}
+
+.slide-text h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1.2rem;
+  line-height: 1.2;
+  color: white;
+}
+
+.slide-text p {
+  font-size: 1.3rem;
+  margin-bottom: 2.5rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.slide-text .btn {
+  margin-right: 1rem;
+}
+
+/* Controles (botones flecha) */
+.slider-controls {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 5; /* encima de todo */
+  pointer-events: none;
+}
+
+.prev-btn,
+.next-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  pointer-events: auto;
+}
+
+.prev-btn:hover,
+.next-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Dots */
+.slider-dots {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 6; /* sobre todo lo demás */
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.dot:hover {
+  transform: scale(1.2);
+}
+
+.dot.active {
+  background: white;
+}
+
+/* Si las slides usan imagen */
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 
 /* Observatorios Section */
 .observatorios {
@@ -355,49 +523,70 @@ section {
 .observatorio-card {
   background: var(--white);
   border-radius: var(--border-radius-xl);
-  padding: var(--spacing-xl);
+  padding: 0;
   text-align: center;
   box-shadow: var(--shadow-md);
   transition: var(--transition-normal);
   cursor: pointer;
   border: 2px solid transparent;
+  overflow: hidden;
+  position: relative;
 }
 
 .observatorio-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--primary-color);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--gray-300);
 }
 
+/* Contenedor de imagen */
+.card-image {
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+
+/* Imagen */
+.observatorio-logo {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+  border-radius: 0;
+  margin: 0;
+  transition: transform 0.5s ease; /* transición suave para el zoom */
+}
+
+/* Efecto de zoom cuando se pasa por la tarjeta */
+.observatorio-card:hover .observatorio-logo {
+  transform: scale(1.25); /* leve zoom */
+}
+
+/* Se mantiene, aunque su uso en 768px+ debe ser revisado */
 .observatorio-center {
   grid-column: 1;
   margin: 0 auto;
   max-width: 400px;
 }
 
-.card-image {
-  margin-bottom: var(--spacing-lg);
-}
-
-.observatorio-logo {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  margin: 0 auto;
-  border-radius: 50%;
-}
-
 .card-title {
   font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--gray-900);
+  /* Restaura margen y padding lateral */
+  margin-top: var(--spacing-xl);
   margin-bottom: var(--spacing-sm);
+  padding-left: var(--spacing-xl);
+  padding-right: var(--spacing-xl);
 }
 
 .card-description {
-  color: var(--gray-600);
-  margin-bottom: var(--spacing-lg);
+  color: var(--gray-900);
   line-height: 1.6;
+  /* Restaura padding lateral y margen inferior */
+  padding-left: var(--spacing-xl);
+  padding-right: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
 }
 
 .card-social {
@@ -436,6 +625,10 @@ section {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-xl);
+}
+
+.informes{
+  background-color: var(--gray-50);
 }
 
 .informe-card {
@@ -553,7 +746,7 @@ section {
 
 /* Novedades Section */
 .novedades {
-  background: var(--gray-50);
+  background: var(--white);
 }
 
 .novedades-grid {
@@ -565,7 +758,7 @@ section {
 .novedad-card {
   background: var(--white);
   border-radius: var(--border-radius-lg);
-  padding: var(--spacing-xl);
+  overflow: hidden; /* asegura que la imagen respete los bordes redondeados */
   box-shadow: var(--shadow-sm);
   transition: var(--transition-normal);
 }
@@ -573,6 +766,30 @@ section {
 .novedad-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+}
+
+/* Imagen superior */
+.novedad-image {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.novedad-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.novedad-card:hover .novedad-image img {
+  transform: scale(1.05);
+}
+
+/* Contenido de la card */
+.novedad-content {
+  padding: var(--spacing-xl);
 }
 
 .novedad-date {
@@ -595,9 +812,17 @@ section {
   line-height: 1.6;
 }
 
+/* Enlace */
+.novedad-card a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+
 /* Contacto Section */
 .contacto {
-  background: var(--white);
+  background: var(--gray-50);
 }
 
 .contacto-content {
@@ -633,7 +858,7 @@ section {
 .contacto-form {
   text-align: center;
   padding: 1.5rem;
-  background: var(--gray-50);
+  background: var(--gray-200);
   border-radius: var(--border-radius-xl);
 }
 
@@ -663,7 +888,6 @@ section {
   height: 40px;
   width: auto;
   margin-bottom: var(--spacing-md);
-  filter: brightness(0) invert(1);
 }
 
 .footer-description {
@@ -736,11 +960,12 @@ section {
     justify-content: center;
   }
 
+  /* Adaptación a Tablet: 3 Columnas (768px a 1023px) */
   .observatorios-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     max-width: none;
   }
-
+  
   .observatorio-center {
     grid-column: 1 / -1;
     max-width: 400px;
@@ -785,10 +1010,12 @@ section {
     font-size: var(--font-size-5xl);
   }
 
+  /* Adaptación a Desktop: 3 Columnas */
   .observatorios-grid {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 900px;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1000px; /* Se ajusta para que quepan 6 tarjetas */
   }
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
