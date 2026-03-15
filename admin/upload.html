@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Informe - Centro de Estudios Renovación</title>
+    <meta name="description" content="Panel de administración - Centro de Estudios Renovación">
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-page">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <a href="../index.html" class="admin-header-logo">
+                <img src="../assets/img/logo-header.png" alt="Centro de Estudios Renovación">
+            </a>
+            <nav class="admin-nav">
+                <a href="index.html" class="admin-nav-link">
+                    <i class="fas fa-file-alt"></i> Informes
+                </a>
+                <a href="upload.html" class="admin-nav-link active">
+                    <i class="fas fa-upload"></i> Subir
+                </a>
+                <a href="users.html" class="admin-nav-link" id="usersNavLink" style="display: none;">
+                    <i class="fas fa-users"></i> Usuarios
+                </a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <div class="admin-user-info">
+                <div class="admin-user-avatar" id="userAvatar">U</div>
+                <div>
+                    <div class="admin-user-name" id="userName">Usuario</div>
+                    <div class="admin-user-role" id="userRole">Cargando...</div>
+                </div>
+            </div>
+            <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="admin-container">
+            <!-- Back link -->
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Volver a informes
+            </a>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title" id="pageTitle">Subir Nuevo Informe</h1>
+                <p class="page-subtitle" id="pageSubtitle">Completa los datos y sube el archivo PDF</p>
+            </div>
+
+            <!-- Upload Form -->
+            <div class="admin-card">
+                <form id="uploadForm">
+                    <div id="formMessage" class="alert" style="display: none;"></div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="titulo">Título del Informe *</label>
+                        <input type="text" id="titulo" class="form-input" placeholder="Ej: Análisis de la Política Exterior Argentina" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="centro">Centro de Investigación *</label>
+                            <select id="centro" class="form-select" required>
+                                <option value="">Selecciona el centro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="tag">Tipo de Publicación *</label>
+                            <select id="tag" class="form-select" required>
+                                <option value="">Selecciona el tipo</option>
+                                <option value="Informe">Informe</option>
+                                <option value="Informe Especial">Informe Especial</option>
+                                <option value="Análisis">Análisis</option>
+                                <option value="Investigación">Investigación</option>
+                                <option value="Documento de Trabajo">Documento de Trabajo</option>
+                                <option value="Policy Brief">Policy Brief</option>
+                                <option value="Nota Técnica">Nota Técnica</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="fecha">Fecha de Publicación *</label>
+                        <input type="date" id="fecha" class="form-input" required>
+                    </div>
+
+                    <!-- PDF Upload -->
+                    <div class="form-group">
+                        <label class="form-label">Archivo PDF *</label>
+                        <div class="file-upload-zone" id="dropZone">
+                            <div class="file-upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p class="file-upload-text">Arrastra tu archivo PDF aquí o haz clic para seleccionar</p>
+                            <p class="file-upload-hint">Tamaño máximo: 10MB</p>
+                            <input type="file" id="pdfFile" accept=".pdf" style="display: none;">
+                        </div>
+                        <div id="filePreview" class="file-upload-preview" style="display: none;">
+                            <div class="file-upload-preview-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="file-upload-preview-info">
+                                <div class="file-upload-preview-name" id="fileName"></div>
+                                <div class="file-upload-preview-size" id="fileSize"></div>
+                            </div>
+                            <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="clearFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Existing PDF info (for edit mode) -->
+                        <div id="existingPdf" class="file-upload-preview" style="display: none;">
+                            <div class="file-upload-preview-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="file-upload-preview-info">
+                                <div class="file-upload-preview-name">PDF actual</div>
+                                <div class="file-upload-preview-size">
+                                    <a id="existingPdfLink" href="#" target="_blank" class="link-text">Ver PDF</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <a href="index.html" class="btn-admin btn-admin-secondary">Cancelar</a>
+                        <button type="submit" class="btn-admin btn-admin-primary" id="submitBtn">
+                            <span class="btn-text" id="submitBtnText">Publicar Informe</span>
+                            <span class="spinner" style="display: none;"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="../assets/js/admin-config.js"></script>
+    <script>
+        let currentUser = null;
+        let selectedFile = null;
+        let editMode = false;
+        let editReportId = null;
+        let existingPdfUrl = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentUser = checkAuth();
+            if (!currentUser) return;
+
+            // Update UI
+            document.getElementById('userName').textContent = currentUser.email;
+            document.getElementById('userRole').textContent = currentUser.role === 'admin' ? 'Administrador' : currentUser.centro;
+            document.getElementById('userAvatar').textContent = currentUser.email.charAt(0).toUpperCase();
+
+            // Show admin links
+            if (currentUser.role === 'admin') {
+                document.getElementById('usersNavLink').style.display = 'inline-flex';
+            }
+
+            // Populate centro select
+            populateCentroSelect();
+
+            // Set today as default date
+            document.getElementById('fecha').valueAsDate = new Date();
+
+            // Setup file upload
+            setupFileUpload();
+
+            // Check if edit mode
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('edit');
+            if (editId) {
+                await loadReportForEdit(editId);
+            }
+        });
+
+        function populateCentroSelect() {
+            const select = document.getElementById('centro');
+            
+            if (currentUser.role === 'admin') {
+                CENTROS.forEach(centro => {
+                    select.innerHTML += `<option value="${centro.id}">${centro.id} - ${centro.name}</option>`;
+                });
+            } else {
+                select.innerHTML = `<option value="${currentUser.centro}">${currentUser.centro}</option>`;
+                select.disabled = true;
+            }
+        }
+
+        async function loadReportForEdit(reportId) {
+            try {
+                const response = await apiCall('getReport', { id: reportId });
+                
+                if (response.success) {
+                    editMode = true;
+                    editReportId = reportId;
+                    const report = response.report;
+
+                    // Update page title
+                    document.getElementById('pageTitle').textContent = 'Editar Informe';
+                    document.getElementById('pageSubtitle').textContent = 'Modifica los datos del informe';
+                    document.getElementById('submitBtnText').textContent = 'Guardar Cambios';
+
+                    // Fill form
+                    document.getElementById('titulo').value = report.titulo;
+                    document.getElementById('centro').value = report.centro;
+                    document.getElementById('tag').value = report.tag;
+                    
+                    // Handle date
+                    if (report.fecha) {
+                        const date = new Date(report.fecha);
+                        document.getElementById('fecha').valueAsDate = date;
+                    }
+
+                    // Show existing PDF
+                    existingPdfUrl = report.pdf_url;
+                    document.getElementById('existingPdf').style.display = 'flex';
+                    document.getElementById('existingPdfLink').href = report.pdf_url;
+
+                    // Check permission
+                    if (currentUser.role !== 'admin' && report.centro !== currentUser.centro) {
+                        showMessage('No tienes permiso para editar este informe', 'danger');
+                        document.getElementById('submitBtn').disabled = true;
+                    }
+                } else {
+                    showMessage('Informe no encontrado', 'danger');
+                }
+            } catch (error) {
+                console.error('Load report error:', error);
+                showMessage('Error al cargar el informe', 'danger');
+            }
+        }
+
+        function setupFileUpload() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('pdfFile');
+
+            // Click to upload
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                }
+            });
+        }
+
+        function handleFile(file) {
+            // Validate file type
+            if (file.type !== 'application/pdf') {
+                showMessage('Solo se permiten archivos PDF', 'danger');
+                return;
+            }
+
+            // Validate file size (10MB max)
+            if (file.size > 10 * 1024 * 1024) {
+                showMessage('El archivo es muy grande. Máximo 10MB', 'danger');
+                return;
+            }
+
+            selectedFile = file;
+
+            // Show preview
+            document.getElementById('dropZone').style.display = 'none';
+            document.getElementById('existingPdf').style.display = 'none';
+            document.getElementById('filePreview').style.display = 'flex';
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+        }
+
+        function clearFile() {
+            selectedFile = null;
+            document.getElementById('pdfFile').value = '';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('dropZone').style.display = 'block';
+            
+            if (editMode && existingPdfUrl) {
+                document.getElementById('existingPdf').style.display = 'flex';
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // Form submit
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const titulo = document.getElementById('titulo').value.trim();
+            const centro = document.getElementById('centro').value;
+            const tag = document.getElementById('tag').value;
+            const fecha = document.getElementById('fecha').value;
+
+            // Validate
+            if (!titulo || !centro || !tag || !fecha) {
+                showMessage('Por favor completa todos los campos', 'danger');
+                return;
+            }
+
+            if (!editMode && !selectedFile) {
+                showMessage('Por favor selecciona un archivo PDF', 'danger');
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.querySelector('.btn-text').style.display = 'none';
+            btn.querySelector('.spinner').style.display = 'inline-block';
+            btn.disabled = true;
+
+            try {
+                let pdfUrl = existingPdfUrl;
+
+                // Upload new PDF if selected
+                if (selectedFile) {
+                    showMessage('Subiendo PDF...', 'info');
+                    const uploadResult = await uploadPDF(selectedFile);
+                    
+                    if (!uploadResult.success) {
+                        throw new Error(uploadResult.error || 'Error al subir PDF');
+                    }
+                    
+                    pdfUrl = uploadResult.url;
+                }
+
+                // Create/update report
+                const reportData = {
+                    titulo,
+                    centro,
+                    tag,
+                    fecha,
+                    pdf_url: pdfUrl
+                };
+
+                let response;
+                if (editMode) {
+                    response = await apiCall('updateReport', {
+                        id: editReportId,
+                        data: JSON.stringify(reportData)
+                    });
+                } else {
+                    response = await apiCall('createReport', {
+                        data: JSON.stringify(reportData)
+                    });
+                }
+
+                if (response.success) {
+                    showNotification(editMode ? 'Informe actualizado correctamente' : 'Informe publicado correctamente', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    throw new Error(response.error || 'Error al guardar el informe');
+                }
+
+            } catch (error) {
+                console.error('Submit error:', error);
+                showMessage(error.message || 'Error al procesar el formulario', 'danger');
+                
+                btn.querySelector('.btn-text').style.display = 'inline';
+                btn.querySelector('.spinner').style.display = 'none';
+                btn.disabled = false;
+            }
+        });
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('formMessage');
+            messageDiv.className = `alert alert-${type}`;
+            messageDiv.innerHTML = `<i class="fas fa-${type === 'danger' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i> ${message}`;
+            messageDiv.style.display = 'flex';
+            
+            // Scroll to message
+            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    </script>
+</body>
+</html>

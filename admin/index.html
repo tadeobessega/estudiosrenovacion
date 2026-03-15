@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Centro de Estudios Renovación</title>
+    <meta name="description" content="Panel de administración - Centro de Estudios Renovación">
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-page">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <a href="../index.html" class="admin-header-logo">
+                <img src="../assets/img/logo-header.png" alt="Centro de Estudios Renovación">
+            </a>
+            <nav class="admin-nav">
+                <a href="index.html" class="admin-nav-link active">
+                    <i class="fas fa-file-alt"></i> Informes
+                </a>
+                <a href="upload.html" class="admin-nav-link">
+                    <i class="fas fa-upload"></i> Subir
+                </a>
+                <a href="users.html" class="admin-nav-link" id="usersNavLink" style="display: none;">
+                    <i class="fas fa-users"></i> Usuarios
+                </a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <div class="admin-user-info">
+                <div class="admin-user-avatar" id="userAvatar">U</div>
+                <div>
+                    <div class="admin-user-name" id="userName">Usuario</div>
+                    <div class="admin-user-role" id="userRole">Cargando...</div>
+                </div>
+            </div>
+            <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="admin-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Panel de Informes</h1>
+                <p class="page-subtitle">Gestiona los informes de tu centro de investigación</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid-admin" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-card-icon primary">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="stat-card-value" id="totalReports">-</div>
+                    <div class="stat-card-label">Total Informes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon success">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-card-value" id="recentReports">-</div>
+                    <div class="stat-card-label">Este Mes</div>
+                </div>
+                <div class="stat-card" id="pendingUsersCard" style="display: none;">
+                    <div class="stat-card-icon warning">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <div class="stat-card-value" id="pendingUsers">-</div>
+                    <div class="stat-card-label">Usuarios Pendientes</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="admin-card">
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <select id="filterCentro" class="form-select" style="width: auto;">
+                            <option value="">Todos los centros</option>
+                        </select>
+                        <input type="text" id="searchInput" class="form-input" placeholder="Buscar informe..." style="width: auto; min-width: 200px;">
+                    </div>
+                    <a href="upload.html" class="btn-admin btn-admin-primary">
+                        <i class="fas fa-plus"></i> Nuevo Informe
+                    </a>
+                </div>
+            </div>
+
+            <!-- Reports Table -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2 class="admin-card-title">Informes Publicados</h2>
+                </div>
+                
+                <div id="reportsContainer">
+                    <div style="text-align: center; padding: 2rem;">
+                        <div class="spinner spinner-dark" style="width: 40px; height: 40px;"></div>
+                        <p style="margin-top: 1rem; color: var(--admin-text-muted);">Cargando informes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Eliminar Informe</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar el informe "<strong id="deleteReportTitle"></strong>"?</p>
+                <p style="color: var(--admin-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+                    Esta acción no se puede deshacer.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-admin btn-admin-secondary" onclick="closeDeleteModal()">Cancelar</button>
+                <button class="btn-admin btn-admin-danger" id="confirmDeleteBtn" onclick="confirmDelete()">
+                    <span class="btn-text">Eliminar</span>
+                    <span class="spinner" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/admin-config.js"></script>
+    <script>
+        let currentUser = null;
+        let allReports = [];
+        let reportToDelete = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentUser = checkAuth();
+            if (!currentUser) return;
+
+            // Update UI
+            document.getElementById('userName').textContent = currentUser.email;
+            document.getElementById('userRole').textContent = currentUser.role === 'admin' ? 'Administrador' : currentUser.centro;
+            document.getElementById('userAvatar').textContent = currentUser.email.charAt(0).toUpperCase();
+
+            // Show admin links
+            if (currentUser.role === 'admin') {
+                document.getElementById('usersNavLink').style.display = 'inline-flex';
+                document.getElementById('pendingUsersCard').style.display = 'block';
+                loadPendingUsers();
+            }
+
+            // Populate centro filter
+            populateCentroFilter();
+
+            // Load reports
+            await loadReports();
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', filterReports);
+            document.getElementById('filterCentro').addEventListener('change', filterReports);
+        });
+
+        function populateCentroFilter() {
+            const select = document.getElementById('filterCentro');
+            
+            // If not admin, only show their centro
+            if (currentUser.role !== 'admin') {
+                select.innerHTML = `<option value="${currentUser.centro}">${currentUser.centro}</option>`;
+                select.disabled = true;
+            } else {
+                select.innerHTML = '<option value="">Todos los centros</option>';
+                CENTROS.forEach(centro => {
+                    select.innerHTML += `<option value="${centro.id}">${centro.id}</option>`;
+                });
+            }
+        }
+
+        async function loadReports() {
+            try {
+                const centro = currentUser.role === 'admin' ? 'all' : currentUser.centro;
+                const response = await apiCall('getReports', { centro });
+                
+                if (response.success) {
+                    allReports = response.reports;
+                    updateStats();
+                    renderReports(allReports);
+                } else {
+                    showError(response.error || 'Error al cargar informes');
+                }
+            } catch (error) {
+                console.error('Load reports error:', error);
+                showError('Error de conexión al cargar informes');
+            }
+        }
+
+        async function loadPendingUsers() {
+            try {
+                const response = await apiCall('getUsers');
+                if (response.success) {
+                    const pending = response.users.filter(u => !u.approved && u.role !== 'admin');
+                    document.getElementById('pendingUsers').textContent = pending.length;
+                }
+            } catch (error) {
+                console.error('Load users error:', error);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalReports').textContent = allReports.length;
+            
+            // Count reports from this month
+            const now = new Date();
+            const thisMonth = allReports.filter(r => {
+                const reportDate = new Date(r.created_at);
+                return reportDate.getMonth() === now.getMonth() && reportDate.getFullYear() === now.getFullYear();
+            });
+            document.getElementById('recentReports').textContent = thisMonth.length;
+        }
+
+        function filterReports() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const centroFilter = document.getElementById('filterCentro').value;
+
+            let filtered = allReports;
+
+            if (centroFilter) {
+                filtered = filtered.filter(r => r.centro === centroFilter);
+            }
+
+            if (searchTerm) {
+                filtered = filtered.filter(r => 
+                    r.titulo.toLowerCase().includes(searchTerm) ||
+                    r.tag.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            renderReports(filtered);
+        }
+
+        function renderReports(reports) {
+            const container = document.getElementById('reportsContainer');
+
+            if (reports.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i class="fas fa-folder-open"></i></div>
+                        <h3 class="empty-state-title">No hay informes</h3>
+                        <p>No se encontraron informes. <a href="upload.html" class="link-text">Sube uno nuevo</a></p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Centro</th>
+                                <th>Tag</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reports.map(report => `
+                                <tr>
+                                    <td>
+                                        <strong>${escapeHtml(report.titulo)}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge-centro badge-${report.centro.toLowerCase()}">${report.centro}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-primary">${escapeHtml(report.tag)}</span>
+                                    </td>
+                                    <td>${formatDateShort(report.fecha)}</td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <a href="${report.pdf_url}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="upload.html?edit=${report.id}" class="btn-admin btn-admin-secondary btn-admin-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            ${canDeleteReport(report) ? `
+                                                <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteModal('${report.id}', '${escapeHtml(report.titulo).replace(/'/g, "\\'")}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            ` : ''}
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function canDeleteReport(report) {
+            return currentUser.role === 'admin' || report.centro === currentUser.centro;
+        }
+
+        function openDeleteModal(reportId, reportTitle) {
+            reportToDelete = reportId;
+            document.getElementById('deleteReportTitle').textContent = reportTitle;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            reportToDelete = null;
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        async function confirmDelete() {
+            if (!reportToDelete) return;
+
+            const btn = document.getElementById('confirmDeleteBtn');
+            btn.querySelector('.btn-text').style.display = 'none';
+            btn.querySelector('.spinner').style.display = 'inline-block';
+            btn.disabled = true;
+
+            try {
+                const response = await apiCall('deleteReport', {
+                    id: reportToDelete,
+                    userEmail: currentUser.email,
+                    userRole: currentUser.role
+                });
+
+                if (response.success) {
+                    showNotification('Informe eliminado correctamente', 'success');
+                    closeDeleteModal();
+                    await loadReports();
+                } else {
+                    showNotification(response.error || 'Error al eliminar', 'error');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                showNotification('Error de conexión', 'error');
+            }
+
+            btn.querySelector('.btn-text').style.display = 'inline';
+            btn.querySelector('.spinner').style.display = 'none';
+            btn.disabled = false;
+        }
+
+        function showError(message) {
+            document.getElementById('reportsContainer').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
