@@ -1,22 +1,5 @@
-/**
- * Admin Configuration
- * 
- * IMPORTANT: Update the API_URL with your Google Apps Script deployment URL
- * 
- * To get your API URL:
- * 1. Open your Google Apps Script project
- * 2. Click Deploy > New deployment
- * 3. Select "Web app"
- * 4. Set "Execute as" to "Me"
- * 5. Set "Who has access" to "Anyone"
- * 6. Click Deploy
- * 7. Copy the URL and paste it below
- */
+const API_URL = 'https://script.google.com/macros/s/AKfycby6Lb2jHPHYs8jsuNxZpM9b6OBIcH5y6isw8WRBidPSIlpdTOarYzKv1dnueEpll12R/exec';
 
-// Replace this with your Google Apps Script deployment URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbydN-YoWpZQ4_4ZwlKo60Ay_LifKRAZyP9mycbEwgucbWLju9GKKkjDLduY_0gbxdYH/exec';
-
-// Research centers configuration
 const CENTROS = [
     { id: 'CEER', name: 'Centro de Estudios Económicos', color: '#020995' },
     { id: 'CEEIR', name: 'Centro de Estudios Estratégicos Internacionales', color: '#489bdc' },
@@ -27,7 +10,6 @@ const CENTROS = [
     { id: 'CIREN', name: 'Centro de Estudios Científicos', color: '#014b3e' }
 ];
 
-// Report tags
 const TAGS = [
     'Informe',
     'Informe Especial',
@@ -38,7 +20,6 @@ const TAGS = [
     'Nota Técnica'
 ];
 
-// Utility functions
 function getCentroColor(centroId) {
     const centro = CENTROS.find(c => c.id === centroId);
     return centro ? centro.color : '#64748b';
@@ -52,23 +33,15 @@ function getCentroName(centroId) {
 function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-AR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    return date.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function formatDateShort(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-AR', {
-        year: 'numeric',
-        month: 'short'
-    });
+    return date.toLocaleDateString('es-AR', { year: 'numeric', month: 'short' });
 }
 
-// Check authentication
 function checkAuth() {
     const user = JSON.parse(localStorage.getItem('adminUser'));
     if (!user) {
@@ -78,47 +51,52 @@ function checkAuth() {
     return user;
 }
 
-// Logout function
 function logout() {
     localStorage.removeItem('adminUser');
     window.location.href = 'login.html';
 }
 
-// API helper functions
+// GET con query params — funciona siempre con Apps Script
 async function apiCall(action, params = {}) {
     const queryParams = new URLSearchParams({ action, ...params });
     const response = await fetch(`${API_URL}?${queryParams.toString()}`);
     return response.json();
 }
 
+// POST sin headers custom — evita el preflight CORS que rompe Apps Script
 async function apiPostJson(action, data) {
-    const response = await fetch(`${API_URL}?action=${action}`, {
+    const params = new URLSearchParams({ action, data: JSON.stringify(data) });
+    const response = await fetch(API_URL, {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: params   // application/x-www-form-urlencoded por defecto → "simple request" → sin preflight
     });
     return response.json();
 }
 
-// File upload helper
+// Upload PDF — misma estrategia: FormData sin Content-Type manual
 async function uploadPDF(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = async () => {
             try {
-                // Get base64 data (remove the data:application/pdf;base64, prefix)
                 const base64Data = reader.result.split(',')[1];
-                
-                const response = await fetch(`${API_URL}?action=uploadPDF`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        fileName: file.name,
-                        fileData: base64Data
-                    })
+
+                // FIX CLAVE: usar URLSearchParams en lugar de JSON body con Content-Type header.
+                // Content-Type: application/json dispara un preflight OPTIONS que Apps Script
+                // no puede responder correctamente, causando "Failed to fetch".
+                // URLSearchParams se manda como application/x-www-form-urlencoded,
+                // que es un "simple request" y no necesita preflight.
+                const params = new URLSearchParams({
+                    action: 'uploadPDF',
+                    fileName: file.name,
+                    fileData: base64Data
                 });
-                
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: params
+                });
+
                 const data = await response.json();
                 resolve(data);
             } catch (error) {
@@ -130,12 +108,9 @@ async function uploadPDF(file) {
     });
 }
 
-// Show notification
 function showNotification(message, type = 'success') {
-    // Remove existing notifications
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(n => n.remove());
-    
+    document.querySelectorAll('.notification').forEach(n => n.remove());
+
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
@@ -143,44 +118,28 @@ function showNotification(message, type = 'success') {
         <span>${message}</span>
     `;
     notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        border-radius: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        z-index: 3000;
-        animation: slideIn 0.3s ease;
+        position: fixed; top: 100px; right: 20px;
+        padding: 1rem 1.5rem; border-radius: 0.5rem;
+        display: flex; align-items: center; gap: 0.75rem;
+        z-index: 3000; animation: slideIn 0.3s ease;
         background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3276f3'};
-        color: white;
-        font-weight: 500;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        color: white; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     `;
-    
     document.body.appendChild(notification);
-    
-    // Auto remove after 4 seconds
+
     setTimeout(() => {
         notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s, transform 0.3s';
         notification.style.transform = 'translateX(100%)';
         setTimeout(() => notification.remove(), 300);
     }, 4000);
 }
 
-// Add animation styles
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
     @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
+        from { opacity: 0; transform: translateX(100%); }
+        to   { opacity: 1; transform: translateX(0); }
     }
 `;
 document.head.appendChild(styleSheet);

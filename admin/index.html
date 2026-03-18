@@ -1,33 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Centro de Estudios Renovación</title>
-    <meta name="description" content="Panel de administración - Centro de Estudios Renovación">
+    <title>Panel de Administración - Centro de Estudios Renovación</title>
     <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-    <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body class="admin-page">
-    <!-- Admin Header -->
+
+    <!-- ===== HEADER ===== -->
     <header class="admin-header">
         <div class="admin-header-left">
             <a href="../index.html" class="admin-header-logo">
                 <img src="../assets/img/logo-header.png" alt="Centro de Estudios Renovación">
             </a>
             <nav class="admin-nav">
-                <a href="index.html" class="admin-nav-link active">
+                <button class="admin-nav-link active" data-view="informes">
                     <i class="fas fa-file-alt"></i> Informes
-                </a>
-                <a href="upload.html" class="admin-nav-link">
+                </button>
+                <button class="admin-nav-link" data-view="upload">
                     <i class="fas fa-upload"></i> Subir
-                </a>
-                <a href="users.html" class="admin-nav-link" id="usersNavLink" style="display: none;">
+                </button>
+                <button class="admin-nav-link" data-view="users" id="usersNavLink" style="display:none;">
                     <i class="fas fa-users"></i> Usuarios
-                </a>
+                </button>
             </nav>
         </div>
         <div class="admin-header-right">
@@ -46,86 +47,287 @@
 
     <main>
         <div class="admin-container">
-            <!-- Page Header -->
-            <div class="page-header">
-                <h1 class="page-title">Panel de Informes</h1>
-                <p class="page-subtitle">Gestiona los informes de tu centro de investigación</p>
+
+            <!-- ===== VIEW: INFORMES ===== -->
+            <div id="view-informes" class="view">
+                <div class="page-header">
+                    <h1 class="page-title">Panel de Informes</h1>
+                    <p class="page-subtitle">Gestiona los informes de tu centro de investigación</p>
+                </div>
+
+                <div class="stats-grid-admin">
+                    <div class="stat-card">
+                        <div class="stat-card-icon primary"><i class="fas fa-file-pdf"></i></div>
+                        <div class="stat-card-value" id="totalReports">-</div>
+                        <div class="stat-card-label">Total Informes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon success"><i class="fas fa-calendar-check"></i></div>
+                        <div class="stat-card-value" id="recentReports">-</div>
+                        <div class="stat-card-label">Este Mes</div>
+                    </div>
+                    <div class="stat-card" id="pendingUsersCard" style="display:none;">
+                        <div class="stat-card-icon warning"><i class="fas fa-user-clock"></i></div>
+                        <div class="stat-card-value" id="pendingUsersCount">-</div>
+                        <div class="stat-card-label">Usuarios Pendientes</div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div
+                        style="display:flex; flex-wrap:wrap; gap:1rem; align-items:center; justify-content:space-between;">
+                        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                            <select id="filterCentro" class="form-select" style="width:auto;"></select>
+                            <input type="text" id="searchInput" class="form-input" placeholder="Buscar informe..."
+                                style="width:auto; min-width:200px;">
+                        </div>
+                        <button class="btn-admin btn-admin-primary" onclick="showView('upload'); resetUploadForm()">
+                            <i class="fas fa-plus"></i> Nuevo Informe
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h2 class="admin-card-title">Informes Publicados</h2>
+                    </div>
+                    <div id="reportsContainer">
+                        <div style="text-align:center; padding:2rem;">
+                            <div class="spinner spinner-dark" style="width:40px; height:40px;"></div>
+                            <p style="margin-top:1rem; color:var(--admin-text-muted);">Cargando informes...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Stats -->
-            <div class="stats-grid-admin" id="statsGrid">
-                <div class="stat-card">
-                    <div class="stat-card-icon primary">
-                        <i class="fas fa-file-pdf"></i>
-                    </div>
-                    <div class="stat-card-value" id="totalReports">-</div>
-                    <div class="stat-card-label">Total Informes</div>
+            <!-- ===== VIEW: UPLOAD / EDIT ===== -->
+            <div id="view-upload" class="view" style="display:none;">
+                <button class="back-link" onclick="showView('informes')">
+                    <i class="fas fa-arrow-left"></i> Volver a informes
+                </button>
+
+                <div class="page-header">
+                    <h1 class="page-title" id="uploadPageTitle">Subir Nuevo Informe</h1>
+                    <p class="page-subtitle" id="uploadPageSubtitle">Completa los datos y sube el archivo PDF</p>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-card-icon success">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="stat-card-value" id="recentReports">-</div>
-                    <div class="stat-card-label">Este Mes</div>
-                </div>
-                <div class="stat-card" id="pendingUsersCard" style="display: none;">
-                    <div class="stat-card-icon warning">
-                        <i class="fas fa-user-clock"></i>
-                    </div>
-                    <div class="stat-card-value" id="pendingUsers">-</div>
-                    <div class="stat-card-label">Usuarios Pendientes</div>
+
+                <div class="admin-card">
+                    <form id="uploadForm">
+                        <div id="formMessage" class="alert" style="display:none;"></div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="titulo">Título del Informe *</label>
+                            <input type="text" id="titulo" class="form-input"
+                                placeholder="Ej: Análisis de la Política Exterior Argentina" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="centro">Centro de Investigación *</label>
+                                <select id="centro" class="form-select" required>
+                                    <option value="">Selecciona el centro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="tag">Tipo de Publicación *</label>
+                                <select id="tag" class="form-select" required>
+                                    <option value="">Selecciona el tipo</option>
+                                    <option>Informe</option>
+                                    <option>Informe Especial</option>
+                                    <option>Análisis</option>
+                                    <option>Investigación</option>
+                                    <option>Documento de Trabajo</option>
+                                    <option>Policy Brief</option>
+                                    <option>Nota Técnica</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="fecha">Fecha de Publicación *</label>
+                            <input type="date" id="fecha" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Archivo PDF *</label>
+                            <div class="file-upload-zone" id="dropZone">
+                                <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                <p class="file-upload-text">Arrastrá tu archivo PDF aquí o hacé clic para seleccionar
+                                </p>
+                                <p class="file-upload-hint">Tamaño máximo: 10MB</p>
+                                <input type="file" id="pdfFile" accept=".pdf" style="display:none;">
+                            </div>
+                            <div id="filePreview" class="file-upload-preview" style="display:none;">
+                                <div class="file-upload-preview-icon"><i class="fas fa-file-pdf"></i></div>
+                                <div class="file-upload-preview-info">
+                                    <div class="file-upload-preview-name" id="fileName"></div>
+                                    <div class="file-upload-preview-size" id="fileSize"></div>
+                                </div>
+                                <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm"
+                                    onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div id="existingPdf" class="file-upload-preview" style="display:none;">
+                                <div class="file-upload-preview-icon"><i class="fas fa-file-pdf"></i></div>
+                                <div class="file-upload-preview-info">
+                                    <div class="file-upload-preview-name">PDF actual</div>
+                                    <div class="file-upload-preview-size">
+                                        <a id="existingPdfLink" href="#" target="_blank" class="link-text">Ver PDF</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:1rem; justify-content:flex-end; margin-top:2rem;">
+                            <button type="button" class="btn-admin btn-admin-secondary"
+                                onclick="showView('informes')">Cancelar</button>
+                            <button type="submit" class="btn-admin btn-admin-primary" id="submitBtn">
+                                <span class="btn-text" id="submitBtnText">Publicar Informe</span>
+                                <span class="spinner" style="display:none;"></span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <!-- Filters -->
-            <div class="admin-card">
-                <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <select id="filterCentro" class="form-select" style="width: auto;">
-                            <option value="">Todos los centros</option>
-                        </select>
-                        <input type="text" id="searchInput" class="form-input" placeholder="Buscar informe..." style="width: auto; min-width: 200px;">
+            <!-- ===== VIEW: USUARIOS ===== -->
+            <div id="view-users" class="view" style="display:none;">
+                <div class="page-header">
+                    <h1 class="page-title">Gestión de Usuarios</h1>
+                    <p class="page-subtitle">Administrá los usuarios y sus permisos</p>
+                </div>
+
+                <div class="stats-grid-admin">
+                    <div class="stat-card">
+                        <div class="stat-card-icon primary"><i class="fas fa-users"></i></div>
+                        <div class="stat-card-value" id="totalUsers">-</div>
+                        <div class="stat-card-label">Total Usuarios</div>
                     </div>
-                    <a href="upload.html" class="btn-admin btn-admin-primary">
-                        <i class="fas fa-plus"></i> Nuevo Informe
-                    </a>
+                    <div class="stat-card">
+                        <div class="stat-card-icon success"><i class="fas fa-user-check"></i></div>
+                        <div class="stat-card-value" id="approvedUsers">-</div>
+                        <div class="stat-card-label">Aprobados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon warning"><i class="fas fa-user-clock"></i></div>
+                        <div class="stat-card-value" id="pendingUsersStatCount">-</div>
+                        <div class="stat-card-label">Pendientes</div>
+                    </div>
+                </div>
+
+                <div class="tab-nav">
+                    <button class="tab-link active" data-tab="pending">
+                        <i class="fas fa-user-clock"></i> Pendientes (<span id="pendingCount">0</span>)
+                    </button>
+                    <button class="tab-link" data-tab="approved">
+                        <i class="fas fa-user-check"></i> Aprobados
+                    </button>
+                    <button class="tab-link" data-tab="all">
+                        <i class="fas fa-users"></i> Todos
+                    </button>
+                </div>
+
+                <div id="pending-tab" class="tab-content active">
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h2 class="admin-card-title">Usuarios Pendientes de Aprobación</h2>
+                        </div>
+                        <div id="pendingContainer"></div>
+                    </div>
+                </div>
+
+                <div id="approved-tab" class="tab-content">
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h2 class="admin-card-title">Usuarios Aprobados</h2>
+                        </div>
+                        <div id="approvedContainer"></div>
+                    </div>
+                </div>
+
+                <div id="all-tab" class="tab-content">
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h2 class="admin-card-title">Todos los Usuarios</h2>
+                        </div>
+                        <div id="allContainer"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Reports Table -->
-            <div class="admin-card">
-                <div class="admin-card-header">
-                    <h2 class="admin-card-title">Informes Publicados</h2>
-                </div>
-                
-                <div id="reportsContainer">
-                    <div style="text-align: center; padding: 2rem;">
-                        <div class="spinner spinner-dark" style="width: 40px; height: 40px;"></div>
-                        <p style="margin-top: 1rem; color: var(--admin-text-muted);">Cargando informes...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </div><!-- /admin-container -->
     </main>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal-overlay" id="deleteModal">
+    <!-- ===== MODAL: Eliminar Informe ===== -->
+    <div class="modal-overlay" id="deleteReportModal">
         <div class="modal">
             <div class="modal-header">
                 <h3 class="modal-title">Eliminar Informe</h3>
-                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+                <button class="modal-close" onclick="closeModal('deleteReportModal')">&times;</button>
             </div>
             <div class="modal-body">
                 <p>¿Estás seguro de que deseas eliminar el informe "<strong id="deleteReportTitle"></strong>"?</p>
-                <p style="color: var(--admin-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
-                    Esta acción no se puede deshacer.
-                </p>
+                <p style="color:var(--admin-text-muted); font-size:0.875rem; margin-top:0.5rem;">Esta acción no se puede
+                    deshacer.</p>
             </div>
             <div class="modal-footer">
-                <button class="btn-admin btn-admin-secondary" onclick="closeDeleteModal()">Cancelar</button>
-                <button class="btn-admin btn-admin-danger" id="confirmDeleteBtn" onclick="confirmDelete()">
+                <button class="btn-admin btn-admin-secondary"
+                    onclick="closeModal('deleteReportModal')">Cancelar</button>
+                <button class="btn-admin btn-admin-danger" id="confirmDeleteReportBtn" onclick="confirmDeleteReport()">
                     <span class="btn-text">Eliminar</span>
-                    <span class="spinner" style="display: none;"></span>
+                    <span class="spinner" style="display:none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: Editar Usuario ===== -->
+    <div class="modal-overlay" id="editUserModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Editar Usuario</h3>
+                <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="text" id="editEmail" class="form-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Centro de Investigación</label>
+                    <select id="editCentro" class="form-select">
+                        <option value="">Selecciona el centro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-admin btn-admin-secondary" onclick="closeModal('editUserModal')">Cancelar</button>
+                <button class="btn-admin btn-admin-primary" id="saveEditBtn" onclick="saveUserEdit()">
+                    <span class="btn-text">Guardar</span>
+                    <span class="spinner" style="display:none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: Eliminar Usuario ===== -->
+    <div class="modal-overlay" id="deleteUserModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Eliminar Usuario</h3>
+                <button class="modal-close" onclick="closeModal('deleteUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar al usuario "<strong id="deleteUserEmail"></strong>"?</p>
+                <p style="color:var(--admin-text-muted); font-size:0.875rem; margin-top:0.5rem;">Esta acción no se puede
+                    deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-admin btn-admin-secondary" onclick="closeModal('deleteUserModal')">Cancelar</button>
+                <button class="btn-admin btn-admin-danger" id="confirmDeleteUserBtn" onclick="confirmDeleteUser()">
+                    <span class="btn-text">Eliminar</span>
+                    <span class="spinner" style="display:none;"></span>
                 </button>
             </div>
         </div>
@@ -133,238 +335,523 @@
 
     <script src="../assets/js/admin-config.js"></script>
     <script>
+        // ============================================================
+        // STATE
+        // ============================================================
         let currentUser = null;
         let allReports = [];
+        let allUsers = [];
         let reportToDelete = null;
+        let userToEdit = null;
+        let userToDelete = null;
+        let editMode = false;
+        let editReportId = null;
+        let existingPdfUrl = null;
+        let selectedFile = null;
 
-        // Initialize
+        // ============================================================
+        // INIT
+        // ============================================================
         document.addEventListener('DOMContentLoaded', async () => {
             currentUser = checkAuth();
             if (!currentUser) return;
 
-            // Update UI
+            // Header UI
             document.getElementById('userName').textContent = currentUser.email;
-            document.getElementById('userRole').textContent = currentUser.role === 'admin' ? 'Administrador' : currentUser.centro;
             document.getElementById('userAvatar').textContent = currentUser.email.charAt(0).toUpperCase();
+            document.getElementById('userRole').textContent = currentUser.role === 'admin' ? 'Administrador' : currentUser.centro;
 
-            // Show admin links
             if (currentUser.role === 'admin') {
                 document.getElementById('usersNavLink').style.display = 'inline-flex';
                 document.getElementById('pendingUsersCard').style.display = 'block';
-                loadPendingUsers();
             }
 
-            // Populate centro filter
+            // Nav buttons
+            document.querySelectorAll('.admin-nav-link[data-view]').forEach(btn => {
+                btn.addEventListener('click', () => showView(btn.dataset.view));
+            });
+
+            // Users tab buttons
+            document.querySelectorAll('.tab-link[data-tab]').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+                });
+            });
+
+            // Populate selects
             populateCentroFilter();
+            populateCentroSelects();
+            setupFileUpload();
 
-            // Load reports
-            await loadReports();
-
-            // Search functionality
+            // Search
             document.getElementById('searchInput').addEventListener('input', filterReports);
             document.getElementById('filterCentro').addEventListener('change', filterReports);
+
+            // Load initial data
+            await loadReports();
+            if (currentUser.role === 'admin') loadUsers();
         });
 
-        function populateCentroFilter() {
-            const select = document.getElementById('filterCentro');
-            
-            // If not admin, only show their centro
-            if (currentUser.role !== 'admin') {
-                select.innerHTML = `<option value="${currentUser.centro}">${currentUser.centro}</option>`;
-                select.disabled = true;
-            } else {
-                select.innerHTML = '<option value="">Todos los centros</option>';
-                CENTROS.forEach(centro => {
-                    select.innerHTML += `<option value="${centro.id}">${centro.id}</option>`;
-                });
-            }
+        // ============================================================
+        // VIEW ROUTER
+        // ============================================================
+        function showView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+            document.querySelectorAll('.admin-nav-link[data-view]').forEach(b => b.classList.remove('active'));
+
+            document.getElementById('view-' + viewName).style.display = 'block';
+            const navBtn = document.querySelector(`.admin-nav-link[data-view="${viewName}"]`);
+            if (navBtn) navBtn.classList.add('active');
         }
 
+        // ============================================================
+        // REPORTS
+        // ============================================================
         async function loadReports() {
             try {
                 const centro = currentUser.role === 'admin' ? 'all' : currentUser.centro;
                 const response = await apiCall('getReports', { centro });
-                
                 if (response.success) {
                     allReports = response.reports;
-                    updateStats();
+                    updateReportStats();
                     renderReports(allReports);
+                    if (currentUser.role === 'admin') loadPendingUserCount();
                 } else {
-                    showError(response.error || 'Error al cargar informes');
+                    showReportsError(response.error || 'Error al cargar informes');
                 }
-            } catch (error) {
-                console.error('Load reports error:', error);
-                showError('Error de conexión al cargar informes');
+            } catch (err) {
+                showReportsError('Error de conexión al cargar informes');
             }
         }
 
-        async function loadPendingUsers() {
+        async function loadPendingUserCount() {
             try {
                 const response = await apiCall('getUsers');
                 if (response.success) {
-                    const pending = response.users.filter(u => !u.approved && u.role !== 'admin');
-                    document.getElementById('pendingUsers').textContent = pending.length;
+                    const count = response.users.filter(u => !u.approved && u.role !== 'admin').length;
+                    document.getElementById('pendingUsersCount').textContent = count;
                 }
-            } catch (error) {
-                console.error('Load users error:', error);
-            }
+            } catch (e) { }
         }
 
-        function updateStats() {
+        function updateReportStats() {
             document.getElementById('totalReports').textContent = allReports.length;
-            
-            // Count reports from this month
             const now = new Date();
             const thisMonth = allReports.filter(r => {
-                const reportDate = new Date(r.created_at);
-                return reportDate.getMonth() === now.getMonth() && reportDate.getFullYear() === now.getFullYear();
+                const d = new Date(r.created_at);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
             });
             document.getElementById('recentReports').textContent = thisMonth.length;
         }
 
         function filterReports() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const centroFilter = document.getElementById('filterCentro').value;
-
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const centro = document.getElementById('filterCentro').value;
             let filtered = allReports;
-
-            if (centroFilter) {
-                filtered = filtered.filter(r => r.centro === centroFilter);
-            }
-
-            if (searchTerm) {
-                filtered = filtered.filter(r => 
-                    r.titulo.toLowerCase().includes(searchTerm) ||
-                    r.tag.toLowerCase().includes(searchTerm)
-                );
-            }
-
+            if (centro) filtered = filtered.filter(r => r.centro === centro);
+            if (term) filtered = filtered.filter(r =>
+                r.titulo.toLowerCase().includes(term) || r.tag.toLowerCase().includes(term)
+            );
             renderReports(filtered);
         }
 
         function renderReports(reports) {
             const container = document.getElementById('reportsContainer');
-
-            if (reports.length === 0) {
+            if (!reports.length) {
                 container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon"><i class="fas fa-folder-open"></i></div>
-                        <h3 class="empty-state-title">No hay informes</h3>
-                        <p>No se encontraron informes. <a href="upload.html" class="link-text">Sube uno nuevo</a></p>
-                    </div>
-                `;
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="fas fa-folder-open"></i></div>
+          <h3 class="empty-state-title">No hay informes</h3>
+          <p>No se encontraron informes. <button class="link-text" onclick="showView('upload'); resetUploadForm()" style="background:none;border:none;cursor:pointer;">Subí uno nuevo</button></p>
+        </div>`;
                 return;
             }
-
             container.innerHTML = `
-                <div style="overflow-x: auto;">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Título</th>
-                                <th>Centro</th>
-                                <th>Tag</th>
-                                <th>Fecha</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${reports.map(report => `
-                                <tr>
-                                    <td>
-                                        <strong>${escapeHtml(report.titulo)}</strong>
-                                    </td>
-                                    <td>
-                                        <span class="badge-centro badge-${report.centro.toLowerCase()}">${report.centro}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-primary">${escapeHtml(report.tag)}</span>
-                                    </td>
-                                    <td>${formatDateShort(report.fecha)}</td>
-                                    <td>
-                                        <div class="table-actions">
-                                            <a href="${report.pdf_url}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="upload.html?edit=${report.id}" class="btn-admin btn-admin-secondary btn-admin-sm">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            ${canDeleteReport(report) ? `
-                                                <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteModal('${report.id}', '${escapeHtml(report.titulo).replace(/'/g, "\\'")}')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            ` : ''}
-                                        </div>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Título</th><th>Centro</th><th>Tag</th><th>Fecha</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+            ${reports.map(r => `
+              <tr>
+                <td><strong>${esc(r.titulo)}</strong></td>
+                <td><span class="badge-centro badge-${r.centro.toLowerCase()}">${r.centro}</span></td>
+                <td><span class="badge badge-primary">${esc(r.tag)}</span></td>
+                <td>${formatDateShort(r.fecha)}</td>
+                <td>
+                  <div class="table-actions">
+                    <a href="${r.pdf_url}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" title="Ver PDF">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openEditReport('${r.id}')" title="Editar">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    ${(currentUser.role === 'admin' || r.centro === currentUser.centro) ? `
+                    <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteReportModal('${r.id}','${esc(r.titulo).replace(/'/g, "\\'")}')">
+                      <i class="fas fa-trash"></i>
+                    </button>` : ''}
+                  </div>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
         }
 
-        function canDeleteReport(report) {
-            return currentUser.role === 'admin' || report.centro === currentUser.centro;
+        function openDeleteReportModal(id, title) {
+            reportToDelete = id;
+            document.getElementById('deleteReportTitle').textContent = title;
+            openModal('deleteReportModal');
         }
 
-        function openDeleteModal(reportId, reportTitle) {
-            reportToDelete = reportId;
-            document.getElementById('deleteReportTitle').textContent = reportTitle;
-            document.getElementById('deleteModal').classList.add('active');
-        }
-
-        function closeDeleteModal() {
-            reportToDelete = null;
-            document.getElementById('deleteModal').classList.remove('active');
-        }
-
-        async function confirmDelete() {
+        async function confirmDeleteReport() {
             if (!reportToDelete) return;
-
-            const btn = document.getElementById('confirmDeleteBtn');
-            btn.querySelector('.btn-text').style.display = 'none';
-            btn.querySelector('.spinner').style.display = 'inline-block';
-            btn.disabled = true;
-
+            const btn = document.getElementById('confirmDeleteReportBtn');
+            setLoading(btn, true);
             try {
-                const response = await apiCall('deleteReport', {
-                    id: reportToDelete,
-                    userEmail: currentUser.email,
-                    userRole: currentUser.role
-                });
-
-                if (response.success) {
+                const res = await apiCall('deleteReport', { id: reportToDelete, userEmail: currentUser.email, userRole: currentUser.role });
+                if (res.success) {
                     showNotification('Informe eliminado correctamente', 'success');
-                    closeDeleteModal();
+                    closeModal('deleteReportModal');
                     await loadReports();
                 } else {
-                    showNotification(response.error || 'Error al eliminar', 'error');
+                    showNotification(res.error || 'Error al eliminar', 'error');
                 }
-            } catch (error) {
-                console.error('Delete error:', error);
+            } catch (e) {
                 showNotification('Error de conexión', 'error');
             }
-
-            btn.querySelector('.btn-text').style.display = 'inline';
-            btn.querySelector('.spinner').style.display = 'none';
-            btn.disabled = false;
+            setLoading(btn, false);
         }
 
-        function showError(message) {
+        function showReportsError(msg) {
             document.getElementById('reportsContainer').innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i>
-                    ${message}
-                </div>
-            `;
+      <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${msg}</div>`;
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        // ============================================================
+        // UPLOAD / EDIT REPORT
+        // ============================================================
+        function resetUploadForm() {
+            editMode = false; editReportId = null; existingPdfUrl = null; selectedFile = null;
+            document.getElementById('uploadForm').reset();
+            document.getElementById('uploadPageTitle').textContent = 'Subir Nuevo Informe';
+            document.getElementById('uploadPageSubtitle').textContent = 'Completá los datos y subí el archivo PDF';
+            document.getElementById('submitBtnText').textContent = 'Publicar Informe';
+            document.getElementById('formMessage').style.display = 'none';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('existingPdf').style.display = 'none';
+            document.getElementById('dropZone').style.display = 'block';
+            document.getElementById('fecha').valueAsDate = new Date();
+            populateCentroSelects();
+        }
+
+        async function openEditReport(reportId) {
+            resetUploadForm();
+            showView('upload');
+            try {
+                const res = await apiCall('getReport', { id: reportId });
+                if (!res.success) { showFormMessage('Informe no encontrado', 'danger'); return; }
+                const r = res.report;
+                editMode = true; editReportId = reportId; existingPdfUrl = r.pdf_url;
+
+                document.getElementById('uploadPageTitle').textContent = 'Editar Informe';
+                document.getElementById('uploadPageSubtitle').textContent = 'Modificá los datos del informe';
+                document.getElementById('submitBtnText').textContent = 'Guardar Cambios';
+                document.getElementById('titulo').value = r.titulo;
+                document.getElementById('centro').value = r.centro;
+                document.getElementById('tag').value = r.tag;
+                if (r.fecha) document.getElementById('fecha').valueAsDate = new Date(r.fecha);
+                document.getElementById('existingPdf').style.display = 'flex';
+                document.getElementById('existingPdfLink').href = r.pdf_url;
+
+                if (currentUser.role !== 'admin' && r.centro !== currentUser.centro) {
+                    showFormMessage('No tenés permiso para editar este informe', 'danger');
+                    document.getElementById('submitBtn').disabled = true;
+                }
+            } catch (e) {
+                showFormMessage('Error al cargar el informe', 'danger');
+            }
+        }
+
+        function setupFileUpload() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('pdfFile');
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault(); dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+            });
+            fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+        }
+
+        function handleFile(file) {
+            if (file.type !== 'application/pdf') { showFormMessage('Solo se permiten archivos PDF', 'danger'); return; }
+            if (file.size > 10 * 1024 * 1024) { showFormMessage('El archivo es muy grande. Máximo 10MB', 'danger'); return; }
+            selectedFile = file;
+            document.getElementById('dropZone').style.display = 'none';
+            document.getElementById('existingPdf').style.display = 'none';
+            document.getElementById('filePreview').style.display = 'flex';
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+        }
+
+        function clearFile() {
+            selectedFile = null;
+            document.getElementById('pdfFile').value = '';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('dropZone').style.display = 'block';
+            if (editMode && existingPdfUrl) document.getElementById('existingPdf').style.display = 'flex';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('uploadForm').addEventListener('submit', async e => {
+                e.preventDefault();
+                const titulo = document.getElementById('titulo').value.trim();
+                const centro = document.getElementById('centro').value;
+                const tag = document.getElementById('tag').value;
+                const fecha = document.getElementById('fecha').value;
+
+                if (!titulo || !centro || !tag || !fecha) { showFormMessage('Por favor completá todos los campos', 'danger'); return; }
+                if (!editMode && !selectedFile) { showFormMessage('Por favor seleccioná un archivo PDF', 'danger'); return; }
+
+                const btn = document.getElementById('submitBtn');
+                setLoading(btn, true);
+
+                try {
+                    let pdfUrl = existingPdfUrl;
+                    if (selectedFile) {
+                        showFormMessage('Subiendo PDF...', 'info');
+                        const upload = await uploadPDF(selectedFile);
+                        if (!upload.success) throw new Error(upload.error || 'Error al subir PDF');
+                        pdfUrl = upload.url;
+                    }
+
+                    const data = { titulo, centro, tag, fecha, pdf_url: pdfUrl };
+                    const res = editMode
+                        ? await apiCall('updateReport', { id: editReportId, data: JSON.stringify(data) })
+                        : await apiCall('createReport', { data: JSON.stringify(data) });
+
+                    if (res.success) {
+                        showNotification(editMode ? 'Informe actualizado correctamente' : 'Informe publicado correctamente', 'success');
+                        await loadReports();
+                        setTimeout(() => showView('informes'), 1000);
+                    } else {
+                        throw new Error(res.error || 'Error al guardar el informe');
+                    }
+                } catch (err) {
+                    showFormMessage(err.message || 'Error al procesar el formulario', 'danger');
+                    setLoading(btn, false);
+                }
+            });
+        });
+
+        function showFormMessage(msg, type) {
+            const div = document.getElementById('formMessage');
+            const icon = type === 'danger' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle';
+            div.className = `alert alert-${type}`;
+            div.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
+            div.style.display = 'flex';
+            div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // ============================================================
+        // USERS
+        // ============================================================
+        async function loadUsers() {
+            try {
+                const res = await apiCall('getUsers');
+                if (res.success) {
+                    allUsers = res.users;
+                    updateUserStats();
+                    renderUsers();
+                }
+            } catch (e) { }
+        }
+
+        function updateUserStats() {
+            const nonAdmins = allUsers.filter(u => u.role !== 'admin');
+            const pending = nonAdmins.filter(u => !u.approved || u.approved === 'FALSE');
+            const approved = nonAdmins.filter(u => u.approved && u.approved !== 'FALSE');
+            document.getElementById('totalUsers').textContent = nonAdmins.length;
+            document.getElementById('approvedUsers').textContent = approved.length;
+            document.getElementById('pendingUsersStatCount').textContent = pending.length;
+            document.getElementById('pendingCount').textContent = pending.length;
+            document.getElementById('pendingUsersCount').textContent = pending.length;
+        }
+
+        function renderUsers() {
+            const nonAdmins = allUsers.filter(u => u.role !== 'admin');
+            const pending = nonAdmins.filter(u => !u.approved || u.approved === 'FALSE');
+            const approved = nonAdmins.filter(u => u.approved && u.approved !== 'FALSE');
+            renderUserList('pendingContainer', pending, true);
+            renderUserList('approvedContainer', approved, false);
+            renderUserList('allContainer', nonAdmins, null);
+        }
+
+        function renderUserList(containerId, users, showApproval) {
+            const container = document.getElementById(containerId);
+            if (!users.length) {
+                container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="fas fa-user-slash"></i></div>
+          <h3 class="empty-state-title">No hay usuarios</h3>
+          <p>No se encontraron usuarios en esta categoría</p>
+        </div>`;
+                return;
+            }
+            container.innerHTML = `
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead><tr><th>Email</th><th>Centro</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            ${users.map(u => `
+              <tr>
+                <td><strong>${esc(u.email)}</strong></td>
+                <td>${u.centro
+                    ? `<span class="badge-centro badge-${u.centro.toLowerCase()}">${u.centro}</span>`
+                    : '<span class="badge badge-warning">Sin asignar</span>'}</td>
+                <td>${(u.approved && u.approved !== 'FALSE')
+                    ? '<span class="badge badge-success">Aprobado</span>'
+                    : '<span class="badge badge-warning">Pendiente</span>'}</td>
+                <td>
+                  <div class="table-actions">
+                    ${(showApproval === true || (showApproval === null && (!u.approved || u.approved === 'FALSE'))) ? `
+                      <button class="btn-admin btn-admin-success btn-admin-sm" onclick="approveUser('${u.email}')">
+                        <i class="fas fa-check"></i> Aprobar
+                      </button>
+                      <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="rejectUser('${u.email}')">
+                        <i class="fas fa-times"></i> Rechazar
+                      </button>` : ''}
+                    <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openEditUserModal('${u.email}','${u.centro || ''}')">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteUserModal('${u.email}')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+        }
+
+        async function approveUser(email) {
+            const res = await apiCall('approveUser', { email });
+            if (res.success) { showNotification('Usuario aprobado', 'success'); await loadUsers(); }
+            else showNotification(res.error || 'Error al aprobar', 'error');
+        }
+
+        async function rejectUser(email) {
+            if (!confirm(`¿Seguro que deseas rechazar a ${email}?`)) return;
+            const res = await apiCall('rejectUser', { email });
+            if (res.success) { showNotification('Usuario rechazado', 'success'); await loadUsers(); }
+            else showNotification(res.error || 'Error al rechazar', 'error');
+        }
+
+        function openEditUserModal(email, centro) {
+            userToEdit = email;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editCentro').value = centro;
+            openModal('editUserModal');
+        }
+
+        async function saveUserEdit() {
+            if (!userToEdit) return;
+            const btn = document.getElementById('saveEditBtn');
+            const centro = document.getElementById('editCentro').value;
+            setLoading(btn, true);
+            const res = await apiCall('updateUserCentro', { email: userToEdit, centro });
+            if (res.success) {
+                showNotification('Usuario actualizado', 'success');
+                closeModal('editUserModal');
+                await loadUsers();
+            } else {
+                showNotification(res.error || 'Error al actualizar', 'error');
+            }
+            setLoading(btn, false);
+        }
+
+        function openDeleteUserModal(email) {
+            userToDelete = email;
+            document.getElementById('deleteUserEmail').textContent = email;
+            openModal('deleteUserModal');
+        }
+
+        async function confirmDeleteUser() {
+            if (!userToDelete) return;
+            const btn = document.getElementById('confirmDeleteUserBtn');
+            setLoading(btn, true);
+            const res = await apiCall('deleteUser', { email: userToDelete });
+            if (res.success) {
+                showNotification('Usuario eliminado', 'success');
+                closeModal('deleteUserModal');
+                await loadUsers();
+            } else {
+                showNotification(res.error || 'Error al eliminar', 'error');
+            }
+            setLoading(btn, false);
+        }
+
+        // ============================================================
+        // HELPERS
+        // ============================================================
+        function populateCentroFilter() {
+            const select = document.getElementById('filterCentro');
+            if (currentUser.role !== 'admin') {
+                select.innerHTML = `<option value="${currentUser.centro}">${currentUser.centro}</option>`;
+                select.disabled = true;
+            } else {
+                select.innerHTML = '<option value="">Todos los centros</option>' +
+                    CENTROS.map(c => `<option value="${c.id}">${c.id}</option>`).join('');
+            }
+        }
+
+        function populateCentroSelects() {
+            // Upload form select
+            const uploadSelect = document.getElementById('centro');
+            if (currentUser && currentUser.role !== 'admin') {
+                uploadSelect.innerHTML = `<option value="${currentUser.centro}">${currentUser.centro}</option>`;
+                uploadSelect.disabled = true;
+            } else {
+                uploadSelect.innerHTML = '<option value="">Selecciona el centro</option>' +
+                    CENTROS.map(c => `<option value="${c.id}">${c.id} - ${c.name}</option>`).join('');
+                uploadSelect.disabled = false;
+            }
+            // Edit user modal select
+            const editSelect = document.getElementById('editCentro');
+            editSelect.innerHTML = '<option value="">Selecciona el centro</option>' +
+                CENTROS.map(c => `<option value="${c.id}">${c.id} - ${c.name}</option>`).join('');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function setLoading(btn, loading) {
+            btn.querySelector('.btn-text').style.display = loading ? 'none' : 'inline';
+            btn.querySelector('.spinner').style.display = loading ? 'inline-block' : 'none';
+            btn.disabled = loading;
+        }
+
+        function esc(text) {
+            if (!text) return '';
+            const d = document.createElement('div');
+            d.textContent = text;
+            return d.innerHTML;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
         }
     </script>
 </body>
+
 </html>
