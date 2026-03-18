@@ -473,7 +473,7 @@
       <div style="overflow-x:auto;">
         <table class="admin-table">
           <thead>
-            <tr><th>Título</th><th>Centro</th><th>Tag</th><th>Fecha</th><th>Acciones</th></tr>
+            <tr><th>Título</th><th>Centro</th><th>Tag</th><th>Fecha</th><th>Dest.</th><th>Acciones</th></tr>
           </thead>
           <tbody>
             ${reports.map(r => `
@@ -482,6 +482,7 @@
                 <td><span class="badge-centro badge-${r.centro.toLowerCase()}">${r.centro}</span></td>
                 <td><span class="badge badge-primary">${esc(r.tag)}</span></td>
                 <td>${formatDateShort(r.fecha)}</td>
+                <td>${r.featured ? '<i class="fas fa-star" style="color:#f59e0b;" title="Destacado"></i>' : ''}</td>
                 <td>
                   <div class="table-actions">
                     <a href="${r.pdf_url}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" title="Ver PDF">
@@ -723,6 +724,7 @@
                 <td>${(u.approved && u.approved !== 'FALSE')
                     ? '<span class="badge badge-success">Aprobado</span>'
                     : '<span class="badge badge-warning">Pendiente</span>'}</td>
+                <td>${r.featured ? '<i class="fas fa-star" style="color:#f59e0b;" title="Destacado"></i>' : ''}</td>
                 <td>
                   <div class="table-actions">
                     ${(showApproval === true || (showApproval === null && (!u.approved || u.approved === 'FALSE'))) ? `
