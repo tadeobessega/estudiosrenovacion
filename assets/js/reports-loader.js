@@ -5,7 +5,7 @@
  */
 
 // Replace this with your Google Apps Script deployment URL
-const REPORTS_API_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const REPORTS_API_URL = 'https://script.google.com/macros/s/AKfycbydN-YoWpZQ4_4ZwlKo60Ay_LifKRAZyP9mycbEwgucbWLju9GKKkjDLduY_0gbxdYH/exec';
 
 // Centro colors for styling
 const CENTRO_COLORS = {
