@@ -149,38 +149,9 @@
                 </div>
 
                 <div class="publicaciones-grid">
-                    
-                    <div class="publicacion-card">
-                        <div class="publicacion-meta">
-                            <span class="publicacion-date">Diciembre 2025</span>
-                            <span class="publicacion-type-cedhys">Informe</span>
-                        </div>
-                        <h3 class="publicacion-title"> Hacia un Nuevo Paradigma Penitenciario en CABA.</h3>
-                        <p class="publicacion-excerpt">
-                            En este informe se analizan las propuestas de reforma para la ejecución de la pena, se busca configurar un nuevo paradigma penitenciario integral para la Ciudad Autónoma de Buenos Aires (CABA). El objetivo es consolidar la autonomía de CABA y definir un modelo propio para el tratamiento de las personas privadas de libertad.
-                        </p>
-                        <a href="https://docs.google.com/document/d/1cj5rM0ZQjKR-LD24UTcqoLRqbhk2-A-6BeRc6UbLSlA/edit?usp=sharing" class="publicacion-link-cedhys-cedhys">Descargar PDF <i class="fas fa-download"></i></a>
-                    </div>
-                    
-                    
-                    <div class="publicacion-card">
-                        <div class="publicacion-meta">
-                            <span class="publicacion-date">Marzo 2025</span>
-                            <span class="publicacion-type-cedhys">DDHH Brief</span>
-                        </div>
-                        <h3 class="publicacion-title">Mes de la Memoria</h3>
-                        <p class="publicacion-excerpt">
-                            Nunca más.
-                        </p>
-                        <a href="https://docs.google.com/document/d/1cj5rM0ZQjKR-LD24UTcqoLRqbhk2-A-6BeRc6UbLSlA/edit?usp=sharing" class="publicacion-link-cedhys-cedhys">Descargar PDF <i class="fas fa-download"></i></a>
-                    </div>
-
-                    
-
-                </div>
-
-
-            </div>
+            <!-- Cargado dinámicamente -->
+        </div>
+        </div>
         </section>
     </main>
 
@@ -241,5 +212,11 @@
     </footer>
 
     <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/reports-public.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCentroPublicaciones('CEDHyS', 'cedhys');
+      });
+    </script>
 </body>
 </html>

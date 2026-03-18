@@ -149,57 +149,9 @@
                 </div>
 
                 <div class="publicaciones-grid">
-                    
-                    <div class="publicacion-card">
-                        <div class="publicacion-meta">
-                            <span class="publicacion-date">Octubre 2025</span>
-                            <span class="publicacion-type-opal">Informe</span>
-                        </div>
-                        <h3 class="publicacion-title">NÚMEROS GORDOS: NO PASA NADA</h3>
-                        <p class="publicacion-excerpt">
-                            Análisis de coyuntura sobre las grandes cifras que impactan el tablero político y social, desmitificando percepciones y confirmando tendencias clave.
-                        </p>
-                        <a href="https://drive.google.com/file/d/10kTKXYsVtDZXH6x_1Shod64w9_A3h-1y/view?usp=sharing" class="publicacion-link-opal" target="_blank">Leer más <i class="fas fa-download"></i></a>
-                    </div>
-                    
-                    <div class="publicacion-card">
-                        <div class="publicacion-meta">
-                            <span class="publicacion-date">Septiembre 2025</span>
-                            <span class="publicacion-type-opal">Análisis Político</span>
-                        </div>
-                        <h3 class="publicacion-title">Un Nuevo Poder Legislativo. La subtrama de la división de poderes</h3>
-                        <p class="publicacion-excerpt">
-                            Análisis sobre los escenarios de la nueva composición del Poder Legislativo y cómo impactará en el equilibrio de fuerzas y la dinámica de la división de poderes.
-                        </p>
-                        <a href="https://drive.google.com/file/d/1io1CAiqD-SIka0U69YrE2r3j6WmeC6C_/view?usp=sharing" class="publicacion-link-opal" target="_blank">Leer más <i class="fas fa-download"></i></a>
-                    </div>
-
-
-                    <div class="publicacion-card">
-                        <div class="publicacion-meta">
-                            <span class="publicacion-date">Septiembre 2025</span>
-                            <span class="publicacion-type-opal">Estudio Social</span>
-                        </div>
-                        <h3 class="publicacion-title">Narrativas sobre el voto popular en crisis. Milei y el mito del voto marginal</h3>
-                        <p class="publicacion-excerpt">
-                            Trabajo sobre la hipótesis de que "las comunas pobres de CABA votaron a Milei en 2023" y la reconfiguración de las narrativas en torno al voto popular en crisis.
-                        </p>
-                        <a href="https://drive.google.com/file/d/1qrNlgaBFhE6nriEkiPdFruuScg4ZkULu/view?usp=sharing" class="publicacion-link-opal" target="_blank">Leer más <i class="fas fa-download"></i></a>
-                    </div>
-                    
-                    <div class="publicacion-card">
-                        <div class="publicacion-meta">
-                            <span class="publicacion-date">Febrero 2025</span>
-                            <span class="publicacion-type-opal">Guía Electoral</span>
-                        </div>
-                        <h3 class="publicacion-title">Guía al Año Electoral 2025 en Argentina</h3>
-                        <p class="publicacion-excerpt">
-                            Monitoreo preliminar del estatus político-social del país en vísperas del año electoral, incluyendo un análisis de los cargos en juego.
-                        </p>
-                        <a href="https://drive.google.com/file/d/1TS1xSbIVLQaniPFtt1NdbgEJoiOjIpCI/view?usp=sharing" class="publicacion-link-opal" target="_blank">Leer más <i class="fas fa-download"></i></a>
-                    </div>
-                </div>
-            </div>
+            <!-- Cargado dinámicamente -->
+        </div>
+        </div>
         </section>
 
     </main>
@@ -261,5 +213,11 @@
     </footer>
 
     <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/reports-public.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCentroPublicaciones('OPAL', 'opal');
+      });
+    </script>
 </body>
 </html>

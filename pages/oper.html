@@ -151,21 +151,10 @@
             </div>
 
             <div class="publicaciones-grid">
-                
-                <div class="publicacion-card">
-                    <div class="publicacion-meta">
-                        <span class="publicacion-date">Noviembre 2025</span>
-                        <span class="publicacion-type-oper">Informe</span>
-                    </div>
-                    <h3 class="publicacion-title">DOCENTES EN FUGA</h3>
-                    <p class="publicacion-excerpt">
-                        Una crisis silenciosa en la edudación porteña. 
-                    </p>
-                    <a href="https://drive.google.com/file/d/1OxCrmDllsqeiERm7Jyq2vRsWQXVJpVq3/view" class="publicacion-link-oper" target="_blank">Leer más <i class="fas fa-download"></i></a>
-                </div>
-            </div>
+            <!-- Cargado dinámicamente -->
         </div>
-    </section>
+        </div>
+        </section>
 
     </main>
 
@@ -226,5 +215,11 @@
     </footer>
 
     <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/reports-public.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCentroPublicaciones('OPER', 'oper');
+      });
+    </script>
 </body>
 </html>

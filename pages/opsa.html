@@ -156,25 +156,9 @@
                 </div>
 
                 <div class="publicaciones-grid">
-                    
-                    <div class="publicacion-card">
-                        <div class="publicacion-meta">
-                            <span class="publicacion-date">Diciembre 2025</span>
-                            <span class="publicacion-type-opsa">Informe Especial</span>
-                        </div>
-                        <h3 class="publicacion-title">Más allá del clientelismo. La integración socio-urbana como política de co-responsabilidad y gestión colectiva</h3>
-                        <p class="publicacion-excerpt">
-                            En este primer informe definimos qué es el clientelismo y cómo se expresa en la realidad de los barrios populares. 
-                            Estudiamos el panorama actual frente a la eliminación de políticas -el FISU- que no reproducen mecanismos clientelares tradicionales, y que efectivamente promueven
-                            nuevas formas de articulación basadas en la co-responsabilidad, la gestión colectiva y la ampliación de
-                            derechos ciudadanos.   
-
-                        </p>
-                        <a href="https://drive.google.com/file/d/1kolQWCqCu2J4sMU-GEjHxShFBO5ZXL5G/view?usp=sharing" class="publicacion-link-opsa" target="_blank">Leer más <i class="fas fa-download"></i></a>
-                    </div>
-                    
-                </div>
-            </div>
+            <!-- Cargado dinámicamente -->
+        </div>
+        </div>
         </section>
 
     </main>
@@ -236,5 +220,11 @@
     </footer>
 
     <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/reports-public.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCentroPublicaciones('OPSA', 'opsa');
+      });
+    </script>
 </body>
 </html>
