@@ -628,8 +628,12 @@
                     if (selectedFile) {
                         showFormMessage('Subiendo PDF...', 'info');
                         const upload = await uploadPDF(selectedFile);
-                        if (!upload.success) throw new Error(upload.error || 'Error al subir PDF');
-                        pdfUrl = upload.url;
+                        // Si tenemos URL el archivo subió bien aunque haya error de permisos de Drive
+                        if (upload.url) {
+                            pdfUrl = upload.url;
+                        } else {
+                            throw new Error(upload.error || 'Error al subir PDF');
+                        }
                     }
 
                     const data = { titulo, centro, tag, fecha, pdf_url: pdfUrl };

@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycby6Lb2jHPHYs8jsuNxZpM9b6OBIcH5y6isw8WRBidPSIlpdTOarYzKv1dnueEpll12R/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzaKZ6XCEVxS5euoKX9xxqzScKSiJmNvd4XmP1rcpdhg94g6gCa_JxboUTAaj7JHKMK/exec';
 
 const CENTROS = [
     { id: 'CEER', name: 'Centro de Estudios Económicos', color: '#020995' },
@@ -10,44 +10,21 @@ const CENTROS = [
     { id: 'CIREN', name: 'Centro de Estudios Científicos', color: '#014b3e' }
 ];
 
-const TAGS = [
-    'Informe',
-    'Informe Especial',
-    'Análisis',
-    'Investigación',
-    'Documento de Trabajo',
-    'Policy Brief',
-    'Nota Técnica'
-];
+function getCentroColor(id) { const c = CENTROS.find(c => c.id === id); return c ? c.color : '#64748b'; }
+function getCentroName(id) { const c = CENTROS.find(c => c.id === id); return c ? c.name : id; }
 
-function getCentroColor(centroId) {
-    const centro = CENTROS.find(c => c.id === centroId);
-    return centro ? centro.color : '#64748b';
+function formatDate(s) {
+    if (!s) return '';
+    return new Date(s).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' });
 }
-
-function getCentroName(centroId) {
-    const centro = CENTROS.find(c => c.id === centroId);
-    return centro ? centro.name : centroId;
-}
-
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' });
-}
-
-function formatDateShort(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-AR', { year: 'numeric', month: 'short' });
+function formatDateShort(s) {
+    if (!s) return '';
+    return new Date(s).toLocaleDateString('es-AR', { year: 'numeric', month: 'short' });
 }
 
 function checkAuth() {
     const user = JSON.parse(localStorage.getItem('adminUser'));
-    if (!user) {
-        window.location.href = 'login.html';
-        return null;
-    }
+    if (!user) { window.location.href = 'login.html'; return null; }
     return user;
 }
 
@@ -56,90 +33,55 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-// GET con query params — funciona siempre con Apps Script
+// Todas las llamadas normales: GET con query params (nunca dispara preflight)
 async function apiCall(action, params = {}) {
-    const queryParams = new URLSearchParams({ action, ...params });
-    const response = await fetch(`${API_URL}?${queryParams.toString()}`);
-    return response.json();
+    const qs = new URLSearchParams({ action, ...params });
+    const res = await fetch(`${API_URL}?${qs}`);
+    return res.json();
 }
 
-// POST sin headers custom — evita el preflight CORS que rompe Apps Script
-async function apiPostJson(action, data) {
-    const params = new URLSearchParams({ action, data: JSON.stringify(data) });
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        body: params   // application/x-www-form-urlencoded por defecto → "simple request" → sin preflight
-    });
-    return response.json();
-}
-
-// Upload PDF — misma estrategia: FormData sin Content-Type manual
+// Upload PDF: acción en la URL, datos en body como texto plano (sin Content-Type header)
+// — "text/plain" es un "simple request" → sin preflight CORS
+// — los datos van en e.postData.contents en Apps Script (evita el límite de tamaño de e.parameter)
 async function uploadPDF(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = async () => {
             try {
                 const base64Data = reader.result.split(',')[1];
-
-                // FIX CLAVE: usar URLSearchParams en lugar de JSON body con Content-Type header.
-                // Content-Type: application/json dispara un preflight OPTIONS que Apps Script
-                // no puede responder correctamente, causando "Failed to fetch".
-                // URLSearchParams se manda como application/x-www-form-urlencoded,
-                // que es un "simple request" y no necesita preflight.
-                const params = new URLSearchParams({
-                    action: 'uploadPDF',
-                    fileName: file.name,
-                    fileData: base64Data
-                });
-
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: params
-                });
-
-                const data = await response.json();
-                resolve(data);
-            } catch (error) {
-                reject(error);
-            }
+                const body = JSON.stringify({ fileName: file.name, fileData: base64Data });
+                const res = await fetch(`${API_URL}?action=uploadPDF`, { method: 'POST', body });
+                const text = await res.text();
+                console.log('Respuesta del servidor:', text); // ← mirá esto en Console
+                try {
+                    resolve(JSON.parse(text));
+                } catch {
+                    resolve({ success: false, error: 'Respuesta inválida: ' + text.substring(0, 200) });
+                }
+            } catch (err) { reject(err); }
         };
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
 }
-
 function showNotification(message, type = 'success') {
-    document.querySelectorAll('.notification').forEach(n => n.remove());
-
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-        <span>${message}</span>
-    `;
-    notification.style.cssText = `
-        position: fixed; top: 100px; right: 20px;
-        padding: 1rem 1.5rem; border-radius: 0.5rem;
-        display: flex; align-items: center; gap: 0.75rem;
-        z-index: 3000; animation: slideIn 0.3s ease;
-        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3276f3'};
-        color: white; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    `;
-    document.body.appendChild(notification);
-
+    document.querySelectorAll('.admin-notification').forEach(n => n.remove());
+    const n = document.createElement('div');
+    n.className = 'admin-notification';
+    n.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i><span>${message}</span>`;
+    n.style.cssText = `
+    position:fixed;top:80px;right:1.5rem;padding:.875rem 1.25rem;
+    border-radius:.5rem;display:flex;align-items:center;gap:.625rem;
+    z-index:4000;animation:slideIn .25s ease;
+    background:${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3276f3'};
+    color:#fff;font-weight:500;font-size:.9rem;
+    box-shadow:0 8px 24px rgba(0,0,0,.15);
+    font-family:Inter,sans-serif;
+  `;
+    document.body.appendChild(n);
     setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transition = 'opacity 0.3s, transform 0.3s';
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
+        n.style.transition = 'opacity .3s,transform .3s';
+        n.style.opacity = '0'; n.style.transform = 'translateX(110%)';
+        setTimeout(() => n.remove(), 320);
+    }, 3500);
 }
-
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateX(100%); }
-        to   { opacity: 1; transform: translateX(0); }
-    }
-`;
-document.head.appendChild(styleSheet);
