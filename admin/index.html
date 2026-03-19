@@ -335,6 +335,10 @@
 
     <script src="../assets/js/admin-config.js"></script>
     <script>
+    function isPending(u) {
+      const v = u.approved;
+      return !v || v === false || v === 'FALSE' || v === '' || v === 0;
+    }
         // ============================================================
         // STATE
         // ============================================================
@@ -431,7 +435,7 @@
             try {
                 const response = await apiCall('getUsers');
                 if (response.success) {
-                    const count = response.users.filter(u => !u.approved && u.role !== 'admin').length;
+                    const count = response.users.filter(u => u.role !== 'admin' && isPending(u)).length;
                     document.getElementById('pendingUsersCount').textContent = count;
                 }
             } catch (e) { }
@@ -491,6 +495,10 @@
                     <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openEditReport('${r.id}')" title="Editar">
                       <i class="fas fa-edit"></i>
                     </button>
+                    ${currentUser.role === 'admin' ? `
+                    <button class="btn-admin btn-admin-sm ${r.featured ? 'btn-admin-warning' : 'btn-admin-secondary'}" onclick="toggleFeatured('${r.id}')" title="${r.featured ? 'Quitar de destacados' : 'Destacar'}">
+                      <i class="fas fa-star"></i>
+                    </button>` : ''}
                     ${(currentUser.role === 'admin' || r.centro === currentUser.centro) ? `
                     <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteReportModal('${r.id}','${esc(r.titulo).replace(/'/g, "\\'")}')">
                       <i class="fas fa-trash"></i>
@@ -681,8 +689,8 @@
 
         function updateUserStats() {
             const nonAdmins = allUsers.filter(u => u.role !== 'admin');
-            const pending = nonAdmins.filter(u => !u.approved || u.approved === 'FALSE');
-            const approved = nonAdmins.filter(u => u.approved && u.approved !== 'FALSE');
+            const pending = nonAdmins.filter(u => isPending(u));
+            const approved = nonAdmins.filter(u => !isPending(u));
             document.getElementById('totalUsers').textContent = nonAdmins.length;
             document.getElementById('approvedUsers').textContent = approved.length;
             document.getElementById('pendingUsersStatCount').textContent = pending.length;
@@ -692,8 +700,8 @@
 
         function renderUsers() {
             const nonAdmins = allUsers.filter(u => u.role !== 'admin');
-            const pending = nonAdmins.filter(u => !u.approved || u.approved === 'FALSE');
-            const approved = nonAdmins.filter(u => u.approved && u.approved !== 'FALSE');
+            const pending = nonAdmins.filter(u => isPending(u));
+            const approved = nonAdmins.filter(u => !isPending(u));
             renderUserList('pendingContainer', pending, true);
             renderUserList('approvedContainer', approved, false);
             renderUserList('allContainer', nonAdmins, null);
@@ -721,13 +729,13 @@
                 <td>${u.centro
                     ? `<span class="badge-centro badge-${u.centro.toLowerCase()}">${u.centro}</span>`
                     : '<span class="badge badge-warning">Sin asignar</span>'}</td>
-                <td>${(u.approved && u.approved !== 'FALSE')
+                <td>${!isPending(u)
                     ? '<span class="badge badge-success">Aprobado</span>'
                     : '<span class="badge badge-warning">Pendiente</span>'}</td>
                 <td>${r.featured ? '<i class="fas fa-star" style="color:#f59e0b;" title="Destacado"></i>' : ''}</td>
                 <td>
                   <div class="table-actions">
-                    ${(showApproval === true || (showApproval === null && (!u.approved || u.approved === 'FALSE'))) ? `
+                    ${(showApproval === true || (showApproval === null && isPending(u))) ? `
                       <button class="btn-admin btn-admin-success btn-admin-sm" onclick="approveUser('${u.email}')">
                         <i class="fas fa-check"></i> Aprobar
                       </button>
@@ -805,7 +813,22 @@
             setLoading(btn, false);
         }
 
-        // ============================================================
+
+        async function toggleFeatured(id) {
+            try {
+                const res = await apiCall('toggleFeatured', { id });
+                if (res.success) {
+                    showNotification(res.featured ? 'Marcado como destacado' : 'Quitado de destacados', 'success');
+                    await loadReports();
+                } else {
+                    showNotification(res.error || 'Error', 'error');
+                }
+            } catch(e) {
+                showNotification('Error de conexión', 'error');
+            }
+        }
+
+                // ============================================================
         // HELPERS
         // ============================================================
         function populateCentroFilter() {
