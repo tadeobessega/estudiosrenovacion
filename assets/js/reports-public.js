@@ -11,8 +11,7 @@ const CENTRO_COLORS = {
   OPER:   '#780000',
   OPAL:   '#006D77',
   OPSA:   '#a64319',
-  CIREN:   '#014b3e',
-  'Cíclica': '#1a1a2e'
+  CIREN:  '#014b3e'
 };
 
 function formatMonthYear(dateStr) {
