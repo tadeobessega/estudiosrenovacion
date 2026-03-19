@@ -29,6 +29,7 @@
                 <nav class="nav-desktop">
                     <ul class="nav-list">
                         <li><a href="#" class="nav-link">Inicio</a></li>
+                        <li><a href="pages/ciclica.html" class="nav-link">Cíclica</a></li>
                         <li><a href="#observatorios" class="nav-link">Observatorios</a></li>
                         <li><a href="#novedades" class="nav-link">Novedades</a></li>
                         <li><a href="#informes" class="nav-link">Informes</a></li>
@@ -49,6 +50,7 @@
             <nav class="nav-mobile" id="mobileNav">
                 <ul class="nav-mobile-list">
                     <li><a href="#inicio" class="nav-mobile-link">Inicio</a></li>
+                    <li><a href="pages/ciclica.html" class="nav-mobile-link">Cíclica</a></li>
                     <li><a href="#observatorios" class="nav-mobile-link">Observatorios</a></li>
                     <li><a href="#informes" class="nav-mobile-link">Informes</a></li>
                     <li><a href="#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
@@ -405,6 +407,7 @@
                     <h4 class="footer-title">Enlaces Rápidos</h4>
                     <ul class="footer-links">
                         <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="pages/ciclica.html">Cíclica</a></li>
                         <li><a href="#observatorios">Observatorios</a></li>
                         <li><a href="#novedades">Novedades</a></li>
                         <li><a href="#informes">Informes</a></li>
@@ -444,7 +447,13 @@
     </footer>
 
     <script src="assets/js/main.js"></script>
-    <script src="assets/js/reports-loader.js"></script>
+    <script src="assets/js/reports-public.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        loadUltimasPublicaciones();
+        loadInformesDestacados();
+      });
+    </script>
 
 </body>
 
