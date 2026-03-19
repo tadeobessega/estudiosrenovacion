@@ -1,17 +1,22 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbzaKZ6XCEVxS5euoKX9xxqzScKSiJmNvd4XmP1rcpdhg94g6gCa_JxboUTAaj7JHKMK/exec';
 
+// Lista base de centros (se puede sobreescribir desde Config)
 const CENTROS = [
-    { id: 'CEER', name: 'Centro de Estudios Económicos', color: '#020995' },
-    { id: 'CEEIR', name: 'Centro de Estudios Estratégicos Internacionales', color: '#489bdc' },
-    { id: 'CEDHyS', name: 'Centro de Estudios en Derechos Humanos y Seguridad', color: '#2850bd' },
-    { id: 'OPER', name: 'Observatorio de Políticas Educativas', color: '#780000' },
-    { id: 'OPAL', name: 'Observatorio para el Análisis Electoral', color: '#006D77' },
-    { id: 'OPSA', name: 'Observatorio de Política Social Aplicada', color: '#a64319' },
-    { id: 'CIREN', name: 'Centro de Estudios Científicos', color: '#014b3e' }
+    { id: 'CEER',    name: 'Centro de Estudios Económicos',                       color: '#020995' },
+    { id: 'CEEIR',   name: 'Centro de Estudios Estratégicos Internacionales',      color: '#489bdc' },
+    { id: 'CEDHyS',  name: 'Centro de Estudios en Derechos Humanos y Seguridad',   color: '#2850bd' },
+    { id: 'OPER',    name: 'Observatorio de Políticas Educativas',                 color: '#780000' },
+    { id: 'OPAL',    name: 'Observatorio para el Análisis Electoral',              color: '#006D77' },
+    { id: 'OPSA',    name: 'Observatorio de Política Social Aplicada',             color: '#a64319' },
+    { id: 'CIREN',   name: 'Centro de Estudios Científicos',                       color: '#014b3e' },
+    { id: 'Cíclica', name: 'Cíclica — Revista de Opinión',                         color: '#0099cc' }
 ];
 
+// Lista base de tags (se puede sobreescribir desde Config)
+let TAGS = ['Informe','Informe Especial','Análisis','Investigación','Documento de Trabajo','Policy Brief','Nota Técnica'];
+
 function getCentroColor(id) { const c = CENTROS.find(c => c.id === id); return c ? c.color : '#64748b'; }
-function getCentroName(id) { const c = CENTROS.find(c => c.id === id); return c ? c.name : id; }
+function getCentroName(id)  { const c = CENTROS.find(c => c.id === id); return c ? c.name  : id; }
 
 function formatDate(s) {
     if (!s) return '';
@@ -33,16 +38,12 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-// Todas las llamadas normales: GET con query params (nunca dispara preflight)
 async function apiCall(action, params = {}) {
-    const qs = new URLSearchParams({ action, ...params });
+    const qs  = new URLSearchParams({ action, ...params });
     const res = await fetch(`${API_URL}?${qs}`);
     return res.json();
 }
 
-// Upload PDF: acción en la URL, datos en body como texto plano (sin Content-Type header)
-// — "text/plain" es un "simple request" → sin preflight CORS
-// — los datos van en e.postData.contents en Apps Script (evita el límite de tamaño de e.parameter)
 async function uploadPDF(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -50,20 +51,39 @@ async function uploadPDF(file) {
             try {
                 const base64Data = reader.result.split(',')[1];
                 const body = JSON.stringify({ fileName: file.name, fileData: base64Data });
-                const res = await fetch(`${API_URL}?action=uploadPDF`, { method: 'POST', body });
+                const res  = await fetch(`${API_URL}?action=uploadPDF`, { method: 'POST', body });
                 const text = await res.text();
-                console.log('Respuesta del servidor:', text); // ← mirá esto en Console
-                try {
-                    resolve(JSON.parse(text));
-                } catch {
-                    resolve({ success: false, error: 'Respuesta inválida: ' + text.substring(0, 200) });
-                }
+                try { resolve(JSON.parse(text)); }
+                catch { resolve({ success: false, error: 'Respuesta inválida: ' + text.substring(0, 200) }); }
             } catch (err) { reject(err); }
         };
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
 }
+
+// Carga tags desde la API (y actualiza TAGS)
+async function loadTagsFromConfig() {
+    try {
+        const res = await apiCall('getConfig', { key: 'tags' });
+        if (res.success && res.value) {
+            TAGS = res.value.split(',').map(t => t.trim()).filter(Boolean);
+        }
+    } catch(e) { /* usa fallback */ }
+    return TAGS;
+}
+
+// Carga centros desde la API (retorna array de IDs)
+async function loadCentrosFromConfig() {
+    try {
+        const res = await apiCall('getConfig', { key: 'centros' });
+        if (res.success && res.value) {
+            return res.value.split(',').map(c => c.trim()).filter(Boolean);
+        }
+    } catch(e) {}
+    return CENTROS.map(c => c.id);
+}
+
 function showNotification(message, type = 'success') {
     document.querySelectorAll('.admin-notification').forEach(n => n.remove());
     const n = document.createElement('div');
