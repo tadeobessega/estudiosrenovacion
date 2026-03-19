@@ -34,6 +34,8 @@
                         <li><a href="#informes" class="nav-link">Informes</a></li>
                         <li><a href="#quienes-somos" class="nav-link">¿Quiénes somos?</a></li>
                         <li><a href="#contacto" class="nav-link">Contacto</a></li>
+                        <li><a href="pages/ciclica.html" class="nav-link" style="color:#00b4d8;font-weight:600;">Cíclica</a></li>
+                        <li><a href="pages/ciclica.html" class="nav-link" style="font-style:italic;">Cíclica</a></li>
                     </ul>
                 </nav>
 
@@ -53,7 +55,9 @@
                     <li><a href="#informes" class="nav-mobile-link">Informes</a></li>
                     <li><a href="#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
                     <li><a href="#novedades" class="nav-mobile-link">Novedades</a></li>
+                    <li><a href="pages/ciclica.html" class="nav-mobile-link" style="color:#00b4d8;font-weight:600;">Cíclica</a></li>
                     <li><a href="#contacto" class="nav-mobile-link">Contacto</a></li>
+                    <li><a href="pages/ciclica.html" class="nav-mobile-link" style="font-style:italic;">Cíclica</a></li>
                 </ul>
             </nav>
         </div>
@@ -161,6 +165,18 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="slide" data-center="ciclica">
+                    <div class="slide-content">
+                        <div class="container">
+                            <div class="slide-text">
+                                <h1>Revista Cíclica</h1>
+                                <p>Análisis político y social de largo aliento.</p>
+                                <a href="pages/ciclica.html" class="btn btn-primary">Conocer más</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="slider-controls">
@@ -181,6 +197,7 @@
                 <span class="dot" onclick="currentSlide(5)"></span>
                 <span class="dot" onclick="currentSlide(6)"></span>
                 <span class="dot" onclick="currentSlide(7)"></span>
+                <span class="dot" onclick="currentSlide(8)"></span>
 
             </div>
 
@@ -281,6 +298,18 @@
                         <p class="card-description">Centro de Estudios Científicos </p>
                     </div>
 
+
+                <!-- Cíclica separada abajo -->
+                <div style="margin-top:2.5rem; display:flex; justify-content:center;">
+                    <div class="observatorio-card" onclick="window.location.href='pages/ciclica.html'"
+                         style="max-width:280px; border-top:4px solid #00b4d8;">
+                        <div class="card-image">
+                            <img src="assets/img/ceer-logo.png" alt="Cíclica" class="observatorio-logo" style="filter:hue-rotate(180deg) saturate(2);">
+                        </div>
+                        <h3 class="card-title" style="color:#00b4d8;">Cíclica</h3>
+                        <p class="card-description">Revista de los Centros de Estudios Renovación</p>
+                    </div>
+                </div>
                 </div>
             </div>
         </section>
@@ -423,6 +452,7 @@
                         <li><a href="pages/cedhys.html">CEDHyS</a></li>
                         <li><a href="pages/ciren.html">CIREN</a></li>
                         <li><a href="pages/oper.html">OPER</a></li>
+                        <li><a href="pages/ciclica.html" style="font-style:italic;">Cíclica</a></li>
                     </ul>
                 </div>
 
@@ -444,8 +474,25 @@
     </footer>
 
     <script src="assets/js/main.js"></script>
-    <script src="assets/js/reports-loader.js"></script>
+    <script src="assets/js/reports-public.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadUltimasPublicaciones();
+        loadInformesDestacados();
 
-</body>
+        // Acceso escondido al admin: 5 clics en el copyright
+        let clicks = 0, timer;
+        const trigger = document.getElementById('adminTrigger');
+        if (trigger) {
+            trigger.addEventListener('click', () => {
+                clicks++;
+                clearTimeout(timer);
+                timer = setTimeout(() => { clicks = 0; }, 2000);
+                if (clicks >= 5) window.location.href = './admin/login.html';
+            });
+        }
+    });
+    </script>
+
 
 </html>
