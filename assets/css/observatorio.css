@@ -586,3 +586,83 @@
 }
 
 }
+
+/* ── Cíclica ── */
+.observatorio-hero-ciclica {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: var(--white);
+  padding: var(--spacing-3xl) 0;
+  text-align: center;
+}
+.eje-icon-ciclica {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, #1a1a2e, #0f3460);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto var(--spacing-lg);
+  color: white; font-size: 2rem;
+}
+.publicacion-type-ciclica {
+  background-color: #1a1a2e;
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.publicacion-link-ciclica {
+  color: #1a1a2e;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.publicacion-link-ciclica:hover { text-decoration: underline; }
+.badge-ciclica { background: #1a1a2e; }
+
+/* ── Cíclica ── */
+.observatorio-hero-ciclica {
+  background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+  color: white;
+  padding: var(--spacing-3xl) 0;
+  text-align: center;
+}
+
+.eje-icon-ciclica {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #00b4d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--spacing-lg);
+  font-size: 2rem;
+  color: white;
+}
+
+.publicacion-type-ciclica {
+  background: #00b4d8;
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.publicacion-link-ciclica {
+  color: #00b4d8;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.publicacion-link-ciclica:hover {
+  text-decoration: underline;
+}
+
+.badge-ciclica { background: #00b4d8; }
