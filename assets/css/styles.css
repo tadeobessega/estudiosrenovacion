@@ -25,7 +25,8 @@ a{
   --oper: #780000;
   --opal: #006D77;
   --opsa: #a64319; 
-  --ciren: #014b3e; 
+  --ciren: #014b3e;
+  --ciclica: #0099cc; 
 
 
   /* Colores neutros */
@@ -401,6 +402,7 @@ section:not(.hero-slider) {
 .slide[data-center="opal"]  { background-color: var(--opal); }
 .slide[data-center="ciren"] {background-color: var(--ciren);}
 .slide[data-center="opsa"]  { background-color: var(--opsa); }
+.slide[data-center="ciclica"] { background: linear-gradient(135deg, #0099cc 0%, #0066aa 100%); }
 
 
 /* Contenido de cada slide */

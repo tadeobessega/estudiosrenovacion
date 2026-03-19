@@ -586,3 +586,55 @@
 }
 
 }
+
+/* ========== CÍCLICA ========== */
+.observatorio-hero-ciclica {
+  background: linear-gradient(160deg, #00b4e6 0%, #0077cc 60%, #004fa3 100%);
+  color: var(--white);
+  padding: calc(var(--spacing-3xl) + 80px) 0 var(--spacing-3xl);
+  text-align: center;
+}
+
+.publicacion-type-ciclica {
+  background: var(--ciclica);
+  color: var(--white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.publicacion-link-ciclica {
+  color: #0077cc;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  transition: var(--transition-fast);
+}
+.publicacion-link-ciclica:hover { color: #004fa3; }
+
+.publicacion-card-ciclica {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid #b3e0f5;
+}
+.publicacion-card-ciclica:hover {
+  border-color: #0099cc;
+  box-shadow: 0 8px 32px rgba(0,153,204,.15);
+}
+
+.ciclica-section {
+  background: linear-gradient(160deg, #e8f6fc 0%, #d0edf8 60%, #c2e4f4 100%);
+  min-height: 60vh;
+  padding: var(--spacing-3xl) 0;
+}
+
+.badge-ciclica {
+  background: var(--ciclica);
+  color: var(--white);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
