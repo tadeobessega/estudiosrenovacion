@@ -179,3 +179,33 @@ async function loadNotasCiclica() {
 
 // Spinner keyframes
 document.head.insertAdjacentHTML('beforeend', `<style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+
+// ── Carga miembros de un centro — solo muestra la sección si hay datos ──
+async function loadMiembros(centroId) {
+  const section = document.querySelector('.miembros');
+  if (!section) return;
+
+  try {
+    const res  = await fetch(`${API_URL}?action=getMiembros&centro=${encodeURIComponent(centroId)}`);
+    const data = await res.json();
+
+    if (!data.success || !data.miembros.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = '';
+    const grid = section.querySelector('.miembros-grid');
+    if (!grid) return;
+
+    grid.innerHTML = data.miembros.map(m => `
+      <div class="miembro-item">
+        <h3 class="miembro-nombre">${esc(m.nombre)}</h3>
+        <p class="miembro-cargo">${esc(m.cargo)}</p>
+        <p class="miembro-descripcion">${esc(m.descripcion)}</p>
+      </div>
+    `).join('');
+  } catch(e) {
+    if (section) section.style.display = 'none';
+  }
+}
