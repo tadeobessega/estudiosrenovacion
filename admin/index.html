@@ -33,6 +33,9 @@
       <nav class="admin-nav">
         <button class="admin-nav-link active" data-view="informes"><i class="fas fa-file-alt"></i> Informes</button>
         <button class="admin-nav-link" data-view="upload"><i class="fas fa-upload"></i> Subir</button>
+        <button class="admin-nav-link" data-view="miembros" id="miembrosNavLink" style="display:none;">
+          <i class="fas fa-users"></i> Miembros
+        </button>
         <button class="admin-nav-link" data-view="users" id="usersNavLink" style="display:none;"><i class="fas fa-users"></i> Usuarios</button>
         <button class="admin-nav-link" data-view="notas" id="notasNavLink" style="display:none;"><i class="fas fa-pen-nib"></i> Cíclica</button>
         <button class="admin-nav-link" data-view="config" id="configNavLink" style="display:none;"><i class="fas fa-cog"></i> Config</button>
@@ -290,6 +293,37 @@
       </div>
 
     </div><!-- /admin-container -->
+
+      <!-- ===== VIEW: MIEMBROS ===== -->
+      <div id="view-miembros" class="view" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Miembros</h1>
+          <p class="page-subtitle">Gestioná los miembros de cada centro</p>
+        </div>
+
+        <div class="admin-card">
+          <div style="display:flex; gap:1rem; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+            <select id="miembrosCentroFilter" class="form-select" style="width:auto;">
+              <option value="all">Todos los centros</option>
+            </select>
+            <button class="btn-admin btn-admin-primary" onclick="openMiembroModal()">
+              <i class="fas fa-plus"></i> Nuevo Miembro
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2 class="admin-card-title">Miembros Cargados</h2>
+          </div>
+          <div id="miembrosContainer">
+            <div style="text-align:center;padding:2rem;">
+              <div class="spinner spinner-dark" style="width:40px;height:40px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
   </main>
 
   <!-- MODAL: Eliminar Informe -->
@@ -1007,5 +1041,71 @@
     return (bytes/1048576).toFixed(1) + ' MB';
   }
   </script>
+  <!-- ===== MODAL: Miembro ===== -->
+  <div class="modal-overlay" id="miembroModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="miembroModalTitle">Nuevo Miembro</h3>
+        <button class="modal-close" onclick="closeModal('miembroModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="miembroFormMsg" class="alert" style="display:none;"></div>
+        <div class="form-group">
+          <label class="form-label">Nombre completo *</label>
+          <input type="text" id="miembroNombre" class="form-input" placeholder="Ej: Guido Zack">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cargo *</label>
+          <input type="text" id="miembroCargo" class="form-input" placeholder="Ej: Director, Analista, Investigador">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea id="miembroDescripcion" class="form-input" rows="4" style="resize:vertical;" placeholder="Breve descripción del miembro..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Centro *</label>
+            <select id="miembroCentro" class="form-select">
+              <option value="">Seleccionar...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Orden</label>
+            <input type="number" id="miembroOrden" class="form-input" placeholder="1, 2, 3..." min="1" value="99">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-admin btn-admin-secondary" onclick="closeModal('miembroModal')">Cancelar</button>
+        <button class="btn-admin btn-admin-primary" id="saveMiembroBtn" onclick="saveMiembro()">
+          <span class="btn-text">Guardar</span>
+          <span class="spinner" style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Eliminar Miembro ===== -->
+  <div class="modal-overlay" id="deleteMiembroModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Eliminar Miembro</h3>
+        <button class="modal-close" onclick="closeModal('deleteMiembroModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar a <strong id="deleteMiembroNombre"></strong>?</p>
+        <p style="color:var(--muted);font-size:.875rem;margin-top:.5rem;">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-admin btn-admin-secondary" onclick="closeModal('deleteMiembroModal')">Cancelar</button>
+        <button class="btn-admin btn-admin-danger" id="confirmDeleteMiembroBtn" onclick="confirmDeleteMiembro()">
+          <span class="btn-text">Eliminar</span>
+          <span class="spinner" style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
 </body>
 </html>
