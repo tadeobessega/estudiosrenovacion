@@ -156,6 +156,19 @@
         </div>
         </section>
 
+
+        <!-- Miembros Section — se oculta automáticamente si no hay datos -->
+        <section class="miembros" style="display:none;">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Miembros</h2>
+                    <p class="section-subtitle">El equipo detrás del centro</p>
+                </div>
+                <div class="miembros-grid">
+                    <!-- Cargado dinámicamente -->
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -219,6 +232,7 @@
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         loadCentroPublicaciones('OPER', 'oper');
+        loadMiembros('OPER');
       });
     </script>
 </body>
