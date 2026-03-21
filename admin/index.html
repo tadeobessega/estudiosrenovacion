@@ -382,6 +382,11 @@
 
   <script src="../assets/js/admin-config.js"></script>
   <script>
+  function isPending(u) {
+    const v = u.approved;
+    return !v || v === false || v === 'FALSE' || v === '' || v === 0;
+  }
+
   // ===== STATE =====
   let currentUser    = null;
   let allReports     = [];
@@ -410,6 +415,7 @@
 
     if (currentUser.role === 'admin') {
       document.getElementById('usersNavLink').style.display  = 'inline-flex';
+      document.getElementById('miembrosNavLink').style.display = 'inline-flex';
       document.getElementById('notasNavLink').style.display  = 'inline-flex';
       document.getElementById('configNavLink').style.display = 'inline-flex';
       document.getElementById('pendingUsersCard').style.display = 'block';
@@ -492,7 +498,7 @@
     try {
       const response = await apiCall('getUsers');
       if (response.success) {
-        const count = response.users.filter(u => !u.approved && u.role !== 'admin').length;
+        const count = response.users.filter(u => u.role !== 'admin' && isPending(u)).length;
         document.getElementById('pendingUsersCount').textContent = count;
       }
     } catch(e) {}
@@ -757,9 +763,9 @@
       <tbody>${users.map(u => `<tr>
         <td><strong>${esc(u.email)}</strong></td>
         <td>${u.centro ? `<span class="badge-centro badge-${u.centro.toLowerCase()}">${esc(u.centro)}</span>` : '<span class="badge badge-warning">Sin asignar</span>'}</td>
-        <td>${(u.approved && u.approved !== 'FALSE') ? '<span class="badge badge-success">Aprobado</span>' : '<span class="badge badge-warning">Pendiente</span>'}</td>
+        <td>${!isPending(u) ? '<span class="badge badge-success">Aprobado</span>' : '<span class="badge badge-warning">Pendiente</span>'}</td>
         <td><div class="table-actions">
-          ${(showApproval === true || (showApproval === null && (!u.approved || u.approved === 'FALSE'))) ? `
+          ${(showApproval === true || (showApproval === null && isPending(u))) ? `
             <button class="btn-admin btn-admin-success btn-admin-sm" onclick="approveUser('${u.email}')"><i class="fas fa-check"></i> Aprobar</button>
             <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="rejectUser('${u.email}')"><i class="fas fa-times"></i> Rechazar</button>` : ''}
           <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openEditUserModal('${u.email}','${u.centro||''}')"><i class="fas fa-edit"></i></button>
@@ -979,6 +985,164 @@
   }
 
   // ===== HELPERS =====
+
+  // ============================================================
+  // MIEMBROS
+  // ============================================================
+  let allMiembros     = [];
+  let miembroToEdit   = null;
+  let miembroToDelete = null;
+
+  async function loadMiembrosAdmin() {
+    try {
+      const res = await apiCall('getMiembros', { centro: 'all' });
+      if (res.success) {
+        allMiembros = res.miembros;
+        renderMiembrosAdmin(allMiembros);
+      }
+    } catch(e) {}
+  }
+
+  function renderMiembrosAdmin(miembros) {
+    const container = document.getElementById('miembrosContainer');
+    if (!container) return;
+    if (!miembros.length) {
+      container.innerHTML = `<div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-users"></i></div>
+        <h3 class="empty-state-title">No hay miembros</h3>
+        <p>Agregá el primer miembro usando el botón "Nuevo Miembro".</p>
+      </div>`;
+      return;
+    }
+    container.innerHTML = `<div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead><tr><th>Nombre</th><th>Cargo</th><th>Centro</th><th>Orden</th><th>Acciones</th></tr></thead>
+        <tbody>
+          ${miembros.map(m => `
+            <tr>
+              <td><strong>${esc(m.nombre)}</strong></td>
+              <td>${esc(m.cargo)}</td>
+              <td><span class="badge-centro badge-${(m.centro||'').toLowerCase()}">${m.centro}</span></td>
+              <td>${m.orden}</td>
+              <td><div class="table-actions">
+                <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openMiembroModal('${m.id}')">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteMiembroModal('${m.id}','${esc(m.nombre).replace(/'/g,"\\'")}')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
+
+  function populateMiembroCentroSelect() {
+    const sel = document.getElementById('miembroCentro');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Seleccionar...</option>' +
+      CENTROS.map(c => `<option value="${c.id}">${c.id} - ${c.name}</option>`).join('');
+  }
+
+  function populateMiembrosCentroFilter() {
+    const sel = document.getElementById('miembrosCentroFilter');
+    if (!sel) return;
+    sel.innerHTML = '<option value="all">Todos los centros</option>' +
+      CENTROS.map(c => `<option value="${c.id}">${c.id}</option>`).join('');
+    sel.addEventListener('change', () => {
+      const v = sel.value;
+      renderMiembrosAdmin(v === 'all' ? allMiembros : allMiembros.filter(m => m.centro === v));
+    });
+  }
+
+  function openMiembroModal(id) {
+    miembroToEdit = id || null;
+    const titleEl = document.getElementById('miembroModalTitle');
+    if (titleEl) titleEl.textContent = id ? 'Editar Miembro' : 'Nuevo Miembro';
+    const msgEl = document.getElementById('miembroFormMsg');
+    if (msgEl) msgEl.style.display = 'none';
+    populateMiembroCentroSelect();
+    if (id) {
+      const m = allMiembros.find(x => x.id === id);
+      if (m) {
+        document.getElementById('miembroNombre').value      = m.nombre;
+        document.getElementById('miembroCargo').value       = m.cargo;
+        document.getElementById('miembroDescripcion').value = m.descripcion || '';
+        document.getElementById('miembroCentro').value      = m.centro;
+        document.getElementById('miembroOrden').value       = m.orden;
+      }
+    } else {
+      document.getElementById('miembroNombre').value      = '';
+      document.getElementById('miembroCargo').value       = '';
+      document.getElementById('miembroDescripcion').value = '';
+      document.getElementById('miembroCentro').value      = '';
+      document.getElementById('miembroOrden').value       = '99';
+    }
+    openModal('miembroModal');
+  }
+
+  async function saveMiembro() {
+    const nombre      = document.getElementById('miembroNombre').value.trim();
+    const cargo       = document.getElementById('miembroCargo').value.trim();
+    const descripcion = document.getElementById('miembroDescripcion').value.trim();
+    const centro      = document.getElementById('miembroCentro').value;
+    const orden       = parseInt(document.getElementById('miembroOrden').value) || 99;
+    const msgDiv      = document.getElementById('miembroFormMsg');
+
+    if (!nombre || !cargo || !centro) {
+      msgDiv.className = 'alert alert-danger';
+      msgDiv.textContent = 'Nombre, cargo y centro son obligatorios.';
+      msgDiv.style.display = 'flex';
+      return;
+    }
+    msgDiv.style.display = 'none';
+    const btn = document.getElementById('saveMiembroBtn');
+    setLoading(btn, true);
+    try {
+      const data = { nombre, cargo, descripcion, centro, orden };
+      const res  = miembroToEdit
+        ? await apiCall('updateMiembro', { id: miembroToEdit, data: JSON.stringify(data) })
+        : await apiCall('createMiembro', { data: JSON.stringify(data) });
+      if (res.success) {
+        showNotification(miembroToEdit ? 'Miembro actualizado' : 'Miembro creado', 'success');
+        closeModal('miembroModal');
+        await loadMiembrosAdmin();
+      } else {
+        msgDiv.className = 'alert alert-danger';
+        msgDiv.textContent = res.error || 'Error al guardar';
+        msgDiv.style.display = 'flex';
+      }
+    } catch(e) {
+      msgDiv.className = 'alert alert-danger';
+      msgDiv.textContent = 'Error de conexión';
+      msgDiv.style.display = 'flex';
+    }
+    setLoading(btn, false);
+  }
+
+  function openDeleteMiembroModal(id, nombre) {
+    miembroToDelete = id;
+    const el = document.getElementById('deleteMiembroNombre');
+    if (el) el.textContent = nombre;
+    openModal('deleteMiembroModal');
+  }
+
+  async function confirmDeleteMiembro() {
+    if (!miembroToDelete) return;
+    const btn = document.getElementById('confirmDeleteMiembroBtn');
+    setLoading(btn, true);
+    const res = await apiCall('deleteMiembro', { id: miembroToDelete });
+    if (res.success) {
+      showNotification('Miembro eliminado', 'success');
+      closeModal('deleteMiembroModal');
+      await loadMiembrosAdmin();
+    } else {
+      showNotification(res.error || 'Error', 'error');
+    }
+    setLoading(btn, false);
+  }
+
   function populateCentroFilter() {
     const select = document.getElementById('filterCentro');
     if (currentUser.role !== 'admin') {
