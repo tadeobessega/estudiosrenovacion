@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Estudios Renovación - Red de Observatorios</title>
+    <meta name="description"
+        content="Red de observatorios especializados en investigación y análisis de políticas públicas, relaciones internacionales y desarrollo social.">
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/observatorio.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="#inicio">
+                        <img src="assets/img/logo-header.png" alt="Centro de Estudios Estratégicos" class="logo-img">
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="nav-desktop">
+                    <ul class="nav-list">
+                        <li><a href="#" class="nav-link">Inicio</a></li>
+                        <li><a href="pages/ciclica.html" class="nav-link">Cíclica</a></li>
+                        <li><a href="#observatorios" class="nav-link">Observatorios</a></li>
+                        <li><a href="#novedades" class="nav-link">Novedades</a></li>
+                        <li><a href="#informes" class="nav-link">Informes</a></li>
+                        <li><a href="#quienes-somos" class="nav-link">¿Quiénes somos?</a></li>
+                        <li><a href="#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <span class="hamburger"></span>
+                    <span class="hamburger"></span>
+                    <span class="hamburger"></span>
+                </button>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <nav class="nav-mobile" id="mobileNav">
+                <ul class="nav-mobile-list">
+                    <li><a href="#inicio" class="nav-mobile-link">Inicio</a></li>
+                    <li><a href="pages/ciclica.html" class="nav-mobile-link">Cíclica</a></li>
+                    <li><a href="#observatorios" class="nav-mobile-link">Observatorios</a></li>
+                    <li><a href="#informes" class="nav-mobile-link">Informes</a></li>
+                    <li><a href="#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
+                    <li><a href="#novedades" class="nav-mobile-link">Novedades</a></li>
+                    <li><a href="#contacto" class="nav-mobile-link">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section 
+        <section class="hero" id="">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Centro de Estudios Estratégicos</h1>
+                    <p class="hero-subtitle">
+                        Red de observatorios especializados en investigación y análisis de políticas públicas. 
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#observatorios" class="btn btn-primary">Explorar Observatorios</a>
+                        <a href="#informes" class="btn btn-secondary">Ver Informes</a>
+                    </div>
+                </div>
+            </div>
+        </section>-->
+
+        <!-- Hero Slider -->
+        <section id="hero-slider" class="hero-slider">
+            <div class="slider-container">
+                <div class="slide active" data-center="ceer">
+                    <div class="slide-content">
+                        <div class="container">
+                            <div class="slide-text">
+                                <h1>Centro de Estudios Económicos Renovación</h1>
+                                <p>Informes de coyuntura económica </p>
+                                <a href="pages/ceer.html" class="btn btn-primary">Conocer más</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide" data-center="cedhys">
+                    <div class="slide-content">
+                        <div class="container">
+                            <div class="slide-text">
+                                <h1>Centro de Estudios de Derechos Humanos y Seguridad</h1>
+                                <p>Pensamos políticas públicas en materia de seguridad y derechos humanos</p>
+                                <a href="pages/cedhys.html" class="btn btn-primary">Conocer más</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide" data-center="oper">
+                    <div class="slide-content">
+                        <div class="container">
+                            <div class="slide-text">
+                                <h1>Observatorio de Políticas Educativas Renovación</h1>
+                                <p>Informes sobre el aula actual y diagnósticos sobre políticas educativas</p>
+                                <a href="pages/oper.html" class="btn btn-primary">Conocer más</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide" data-center="ceeir">
+                    <div class="slide-content">
+                        <div class="container">
+                            <div class="slide-text">
+                                <h1>Centro de Estudios Estratégicos Internacionales</h1>
+                                <p>Análisis de política exterior como herramienta fundamental para el desarrollo.</p>
+                                <a href="pages/ceeir.html" class="btn btn-primary">Conocer más</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide" data-center="opal">
+                    <div class="slide-content">
+                        <div class="container">
+                            <div class="slide-text">
+                                <h1>Observatorio de Políticas Electorales</h1>
+                                <p>Informes de coyuntura política electoral.</p>
+                                <a href="pages/opal.html" class="btn btn-primary">Conocer más</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide" data-center="ciren">
+                    <div class="slide-content">
+                        <div class="container">
+                            <div class="slide-text">
+                                <h1>Centro de Estudios Científicos Renovación</h1>
+                                <p>Investigación sobre ciencia, tecnología e innovación.</p>
+                                <a href="pages/ciren.html" class="btn btn-primary">Conocer más</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide" data-center="opsa">
+                    <div class="slide-content">
+                        <div class="container">
+                            <div class="slide-text">
+                                <h1>Observatorio de Política Social Aplicada</h1>
+                                <p>Informes sobre políticas de integración socio-urbana.</p>
+                                <a href="pages/opsa.html" class="btn btn-primary">Conocer más</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slider-controls">
+                <button class="prev-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="next-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+
+            <div class="slider-dots">
+                <span class="dot active" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+                <span class="dot" onclick="currentSlide(4)"></span>
+                <span class="dot" onclick="currentSlide(5)"></span>
+                <span class="dot" onclick="currentSlide(6)"></span>
+                <span class="dot" onclick="currentSlide(7)"></span>
+
+            </div>
+
+        </section>
+
+        <!-- Stats Section
+        <section class="stats-section">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Centros de Investigación</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">46+</div>
+                        <div class="stat-label">Investigadores</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">120+</div>
+                        <div class="stat-label">Publicaciones</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">15</div>
+                        <div class="stat-label">Años de Experiencia</div>
+                    </div>
+                </div>
+            </div>
+        </section> -->
+
+        <!-- Observatorios Section -->
+        <section class="observatorios" id="observatorios">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Observatorios de la Renovación</h2>
+                    <p class="section-subtitle">Centros especializados de investigación y análisis</p>
+                </div>
+
+                <!-- Grid con observatorios y logos reales -->
+                <div class="observatorios-grid">
+
+                    <div class="observatorio-card" onclick="window.location.href='pages/ceeir.html'">
+                        <div class="card-image">
+                            <img src="assets/img/ceeir-logo.png" alt="CEEIR" class="observatorio-logo">
+                        </div>
+                        <h3 class="card-title">CEEIR</h3>
+                        <p class="card-description">Centro de Estudios Estratégicos Internacionales </p>
+
+                    </div>
+
+                    <div class="observatorio-card" onclick="window.location.href='pages/ceer.html'">
+                        <div class="card-image">
+                            <img src="assets/img/ceer-logo.png" alt="CEER" class="observatorio-logo">
+                        </div>
+                        <h3 class="card-title">CEER</h3>
+                        <p class="card-description">Centro de Estudios Económicos </p>
+
+                    </div>
+
+                    <div class="observatorio-card" onclick="window.location.href='pages/cedhys.html'">
+                        <div class="card-image">
+                            <img src="assets/img/cedhys-logo.png" alt="CEDHyS" class="observatorio-logo">
+                        </div>
+                        <h3 class="card-title">CEDHyS</h3>
+                        <p class="card-description">Centro de Estudios en Derechos Humanos y Seguridad</p>
+
+                    </div>
+
+                    <div class="observatorio-card" onclick="window.location.href='pages/opsa.html'">
+                        <div class="card-image">
+                            <img src="assets/img/opsa-logo.png" alt="OPSA" class="observatorio-logo">
+                        </div>
+                        <h3 class="card-title">OPSA</h3>
+                        <p class="card-description">Observatorio de Política Social Aplicada</p>
+                    </div>
+
+                    <div class="observatorio-card" onclick="window.location.href='pages/opal.html'">
+                        <div class="card-image">
+                            <img src="assets/img/opal-logo.png" alt="OPAL" class="observatorio-logo">
+                        </div>
+                        <h3 class="card-title">OPAL</h3>
+                        <p class="card-description">Observatorio para el Análisis Electoral</p>
+
+                    </div>
+
+                    <div class="observatorio-card" onclick="window.location.href='pages/oper.html'">
+                        <div class="card-image">
+                            <img src="assets/img/oper-logo.png" alt="OPER" class="observatorio-logo">
+                        </div>
+                        <h3 class="card-title">OPER</h3>
+                        <p class="card-description">Observatorio de Políticas Educativas </p>
+                    </div>
+
+                    <div class="observatorio-card" onclick="window.location.href='pages/ciren.html'">
+                        <div class="card-image">
+                            <img src="assets/img/ciren-logo.png" alt="CIREN" class="observatorio-logo">
+                        </div>
+                        <h3 class="card-title">CIREN</h3>
+                        <p class="card-description">Centro de Estudios Científicos </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Novedades Section -->
+        <section class="novedades" id="novedades">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Últimas Publicaciones</h2>
+                    <p class="section-subtitle">
+                        Los últimos informes publicados por todos los centros
+                    </p>
+                </div>
+
+                <div class="novedades-grid">
+                <!-- Cargado dinámicamente desde la API -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Informes Section -->
+        <section class="informes" id="informes">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Informes Destacados</h2>
+                    <p class="section-subtitle">Accede a nuestros estudios y análisis más recientes</p>
+                </div>
+
+                <div class="informes-grid">
+                <!-- Cargado dinámicamente desde la API -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Quiénes Somos Section -->
+        <section class="quienes-somos" id="quienes-somos">
+            <div class="container">
+                <div class="section-content">
+                    <div>
+                        <h2 class="section-title">¿Quiénes somos?</h2>
+                        <p class="section-description">
+                            Somos una red de centros de investigación especializados en el análisis
+                            de políticas públicas, relaciones internacionales y desarrollo social.
+                            Nuestro trabajo se enfoca en generar informes detallados, diagnósticos y propuestas
+                            renovadas para los desafíos actuales de la Argentina.
+                        </p>
+                        <p class="section-description">
+                            Con más de cinco centros y observatorios, nuestro objetivo es contribuir al debate público,
+                            a la formación política de la juventud y a la elaboración de propuestas programáticas de
+                            políticas públicas.
+                        </p>
+                    </div>
+
+                    <!-- Agregando logo principal en sección about -->
+                    <div>
+                        <img src="assets/img/logo-header.png" alt="Centro de Estudios Estratégicos" class="about-image">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contacto Section -->
+        <section class="contacto" id="contacto">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Contacto</h2>
+                    <p class="section-subtitle">Ponete en contacto con nosotros</p>
+                </div>
+
+                <div class="contacto-content">
+                    <div>
+                        <div class="info-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>Email</h4>
+                                <p>estudiosrenovacion@gmail.com</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>Dirección</h4>
+                                <p>México 430, CABA.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agregando botón de contacto que redirije a Google Forms -->
+                    <div class="contacto-form">
+                        <p class="form-note">Completa nuestro formulario de contacto y te escribimos.</p>
+                        <a href="https://forms.gle/VniWpEvBexoPXGZJ9" class="btn btn-contact">Sumate</button></a>
+
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <!-- Logo principal en footer -->
+                    <div class="footer-logo">
+                        <a href="#inicio">
+                            <img src="assets/img/logos.png" alt="Centro de Estudios Estratégicos"
+                                class="footer-logo-img">
+                        </a>
+                    </div>
+                    <p class="footer-description">
+                        Centro de investigación dedicado al análisis multidisciplinario.
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">Enlaces Rápidos</h4>
+                    <ul class="footer-links">
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="pages/ciclica.html">Cíclica</a></li>
+                        <li><a href="#observatorios">Observatorios</a></li>
+                        <li><a href="#novedades">Novedades</a></li>
+                        <li><a href="#informes">Informes</a></li>
+                        <li><a href="#quienes-somos">¿Quiénes somos?</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">Observatorios</h4>
+                    <ul class="footer-links">
+                        <li><a href="pages/opal.html">OPAL</a></li>
+                        <li><a href="pages/ceeir.html">CEEIR</a></li>
+                        <li><a href="pages/ceer.html">CEER</a></li>
+                        <li><a href="pages/opsa.html">OPSA</a></li>
+                        <li><a href="pages/cedhys.html">CEDHyS</a></li>
+                        <li><a href="pages/ciren.html">CIREN</a></li>
+                        <li><a href="pages/oper.html">OPER</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">Seguínos</h4>
+                    <!-- Redes sociales con iconos profesionales -->
+                    <div class="footer-social">
+                        <a href="https://www.instagram.com/estudiosrenovacion/?hl=es" class="social-link"><i
+                                class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p><span id="adminTrigger" style="cursor:default;" title="">&copy; 2025 Centros de Estudios Renovación. Todos los derechos reservados.</span></p>
+                <p style="margin-top: 0.5rem;"><a href="admin/login.html" style="color: var(--gray-500); text-decoration: none; font-size: 0.875rem;">Panel de Administración</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/reports-public.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        loadUltimasPublicaciones();
+        loadInformesDestacados();
+      });
+    </script>
+
+</body>
+
+</html>

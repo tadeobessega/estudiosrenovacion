@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Centro de Estudios Renovación</title>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <a href="../index.html">
+                    <img src="../assets/img/logo-header.png" alt="Centro de Estudios Renovación">
+                </a>
+            </div>
+
+            <h1 class="login-title">Panel de Administración</h1>
+            <p class="login-subtitle">Ingresá tus credenciales para continuar</p>
+
+            <div class="tab-nav">
+                <button class="tab-link active" data-tab="login">Iniciar Sesión</button>
+                <button class="tab-link" data-tab="register">Registrarse</button>
+            </div>
+
+            <!-- Login -->
+            <div id="login-tab" class="tab-content active">
+                <form id="loginForm">
+                    <div id="loginError" class="alert alert-danger" style="display:none;"></div>
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">Usuario</label>
+                        <input type="text" id="loginEmail" class="form-input" placeholder="tu usuario" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Contraseña</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="Tu contraseña"
+                            required>
+                    </div>
+                    <button type="submit" class="btn-admin btn-admin-primary btn-admin-block" id="loginBtn">
+                        <span class="btn-text">Iniciar Sesión</span>
+                        <span class="spinner" style="display:none;"></span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Register -->
+            <div id="register-tab" class="tab-content">
+                <form id="registerForm">
+                    <div id="registerMessage" class="alert" style="display:none;"></div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerEmail">Usuario</label>
+                        <input type="text" id="registerEmail" class="form-input" placeholder="nombre.apellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerPassword">Contraseña</label>
+                        <input type="password" id="registerPassword" class="form-input"
+                            placeholder="Mínimo 6 caracteres" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerCentro">Centro de Investigación</label>
+                        <select id="registerCentro" class="form-select" required>
+                            <option value="">Selecciona tu centro</option>
+                            <option value="CEER">CEER - Centro de Estudios Económicos</option>
+                            <option value="CEEIR">CEEIR - Centro de Estudios Estratégicos Internacionales</option>
+                            <option value="CEDHyS">CEDHyS - Centro de Estudios en Derechos Humanos y Seguridad</option>
+                            <option value="OPER">OPER - Observatorio de Políticas Educativas</option>
+                            <option value="OPAL">OPAL - Observatorio para el Análisis Electoral</option>
+                            <option value="OPSA">OPSA - Observatorio de Política Social Aplicada</option>
+                            <option value="CIREN">CIREN - Centro de Estudios Científicos</option>
+                            <option value="Cíclica">Cíclica - Revista de Opinión</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-admin btn-admin-primary btn-admin-block" id="registerBtn">
+                        <span class="btn-text">Solicitar Registro</span>
+                        <span class="spinner" style="display:none;"></span>
+                    </button>
+                    <p style="text-align:center; margin-top:1rem; font-size:0.875rem; color:var(--admin-text-muted);">
+                        Tu registro será revisado por un administrador
+                    </p>
+                </form>
+            </div>
+
+            <div
+                style="text-align:center; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--admin-border);">
+                <a href="../index.html" class="link-text" style="font-size:0.875rem;">
+                    <i class="fas fa-arrow-left"></i> Volver al sitio
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/admin-config.js"></script>
+    <script>
+        // Tabs
+        document.querySelectorAll('.tab-link').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        // Redirect if already logged in
+        if (localStorage.getItem('adminUser')) window.location.href = 'index.html';
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('loginError');
+
+            btn.querySelector('.btn-text').style.display = 'none';
+            btn.querySelector('.spinner').style.display = 'inline-block';
+            btn.disabled = true;
+            errorDiv.style.display = 'none';
+
+            try {
+                const res = await apiCall('login', { email, password });
+                if (res.success) {
+                    localStorage.setItem('adminUser', JSON.stringify(res.user));
+                    window.location.href = 'index.html';
+                } else {
+                    errorDiv.textContent = res.error || 'Error al iniciar sesión';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Error de conexión. Verificá tu configuración.';
+                errorDiv.style.display = 'block';
+            }
+
+            btn.querySelector('.btn-text').style.display = 'inline';
+            btn.querySelector('.spinner').style.display = 'none';
+            btn.disabled = false;
+        });
+
+        // Register
+        document.getElementById('registerForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const centro = document.getElementById('registerCentro').value;
+            const btn = document.getElementById('registerBtn');
+            const messageDiv = document.getElementById('registerMessage');
+
+            btn.querySelector('.btn-text').style.display = 'none';
+            btn.querySelector('.spinner').style.display = 'inline-block';
+            btn.disabled = true;
+            messageDiv.style.display = 'none';
+
+            try {
+                const res = await apiCall('register', { email, password, centro });
+                if (res.success) {
+                    messageDiv.className = 'alert alert-success';
+                    messageDiv.textContent = res.message || 'Registro exitoso. Esperá la aprobación del administrador.';
+                    messageDiv.style.display = 'block';
+                    document.getElementById('registerForm').reset();
+                } else {
+                    messageDiv.className = 'alert alert-danger';
+                    messageDiv.textContent = res.error || 'Error al registrarse';
+                    messageDiv.style.display = 'block';
+                }
+            } catch (err) {
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = 'Error de conexión.';
+                messageDiv.style.display = 'block';
+            }
+
+            btn.querySelector('.btn-text').style.display = 'inline';
+            btn.querySelector('.spinner').style.display = 'none';
+            btn.disabled = false;
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Centro de Estudios Renovación</title>
+  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .badge-featured { background:#f59e0b;color:#fff;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700; }
+    .badge-ciclica  { background:#0099cc;color:#fff;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700; }
+    .tag-pill {
+      display:inline-flex;align-items:center;gap:.4rem;
+      background:var(--admin-bg-card);border:1px solid var(--admin-border);
+      border-radius:999px;padding:.25rem .75rem;font-size:.8rem;
+    }
+    .tag-pill button { background:none;border:none;cursor:pointer;color:#ef4444;line-height:1;font-size:.9rem;padding:0; }
+    .tags-container { display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;min-height:2rem; }
+    .config-add-row { display:flex;gap:.5rem;margin-top:.5rem; }
+    .config-add-row input { flex:1; }
+  </style>
+</head>
+<body class="admin-page">
+
+  <!-- HEADER -->
+  <header class="admin-header">
+    <div class="admin-header-left">
+      <a href="../index.html" class="admin-header-logo">
+        <img src="../assets/img/logo-header.png" alt="Centro de Estudios Renovación">
+      </a>
+      <nav class="admin-nav">
+        <button class="admin-nav-link active" data-view="informes"><i class="fas fa-file-alt"></i> Informes</button>
+        <button class="admin-nav-link" data-view="upload"><i class="fas fa-upload"></i> Subir</button>
+        <button class="admin-nav-link" data-view="miembros" id="miembrosNavLink" style="display:none;">
+          <i class="fas fa-users"></i> Miembros
+        </button>
+        <button class="admin-nav-link" data-view="users" id="usersNavLink" style="display:none;"><i class="fas fa-users"></i> Usuarios</button>
+        <button class="admin-nav-link" data-view="notas" id="notasNavLink" style="display:none;"><i class="fas fa-pen-nib"></i> Cíclica</button>
+        <button class="admin-nav-link" data-view="config" id="configNavLink" style="display:none;"><i class="fas fa-cog"></i> Config</button>
+      </nav>
+    </div>
+    <div class="admin-header-right">
+      <div class="admin-user-info">
+        <div class="admin-user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="admin-user-name" id="userName">Usuario</div>
+          <div class="admin-user-role" id="userRole">Cargando...</div>
+        </div>
+      </div>
+      <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Salir
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="admin-container">
+
+      <!-- ===== VIEW: INFORMES ===== -->
+      <div id="view-informes" class="view">
+        <div class="page-header">
+          <h1 class="page-title">Panel de Informes</h1>
+          <p class="page-subtitle">Gestiona los informes de tu centro</p>
+        </div>
+
+        <div class="stats-grid-admin">
+          <div class="stat-card">
+            <div class="stat-card-icon primary"><i class="fas fa-file-pdf"></i></div>
+            <div class="stat-card-value" id="totalReports">-</div>
+            <div class="stat-card-label">Total Informes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon success"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-card-value" id="recentReports">-</div>
+            <div class="stat-card-label">Este Mes</div>
+          </div>
+          <div class="stat-card" id="pendingUsersCard" style="display:none;">
+            <div class="stat-card-icon warning"><i class="fas fa-user-clock"></i></div>
+            <div class="stat-card-value" id="pendingUsersCount">-</div>
+            <div class="stat-card-label">Usuarios Pendientes</div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+              <select id="filterCentro" class="form-select" style="width:auto;"></select>
+              <input type="text" id="searchInput" class="form-input" placeholder="Buscar informe..." style="width:auto;min-width:200px;">
+            </div>
+            <button class="btn-admin btn-admin-primary" onclick="showView('upload');resetUploadForm()">
+              <i class="fas fa-plus"></i> Nuevo Informe
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2 class="admin-card-title">Informes Publicados</h2>
+          </div>
+          <div id="reportsContainer">
+            <div style="text-align:center;padding:2rem;">
+              <div class="spinner spinner-dark" style="width:40px;height:40px;"></div>
+              <p style="margin-top:1rem;color:var(--admin-text-muted);">Cargando informes...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: UPLOAD / EDIT ===== -->
+      <div id="view-upload" class="view" style="display:none;">
+        <button class="back-link" onclick="showView('informes')">
+          <i class="fas fa-arrow-left"></i> Volver a informes
+        </button>
+        <div class="page-header">
+          <h1 class="page-title" id="uploadPageTitle">Subir Nuevo Informe</h1>
+          <p class="page-subtitle" id="uploadPageSubtitle">Completa los datos y sube el archivo PDF</p>
+        </div>
+
+        <div class="admin-card">
+          <form id="uploadForm" onsubmit="handleUploadSubmit(event)">
+            <div id="formMessage" class="alert" style="display:none;"></div>
+
+            <div class="form-group">
+              <label class="form-label" for="titulo">Título del Informe *</label>
+              <input type="text" id="titulo" class="form-input" placeholder="Ej: Análisis de la Política Exterior Argentina" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="descripcion">Descripción breve <span style="font-weight:400;color:var(--admin-text-muted);">(máx. 500 caracteres)</span></label>
+              <textarea id="descripcion" class="form-input" rows="3" maxlength="500" placeholder="Breve resumen del informe (opcional pero recomendado)" style="resize:vertical;" oninput="updateDescCounter(this)"></textarea>
+              <div style="text-align:right;font-size:.75rem;color:var(--admin-text-muted);margin-top:.25rem;" id="descCounter">0 / 500</div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="centro">Centro de Investigación *</label>
+                <select id="centro" class="form-select" required>
+                  <option value="">Selecciona el centro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tag">Tipo de Publicación *</label>
+                <select id="tag" class="form-select" required>
+                  <option value="">Selecciona el tipo</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="fecha">Fecha de Publicación *</label>
+              <input type="date" id="fecha" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Archivo PDF *</label>
+              <div class="file-upload-zone" id="dropZone">
+                <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <p class="file-upload-text">Arrastrá tu archivo PDF aquí o hacé clic para seleccionar</p>
+                <p class="file-upload-hint">Tamaño máximo: 10MB</p>
+                <input type="file" id="pdfFile" accept=".pdf" style="display:none;">
+              </div>
+              <div id="filePreview" class="file-upload-preview" style="display:none;">
+                <div class="file-upload-preview-icon"><i class="fas fa-file-pdf"></i></div>
+                <div class="file-upload-preview-info">
+                  <div class="file-upload-preview-name" id="fileName"></div>
+                  <div class="file-upload-preview-size" id="fileSize"></div>
+                </div>
+                <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="clearFile()"><i class="fas fa-times"></i></button>
+              </div>
+              <div id="existingPdf" class="file-upload-preview" style="display:none;">
+                <div class="file-upload-preview-icon"><i class="fas fa-file-pdf"></i></div>
+                <div class="file-upload-preview-info">
+                  <div class="file-upload-preview-name">PDF actual</div>
+                  <div class="file-upload-preview-size"><a id="existingPdfLink" href="#" target="_blank" class="link-text">Ver PDF</a></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
+              <button type="button" class="btn-admin btn-admin-secondary" onclick="showView('informes')">Cancelar</button>
+              <button type="submit" class="btn-admin btn-admin-primary" id="submitBtn">
+                <span class="btn-text" id="submitBtnText">Publicar Informe</span>
+                <span class="spinner" style="display:none;"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: USUARIOS ===== -->
+      <div id="view-users" class="view" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Gestión de Usuarios</h1>
+          <p class="page-subtitle">Administrá los usuarios y sus permisos</p>
+        </div>
+
+        <div class="stats-grid-admin">
+          <div class="stat-card"><div class="stat-card-icon primary"><i class="fas fa-users"></i></div><div class="stat-card-value" id="totalUsers">-</div><div class="stat-card-label">Total Usuarios</div></div>
+          <div class="stat-card"><div class="stat-card-icon success"><i class="fas fa-user-check"></i></div><div class="stat-card-value" id="approvedUsers">-</div><div class="stat-card-label">Aprobados</div></div>
+          <div class="stat-card"><div class="stat-card-icon warning"><i class="fas fa-user-clock"></i></div><div class="stat-card-value" id="pendingUsersStatCount">-</div><div class="stat-card-label">Pendientes</div></div>
+        </div>
+
+        <div class="tab-nav">
+          <button class="tab-link active" data-tab="pending"><i class="fas fa-user-clock"></i> Pendientes (<span id="pendingCount">0</span>)</button>
+          <button class="tab-link" data-tab="approved"><i class="fas fa-user-check"></i> Aprobados</button>
+          <button class="tab-link" data-tab="all"><i class="fas fa-users"></i> Todos</button>
+        </div>
+
+        <div id="pending-tab" class="tab-content active">
+          <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Usuarios Pendientes</h2></div><div id="pendingContainer"></div></div>
+        </div>
+        <div id="approved-tab" class="tab-content">
+          <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Usuarios Aprobados</h2></div><div id="approvedContainer"></div></div>
+        </div>
+        <div id="all-tab" class="tab-content">
+          <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Todos los Usuarios</h2></div><div id="allContainer"></div></div>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: NOTAS CÍCLICA ===== -->
+      <div id="view-notas" class="view" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Cíclica — Notas de Opinión</h1>
+          <p class="page-subtitle">Revisá y aprobá las notas enviadas por los colaboradores</p>
+        </div>
+
+        <div class="tab-nav">
+          <button class="tab-link active" data-tab="notas-pending"><i class="fas fa-clock"></i> Pendientes (<span id="notasPendingCount">0</span>)</button>
+          <button class="tab-link" data-tab="notas-approved"><i class="fas fa-check"></i> Aprobadas</button>
+          <button class="tab-link" data-tab="notas-all"><i class="fas fa-list"></i> Todas</button>
+        </div>
+
+        <div id="notas-pending-tab" class="tab-content active">
+          <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Notas Pendientes de Aprobación</h2></div><div id="notasPendingContainer"></div></div>
+        </div>
+        <div id="notas-approved-tab" class="tab-content">
+          <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Notas Aprobadas</h2></div><div id="notasApprovedContainer"></div></div>
+        </div>
+        <div id="notas-all-tab" class="tab-content">
+          <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Todas las Notas</h2></div><div id="notasAllContainer"></div></div>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: CONFIG ===== -->
+      <div id="view-config" class="view" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Configuración</h1>
+          <p class="page-subtitle">Administrá las opciones del sitio</p>
+        </div>
+
+        <!-- Tipos de publicación -->
+        <div class="admin-card" style="margin-bottom:1.5rem;">
+          <div class="admin-card-header">
+            <h2 class="admin-card-title"><i class="fas fa-tags" style="margin-right:.5rem;color:#3276f3;"></i>Tipos de Publicación</h2>
+          </div>
+          <p style="font-size:.875rem;color:var(--admin-text-muted);margin-bottom:1rem;">Estas opciones aparecen en el selector "Tipo de Publicación" al subir un informe.</p>
+          <div class="tags-container" id="tagsPills"></div>
+          <div class="config-add-row">
+            <input type="text" id="newTagInput" class="form-input" placeholder="Nuevo tipo (ej: Dossier)" maxlength="60">
+            <button class="btn-admin btn-admin-primary" onclick="addTag()"><i class="fas fa-plus"></i> Agregar</button>
+          </div>
+          <div id="tagsSaveMsg" style="margin-top:.75rem;display:none;"></div>
+        </div>
+
+        <!-- Centros (en selectores de admin) -->
+        <div class="admin-card" style="margin-bottom:1.5rem;">
+          <div class="admin-card-header">
+            <h2 class="admin-card-title"><i class="fas fa-building" style="margin-right:.5rem;color:#3276f3;"></i>Centros de Investigación</h2>
+          </div>
+          <p style="font-size:.875rem;color:var(--admin-text-muted);margin-bottom:1rem;">Centros disponibles en los selectores del panel de administración.</p>
+          <div class="tags-container" id="centrosPills"></div>
+          <div class="config-add-row">
+            <input type="text" id="newCentroInput" class="form-input" placeholder="Nuevo centro (ej: NUEVOC)" maxlength="40">
+            <button class="btn-admin btn-admin-primary" onclick="addCentro()"><i class="fas fa-plus"></i> Agregar</button>
+          </div>
+          <div id="centrosSaveMsg" style="margin-top:.75rem;display:none;"></div>
+        </div>
+
+        <!-- Informes Destacados -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2 class="admin-card-title"><i class="fas fa-star" style="margin-right:.5rem;color:#f59e0b;"></i>Informes Destacados</h2>
+          </div>
+          <p style="font-size:.875rem;color:var(--admin-text-muted);margin-bottom:1.5rem;">
+            Elegí hasta 6 informes para mostrar en la sección "Informes Destacados" de la página de inicio. Podés activarlos o desactivarlos desde la tabla de informes.
+          </p>
+          <div id="featuredContainer">
+            <div style="text-align:center;padding:1.5rem;"><div class="spinner spinner-dark" style="width:30px;height:30px;display:inline-block;"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-container -->
+
+      <!-- ===== VIEW: MIEMBROS ===== -->
+      <div id="view-miembros" class="view" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Miembros</h1>
+          <p class="page-subtitle">Gestioná los miembros de cada centro</p>
+        </div>
+
+        <div class="admin-card">
+          <div style="display:flex; gap:1rem; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+            <select id="miembrosCentroFilter" class="form-select" style="width:auto;">
+              <option value="all">Todos los centros</option>
+            </select>
+            <button class="btn-admin btn-admin-primary" onclick="openMiembroModal()">
+              <i class="fas fa-plus"></i> Nuevo Miembro
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2 class="admin-card-title">Miembros Cargados</h2>
+          </div>
+          <div id="miembrosContainer">
+            <div style="text-align:center;padding:2rem;">
+              <div class="spinner spinner-dark" style="width:40px;height:40px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  </main>
+
+  <!-- MODAL: Eliminar Informe -->
+  <div class="modal-overlay" id="deleteReportModal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Eliminar Informe</h3><button class="modal-close" onclick="closeModal('deleteReportModal')">&times;</button></div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar el informe "<strong id="deleteReportTitle"></strong>"?</p>
+        <p style="color:var(--admin-text-muted);font-size:.875rem;margin-top:.5rem;">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-admin btn-admin-secondary" onclick="closeModal('deleteReportModal')">Cancelar</button>
+        <button class="btn-admin btn-admin-danger" id="confirmDeleteReportBtn" onclick="confirmDeleteReport()">
+          <span class="btn-text">Eliminar</span><span class="spinner" style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Editar Usuario -->
+  <div class="modal-overlay" id="editUserModal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Editar Usuario</h3><button class="modal-close" onclick="closeModal('editUserModal')">&times;</button></div>
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">Email</label><input type="text" id="editEmail" class="form-input" readonly></div>
+        <div class="form-group">
+          <label class="form-label">Centro de Investigación</label>
+          <select id="editCentro" class="form-select"><option value="">Selecciona el centro</option></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-admin btn-admin-secondary" onclick="closeModal('editUserModal')">Cancelar</button>
+        <button class="btn-admin btn-admin-primary" id="saveEditBtn" onclick="saveUserEdit()">
+          <span class="btn-text">Guardar</span><span class="spinner" style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Eliminar Usuario -->
+  <div class="modal-overlay" id="deleteUserModal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Eliminar Usuario</h3><button class="modal-close" onclick="closeModal('deleteUserModal')">&times;</button></div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar al usuario "<strong id="deleteUserEmail"></strong>"?</p>
+        <p style="color:var(--admin-text-muted);font-size:.875rem;margin-top:.5rem;">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-admin btn-admin-secondary" onclick="closeModal('deleteUserModal')">Cancelar</button>
+        <button class="btn-admin btn-admin-danger" id="confirmDeleteUserBtn" onclick="confirmDeleteUser()">
+          <span class="btn-text">Eliminar</span><span class="spinner" style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/admin-config.js"></script>
+  <script>
+  function isPending(u) {
+    const v = u.approved;
+    return !v || v === false || v === 'FALSE' || v === '' || v === 0;
+  }
+
+  // ===== STATE =====
+  let currentUser    = null;
+  let allReports     = [];
+  let allUsers       = [];
+  let allNotes       = [];
+  let reportToDelete = null;
+  let userToEdit     = null;
+  let userToDelete   = null;
+  let editMode       = false;
+  let editReportId   = null;
+  let existingPdfUrl = null;
+  let selectedFile   = null;
+
+  // Dynamic lists (loaded from API)
+  let dynamicTags    = [...TAGS];
+  let dynamicCentros = CENTROS.map(c => c.id);
+
+  // ===== INIT =====
+  document.addEventListener('DOMContentLoaded', async () => {
+    currentUser = checkAuth();
+    if (!currentUser) return;
+
+    document.getElementById('userName').textContent   = currentUser.email;
+    document.getElementById('userAvatar').textContent = currentUser.email.charAt(0).toUpperCase();
+    document.getElementById('userRole').textContent   = currentUser.role === 'admin' ? 'Administrador' : currentUser.centro;
+
+    if (currentUser.role === 'admin') {
+      document.getElementById('usersNavLink').style.display  = 'inline-flex';
+      document.getElementById('miembrosNavLink').style.display = 'inline-flex';
+      document.getElementById('notasNavLink').style.display  = 'inline-flex';
+      document.getElementById('configNavLink').style.display = 'inline-flex';
+      document.getElementById('pendingUsersCard').style.display = 'block';
+    } else if (currentUser.centro === 'Cíclica') {
+      // Cíclica users see the notas section but not users/config
+      document.getElementById('notasNavLink').style.display = 'inline-flex';
+    }
+
+    // Nav tabs
+    document.querySelectorAll('.admin-nav-link[data-view]').forEach(btn => {
+      btn.addEventListener('click', () => showView(btn.dataset.view));
+    });
+
+    // User tabs
+    document.querySelectorAll('.tab-link[data-tab]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const parent = tab.closest('.tab-nav');
+        parent.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        // Find sibling tab-content
+        const id = tab.dataset.tab + '-tab';
+        const container = tab.closest('.view') || document;
+        container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+      });
+    });
+
+    // Load config (tags, centros)
+    await loadDynamicConfig();
+
+    populateCentroFilter();
+    populateCentroSelects();
+    populateTagSelect();
+    setupFileUpload();
+
+    document.getElementById('searchInput').addEventListener('input', filterReports);
+    document.getElementById('filterCentro').addEventListener('change', filterReports);
+
+    await loadReports();
+    if (currentUser.role === 'admin') { loadUsers(); loadNotes(); loadFeaturedAdmin(); loadConfigUI(); }
+    else if (currentUser.centro === 'Cíclica') loadNotes();
+  });
+
+  async function loadDynamicConfig() {
+    try {
+      const [tagsRes, centrosRes] = await Promise.all([
+        apiCall('getConfig', { key: 'tags' }),
+        apiCall('getConfig', { key: 'centros' })
+      ]);
+      if (tagsRes.success && tagsRes.value)      dynamicTags    = tagsRes.value.split(',').map(t=>t.trim()).filter(Boolean);
+      if (centrosRes.success && centrosRes.value) dynamicCentros = centrosRes.value.split(',').map(c=>c.trim()).filter(Boolean);
+    } catch(e) {}
+  }
+
+  // ===== VIEW ROUTER =====
+  function showView(v) {
+    document.querySelectorAll('.view').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.admin-nav-link[data-view]').forEach(b => b.classList.remove('active'));
+    document.getElementById('view-' + v).style.display = 'block';
+    const btn = document.querySelector(`.admin-nav-link[data-view="${v}"]`);
+    if (btn) btn.classList.add('active');
+    if (v === 'config') { loadFeaturedAdmin(); loadConfigUI(); }
+  }
+
+  // ===== REPORTS =====
+  async function loadReports() {
+    try {
+      const centro = (currentUser.role === 'admin') ? 'all' : currentUser.centro;
+      const response = await apiCall('getReports', { centro });
+      if (response.success) {
+        allReports = response.reports;
+        updateReportStats();
+        renderReports(allReports);
+        if (currentUser.role === 'admin') loadPendingUserCount();
+      } else showReportsError(response.error || 'Error al cargar informes');
+    } catch (err) { showReportsError('Error de conexión al cargar informes'); }
+  }
+
+  async function loadPendingUserCount() {
+    try {
+      const response = await apiCall('getUsers');
+      if (response.success) {
+        const count = response.users.filter(u => u.role !== 'admin' && isPending(u)).length;
+        document.getElementById('pendingUsersCount').textContent = count;
+      }
+    } catch(e) {}
+  }
+
+  function updateReportStats() {
+    document.getElementById('totalReports').textContent = allReports.length;
+    const now = new Date();
+    const thisMonth = allReports.filter(r => {
+      const d = new Date(r.created_at);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    document.getElementById('recentReports').textContent = thisMonth.length;
+  }
+
+  function filterReports() {
+    const term   = document.getElementById('searchInput').value.toLowerCase();
+    const centro = document.getElementById('filterCentro').value;
+    let f = allReports;
+    if (centro) f = f.filter(r => r.centro === centro);
+    if (term)   f = f.filter(r => r.titulo.toLowerCase().includes(term) || (r.tag||'').toLowerCase().includes(term));
+    renderReports(f);
+  }
+
+  function renderReports(reports) {
+    const container = document.getElementById('reportsContainer');
+    if (!reports.length) {
+      container.innerHTML = `<div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-folder-open"></i></div>
+        <h3 class="empty-state-title">No hay informes</h3>
+        <p>No se encontraron informes. <button class="link-text" onclick="showView('upload');resetUploadForm()" style="background:none;border:none;cursor:pointer;">Subí uno nuevo</button></p>
+      </div>`; return;
+    }
+    container.innerHTML = `<div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead><tr><th>Título</th><th>Centro</th><th>Tag</th><th>Fecha</th><th>Destacado</th><th>Acciones</th></tr></thead>
+        <tbody>${reports.map(r => `
+          <tr>
+            <td><strong>${esc(r.titulo)}</strong>${r.descripcion ? `<br><span style="font-size:.75rem;color:var(--admin-text-muted);">${esc(r.descripcion.length>80?r.descripcion.slice(0,80)+'…':r.descripcion)}</span>` : ''}</td>
+            <td><span class="badge-centro badge-${r.centro.toLowerCase()}">${esc(r.centro)}</span></td>
+            <td><span class="badge badge-primary">${esc(r.tag)}</span></td>
+            <td>${formatDateShort(r.fecha)}</td>
+            <td>
+              ${currentUser.role === 'admin' ? `
+              <button class="btn-admin btn-admin-sm ${r.destacado ? 'btn-admin-primary' : 'btn-admin-secondary'}"
+                onclick="toggleFeatured('${r.id}',${r.destacado})"
+                title="${r.destacado ? 'Quitar de destacados' : 'Agregar a destacados'}">
+                <i class="fas fa-star"></i>
+              </button>` : (r.destacado ? '<span class="badge-featured">★ Destacado</span>' : '—')}
+            </td>
+            <td>
+              <div class="table-actions">
+                <a href="${r.pdf_url}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" title="Ver PDF"><i class="fas fa-eye"></i></a>
+                <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openEditReport('${r.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                ${(currentUser.role === 'admin' || r.centro === currentUser.centro) ? `
+                <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteReportModal('${r.id}','${esc(r.titulo).replace(/'/g,"\\'")}')">
+                  <i class="fas fa-trash"></i>
+                </button>` : ''}
+              </div>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+  }
+
+  async function toggleFeatured(id, currentVal) {
+    const newVal = !currentVal;
+    const res = await apiCall('setFeatured', { id, value: String(newVal) });
+    if (res.success) {
+      showNotification(newVal ? 'Informe agregado a destacados' : 'Informe quitado de destacados', 'success');
+      await loadReports();
+    } else {
+      showNotification(res.error || 'Error al actualizar', 'error');
+    }
+  }
+
+  function openDeleteReportModal(id, title) {
+    reportToDelete = id;
+    document.getElementById('deleteReportTitle').textContent = title;
+    openModal('deleteReportModal');
+  }
+
+  async function confirmDeleteReport() {
+    if (!reportToDelete) return;
+    const btn = document.getElementById('confirmDeleteReportBtn');
+    setLoading(btn, true);
+    try {
+      const res = await apiCall('deleteReport', { id: reportToDelete, userEmail: currentUser.email, userRole: currentUser.role });
+      if (res.success) { showNotification('Informe eliminado', 'success'); closeModal('deleteReportModal'); await loadReports(); }
+      else showNotification(res.error || 'Error al eliminar', 'error');
+    } catch(e) { showNotification('Error de conexión', 'error'); }
+    setLoading(btn, false);
+  }
+
+  function showReportsError(msg) {
+    document.getElementById('reportsContainer').innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${msg}</div>`;
+  }
+
+  // ===== UPLOAD / EDIT =====
+  function updateDescCounter(el) {
+    const counter = document.getElementById('descCounter');
+    counter.textContent = `${el.value.length} / 500`;
+    counter.style.color = el.value.length > 500 ? '#ef4444' : '';
+  }
+
+  function resetUploadForm() {
+    editMode = false; editReportId = null; existingPdfUrl = null; selectedFile = null;
+    document.getElementById('uploadForm').reset();
+    document.getElementById('uploadPageTitle').textContent    = 'Subir Nuevo Informe';
+    document.getElementById('uploadPageSubtitle').textContent = 'Completá los datos y subí el archivo PDF';
+    document.getElementById('submitBtnText').textContent      = 'Publicar Informe';
+    document.getElementById('formMessage').style.display     = 'none';
+    document.getElementById('filePreview').style.display     = 'none';
+    document.getElementById('existingPdf').style.display     = 'none';
+    document.getElementById('dropZone').style.display        = 'block';
+    document.getElementById('fecha').valueAsDate             = new Date();
+    document.getElementById('descCounter').textContent       = '0 / 500';
+    populateCentroSelects();
+    populateTagSelect();
+  }
+
+  async function openEditReport(reportId) {
+    resetUploadForm();
+    showView('upload');
+    try {
+      const res = await apiCall('getReport', { id: reportId });
+      if (!res.success) { showFormMessage('Informe no encontrado', 'danger'); return; }
+      const r = res.report;
+      editMode = true; editReportId = reportId; existingPdfUrl = r.pdf_url;
+      document.getElementById('uploadPageTitle').textContent    = 'Editar Informe';
+      document.getElementById('uploadPageSubtitle').textContent = 'Modificá los datos del informe';
+      document.getElementById('submitBtnText').textContent      = 'Guardar Cambios';
+      document.getElementById('titulo').value                   = r.titulo;
+      document.getElementById('centro').value                   = r.centro;
+      document.getElementById('tag').value                      = r.tag;
+      document.getElementById('descripcion').value              = r.descripcion || '';
+      document.getElementById('descCounter').textContent        = `${(r.descripcion||'').length} / 500`;
+      if (r.fecha) document.getElementById('fecha').valueAsDate = new Date(r.fecha);
+      document.getElementById('existingPdf').style.display = 'flex';
+      document.getElementById('existingPdfLink').href      = r.pdf_url;
+      if (currentUser.role !== 'admin' && r.centro !== currentUser.centro) {
+        showFormMessage('No tenés permiso para editar este informe', 'danger');
+        document.getElementById('submitBtn').disabled = true;
+      }
+    } catch(e) { showFormMessage('Error al cargar el informe', 'danger'); }
+  }
+
+  function setupFileUpload() {
+    const dropZone  = document.getElementById('dropZone');
+    const fileInput = document.getElementById('pdfFile');
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+  }
+
+  function handleFile(file) {
+    if (file.type !== 'application/pdf') { showFormMessage('Solo se permiten archivos PDF', 'danger'); return; }
+    if (file.size > 10*1024*1024)        { showFormMessage('El archivo es muy grande. Máximo 10MB', 'danger'); return; }
+    selectedFile = file;
+    document.getElementById('dropZone').style.display    = 'none';
+    document.getElementById('existingPdf').style.display = 'none';
+    document.getElementById('filePreview').style.display = 'flex';
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+  }
+
+  function clearFile() {
+    selectedFile = null;
+    document.getElementById('pdfFile').value = '';
+    document.getElementById('filePreview').style.display = 'none';
+    document.getElementById('dropZone').style.display    = 'block';
+    if (editMode && existingPdfUrl) document.getElementById('existingPdf').style.display = 'flex';
+  }
+
+  async function handleUploadSubmit(e) {
+    e.preventDefault();
+    const titulo      = document.getElementById('titulo').value.trim();
+    const centro      = document.getElementById('centro').value;
+    const tag         = document.getElementById('tag').value;
+    const fecha       = document.getElementById('fecha').value;
+    const descripcion = document.getElementById('descripcion').value.trim();
+
+    if (!titulo || !centro || !tag || !fecha) { showFormMessage('Por favor completá todos los campos obligatorios', 'danger'); return; }
+    if (!editMode && !selectedFile)           { showFormMessage('Por favor seleccioná un archivo PDF', 'danger'); return; }
+    if (descripcion.length > 500)             { showFormMessage('La descripción supera los 500 caracteres', 'danger'); return; }
+
+    const btn = document.getElementById('submitBtn');
+    setLoading(btn, true);
+    try {
+      let pdfUrl = existingPdfUrl;
+      if (selectedFile) {
+        showFormMessage('Subiendo PDF...', 'info');
+        const upload = await uploadPDF(selectedFile);
+        if (!upload.success) throw new Error(upload.error || 'Error al subir PDF');
+        pdfUrl = upload.url;
+      }
+      const data = { titulo, centro, tag, fecha, pdf_url: pdfUrl, descripcion };
+      const res  = editMode
+        ? await apiCall('updateReport', { id: editReportId, data: JSON.stringify(data) })
+        : await apiCall('createReport', { data: JSON.stringify(data) });
+      if (res.success) {
+        showNotification(editMode ? 'Informe actualizado correctamente' : 'Informe publicado correctamente', 'success');
+        await loadReports();
+        setTimeout(() => showView('informes'), 1000);
+      } else throw new Error(res.error || 'Error al guardar el informe');
+    } catch(err) {
+      showFormMessage(err.message || 'Error al procesar el formulario', 'danger');
+      setLoading(btn, false);
+    }
+  }
+
+  function showFormMessage(msg, type) {
+    const div  = document.getElementById('formMessage');
+    const icon = type === 'danger' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle';
+    div.className = `alert alert-${type}`;
+    div.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
+    div.style.display = 'flex';
+    div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ===== USERS =====
+  async function loadUsers() {
+    try {
+      const res = await apiCall('getUsers');
+      if (res.success) { allUsers = res.users; updateUserStats(); renderUsers(); }
+    } catch(e) {}
+  }
+
+  function updateUserStats() {
+    const nonAdmins = allUsers.filter(u => u.role !== 'admin');
+    const pending   = nonAdmins.filter(u => !u.approved || u.approved === 'FALSE');
+    const approved  = nonAdmins.filter(u => u.approved && u.approved !== 'FALSE');
+    document.getElementById('totalUsers').textContent           = nonAdmins.length;
+    document.getElementById('approvedUsers').textContent        = approved.length;
+    document.getElementById('pendingUsersStatCount').textContent = pending.length;
+    document.getElementById('pendingCount').textContent         = pending.length;
+    document.getElementById('pendingUsersCount').textContent    = pending.length;
+  }
+
+  function renderUsers() {
+    const nonAdmins = allUsers.filter(u => u.role !== 'admin');
+    const pending   = nonAdmins.filter(u => !u.approved || u.approved === 'FALSE');
+    const approved  = nonAdmins.filter(u => u.approved && u.approved !== 'FALSE');
+    renderUserList('pendingContainer',  pending,   true);
+    renderUserList('approvedContainer', approved,  false);
+    renderUserList('allContainer',      nonAdmins, null);
+  }
+
+  function renderUserList(containerId, users, showApproval) {
+    const container = document.getElementById(containerId);
+    if (!users.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-user-slash"></i></div><h3 class="empty-state-title">No hay usuarios</h3></div>`;
+      return;
+    }
+    container.innerHTML = `<div style="overflow-x:auto;"><table class="admin-table">
+      <thead><tr><th>Email</th><th>Centro</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>${users.map(u => `<tr>
+        <td><strong>${esc(u.email)}</strong></td>
+        <td>${u.centro ? `<span class="badge-centro badge-${u.centro.toLowerCase()}">${esc(u.centro)}</span>` : '<span class="badge badge-warning">Sin asignar</span>'}</td>
+        <td>${!isPending(u) ? '<span class="badge badge-success">Aprobado</span>' : '<span class="badge badge-warning">Pendiente</span>'}</td>
+        <td><div class="table-actions">
+          ${(showApproval === true || (showApproval === null && isPending(u))) ? `
+            <button class="btn-admin btn-admin-success btn-admin-sm" onclick="approveUser('${u.email}')"><i class="fas fa-check"></i> Aprobar</button>
+            <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="rejectUser('${u.email}')"><i class="fas fa-times"></i> Rechazar</button>` : ''}
+          <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openEditUserModal('${u.email}','${u.centro||''}')"><i class="fas fa-edit"></i></button>
+          <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteUserModal('${u.email}')"><i class="fas fa-trash"></i></button>
+        </div></td>
+      </tr>`).join('')}</tbody></table></div>`;
+  }
+
+  async function approveUser(email) {
+    const res = await apiCall('approveUser', { email });
+    if (res.success) { showNotification('Usuario aprobado', 'success'); await loadUsers(); }
+    else showNotification(res.error || 'Error al aprobar', 'error');
+  }
+
+  async function rejectUser(email) {
+    if (!confirm(`¿Seguro que deseas rechazar a ${email}?`)) return;
+    const res = await apiCall('rejectUser', { email });
+    if (res.success) { showNotification('Usuario rechazado', 'success'); await loadUsers(); }
+    else showNotification(res.error || 'Error al rechazar', 'error');
+  }
+
+  function openEditUserModal(email, centro) {
+    userToEdit = email;
+    document.getElementById('editEmail').value  = email;
+    document.getElementById('editCentro').value = centro;
+    openModal('editUserModal');
+  }
+
+  async function saveUserEdit() {
+    if (!userToEdit) return;
+    const btn    = document.getElementById('saveEditBtn');
+    const centro = document.getElementById('editCentro').value;
+    setLoading(btn, true);
+    const res = await apiCall('updateUserCentro', { email: userToEdit, centro });
+    if (res.success) { showNotification('Usuario actualizado', 'success'); closeModal('editUserModal'); await loadUsers(); }
+    else showNotification(res.error || 'Error al actualizar', 'error');
+    setLoading(btn, false);
+  }
+
+  function openDeleteUserModal(email) {
+    userToDelete = email;
+    document.getElementById('deleteUserEmail').textContent = email;
+    openModal('deleteUserModal');
+  }
+
+  async function confirmDeleteUser() {
+    if (!userToDelete) return;
+    const btn = document.getElementById('confirmDeleteUserBtn');
+    setLoading(btn, true);
+    const res = await apiCall('deleteUser', { email: userToDelete });
+    if (res.success) { showNotification('Usuario eliminado', 'success'); closeModal('deleteUserModal'); await loadUsers(); }
+    else showNotification(res.error || 'Error al eliminar', 'error');
+    setLoading(btn, false);
+  }
+
+  // ===== NOTAS CÍCLICA =====
+  async function loadNotes() {
+    try {
+      const res = await apiCall('getNotes', { soloAprobadas: 'false' });
+      if (res.success) { allNotes = res.notes; renderNotes(); }
+    } catch(e) {}
+  }
+
+  function renderNotes() {
+    const pending  = allNotes.filter(n => !n.aprobado);
+    const approved = allNotes.filter(n => n.aprobado);
+    document.getElementById('notasPendingCount').textContent = pending.length;
+    renderNoteList('notasPendingContainer',  pending,  true);
+    renderNoteList('notasApprovedContainer', approved, false);
+    renderNoteList('notasAllContainer',      allNotes, null);
+  }
+
+  function renderNoteList(containerId, notes, showApproval) {
+    const container = document.getElementById(containerId);
+    if (!notes.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-pen-nib"></i></div><h3 class="empty-state-title">No hay notas</h3></div>`;
+      return;
+    }
+    container.innerHTML = `<div style="overflow-x:auto;"><table class="admin-table">
+      <thead><tr><th>Título</th><th>Descripción</th><th>Autor</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>${notes.map(n => `<tr>
+        <td><strong>${esc(n.titulo)}</strong></td>
+        <td style="max-width:220px;font-size:.8rem;color:var(--admin-text-muted);">${esc(n.descripcion ? (n.descripcion.length>100?n.descripcion.slice(0,100)+'…':n.descripcion) : '—')}</td>
+        <td>${esc(n.email_autor || '—')}</td>
+        <td>${formatDateShort(n.fecha)}</td>
+        <td>${n.aprobado ? '<span class="badge badge-success">Aprobada</span>' : '<span class="badge badge-warning">Pendiente</span>'}</td>
+        <td><div class="table-actions">
+          ${n.pdf_url ? `<a href="${n.pdf_url}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" title="Ver PDF"><i class="fas fa-eye"></i></a>` : ''}
+          ${(showApproval === true || (showApproval === null && !n.aprobado)) ? `
+            <button class="btn-admin btn-admin-success btn-admin-sm" onclick="approveNota('${n.id}')"><i class="fas fa-check"></i> Aprobar</button>
+            <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="rejectNota('${n.id}')"><i class="fas fa-times"></i> Rechazar</button>` : ''}
+          ${currentUser.role === 'admin' ? `<button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteNota('${n.id}')"><i class="fas fa-trash"></i></button>` : ''}
+        </div></td>
+      </tr>`).join('')}</tbody></table></div>`;
+  }
+
+  async function approveNota(id) {
+    const res = await apiCall('approveNote', { id });
+    if (res.success) { showNotification('Nota aprobada y publicada', 'success'); await loadNotes(); }
+    else showNotification(res.error || 'Error', 'error');
+  }
+
+  async function rejectNota(id) {
+    if (!confirm('¿Rechazar y eliminar esta nota?')) return;
+    const res = await apiCall('rejectNote', { id });
+    if (res.success) { showNotification('Nota rechazada', 'success'); await loadNotes(); }
+    else showNotification(res.error || 'Error', 'error');
+  }
+
+  async function deleteNota(id) {
+    if (!confirm('¿Eliminar esta nota permanentemente?')) return;
+    const res = await apiCall('deleteNote', { id });
+    if (res.success) { showNotification('Nota eliminada', 'success'); await loadNotes(); }
+    else showNotification(res.error || 'Error', 'error');
+  }
+
+  // ===== CONFIG =====
+  async function loadConfigUI() {
+    await loadDynamicConfig();
+    renderTagPills();
+    renderCentrosPills();
+  }
+
+  function renderTagPills() {
+    const container = document.getElementById('tagsPills');
+    container.innerHTML = dynamicTags.map(t => `
+      <span class="tag-pill">${esc(t)}
+        <button onclick="removeTag('${esc(t)}')" title="Eliminar"><i class="fas fa-times"></i></button>
+      </span>`).join('');
+  }
+
+  function renderCentrosPills() {
+    const container = document.getElementById('centrosPills');
+    container.innerHTML = dynamicCentros.map(c => `
+      <span class="tag-pill">${esc(c)}
+        <button onclick="removeCentro('${esc(c)}')" title="Eliminar"><i class="fas fa-times"></i></button>
+      </span>`).join('');
+  }
+
+  async function addTag() {
+    const input = document.getElementById('newTagInput');
+    const val   = input.value.trim();
+    if (!val) return;
+    if (dynamicTags.includes(val)) { showNotification('Ese tipo ya existe', 'error'); return; }
+    dynamicTags.push(val);
+    input.value = '';
+    await saveConfig('tags', dynamicTags.join(','), 'tagsSaveMsg');
+    renderTagPills();
+    populateTagSelect();
+  }
+
+  async function removeTag(t) {
+    dynamicTags = dynamicTags.filter(x => x !== t);
+    await saveConfig('tags', dynamicTags.join(','), 'tagsSaveMsg');
+    renderTagPills();
+    populateTagSelect();
+  }
+
+  async function addCentro() {
+    const input = document.getElementById('newCentroInput');
+    const val   = input.value.trim();
+    if (!val) return;
+    if (dynamicCentros.includes(val)) { showNotification('Ese centro ya existe', 'error'); return; }
+    dynamicCentros.push(val);
+    input.value = '';
+    await saveConfig('centros', dynamicCentros.join(','), 'centrosSaveMsg');
+    renderCentrosPills();
+    populateCentroSelects();
+    populateCentroFilter();
+  }
+
+  async function removeCentro(c) {
+    dynamicCentros = dynamicCentros.filter(x => x !== c);
+    await saveConfig('centros', dynamicCentros.join(','), 'centrosSaveMsg');
+    renderCentrosPills();
+    populateCentroSelects();
+    populateCentroFilter();
+  }
+
+  async function saveConfig(key, value, msgId) {
+    try {
+      const res = await apiCall('setConfig', { key, value });
+      if (res.success) {
+        showNotification('Configuración guardada', 'success');
+      } else {
+        showNotification(res.error || 'Error al guardar', 'error');
+      }
+    } catch(e) { showNotification('Error de conexión', 'error'); }
+  }
+
+  // Informes destacados en Config
+  async function loadFeaturedAdmin() {
+    const container = document.getElementById('featuredContainer');
+    if (!container) return;
+    container.innerHTML = `<div style="text-align:center;padding:1.5rem;"><div class="spinner spinner-dark" style="width:30px;height:30px;display:inline-block;"></div></div>`;
+    try {
+      const res = await apiCall('getFeatured');
+      if (!res.success || !res.reports.length) {
+        container.innerHTML = `<div class="empty-state" style="padding:1.5rem;">
+          <p>No hay informes destacados activos. Activalos desde la <button class="link-text" onclick="showView('informes')" style="background:none;border:none;cursor:pointer;">tabla de informes</button> usando el ⭐.</p>
+        </div>`; return;
+      }
+      container.innerHTML = `<div style="overflow-x:auto;"><table class="admin-table">
+        <thead><tr><th>Título</th><th>Centro</th><th>Fecha</th><th>Quitar</th></tr></thead>
+        <tbody>${res.reports.map(r => `<tr>
+          <td><strong>${esc(r.titulo)}</strong></td>
+          <td><span class="badge-centro badge-${r.centro.toLowerCase()}">${esc(r.centro)}</span></td>
+          <td>${formatDateShort(r.fecha)}</td>
+          <td><button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="toggleFeatured('${r.id}',true)"><i class="fas fa-star-half-alt"></i> Quitar</button></td>
+        </tr>`).join('')}</tbody></table></div>
+        <p style="font-size:.8rem;color:var(--admin-text-muted);margin-top:.75rem;">
+          <i class="fas fa-info-circle"></i> Para agregar: ir a Informes y hacer clic en ⭐ junto al informe deseado.
+        </p>`;
+    } catch(e) {
+      container.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Error al cargar destacados</div>`;
+    }
+  }
+
+  // ===== HELPERS =====
+
+  // ============================================================
+  // MIEMBROS
+  // ============================================================
+  let allMiembros     = [];
+  let miembroToEdit   = null;
+  let miembroToDelete = null;
+
+  async function loadMiembrosAdmin() {
+    try {
+      const res = await apiCall('getMiembros', { centro: 'all' });
+      if (res.success) {
+        allMiembros = res.miembros;
+        renderMiembrosAdmin(allMiembros);
+      }
+    } catch(e) {}
+  }
+
+  function renderMiembrosAdmin(miembros) {
+    const container = document.getElementById('miembrosContainer');
+    if (!container) return;
+    if (!miembros.length) {
+      container.innerHTML = `<div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-users"></i></div>
+        <h3 class="empty-state-title">No hay miembros</h3>
+        <p>Agregá el primer miembro usando el botón "Nuevo Miembro".</p>
+      </div>`;
+      return;
+    }
+    container.innerHTML = `<div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead><tr><th>Nombre</th><th>Cargo</th><th>Centro</th><th>Orden</th><th>Acciones</th></tr></thead>
+        <tbody>
+          ${miembros.map(m => `
+            <tr>
+              <td><strong>${esc(m.nombre)}</strong></td>
+              <td>${esc(m.cargo)}</td>
+              <td><span class="badge-centro badge-${(m.centro||'').toLowerCase()}">${m.centro}</span></td>
+              <td>${m.orden}</td>
+              <td><div class="table-actions">
+                <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openMiembroModal('${m.id}')">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteMiembroModal('${m.id}','${esc(m.nombre).replace(/'/g,"\\'")}')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
+
+  function populateMiembroCentroSelect() {
+    const sel = document.getElementById('miembroCentro');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Seleccionar...</option>' +
+      CENTROS.map(c => `<option value="${c.id}">${c.id} - ${c.name}</option>`).join('');
+  }
+
+  function populateMiembrosCentroFilter() {
+    const sel = document.getElementById('miembrosCentroFilter');
+    if (!sel) return;
+    sel.innerHTML = '<option value="all">Todos los centros</option>' +
+      CENTROS.map(c => `<option value="${c.id}">${c.id}</option>`).join('');
+    sel.addEventListener('change', () => {
+      const v = sel.value;
+      renderMiembrosAdmin(v === 'all' ? allMiembros : allMiembros.filter(m => m.centro === v));
+    });
+  }
+
+  function openMiembroModal(id) {
+    miembroToEdit = id || null;
+    const titleEl = document.getElementById('miembroModalTitle');
+    if (titleEl) titleEl.textContent = id ? 'Editar Miembro' : 'Nuevo Miembro';
+    const msgEl = document.getElementById('miembroFormMsg');
+    if (msgEl) msgEl.style.display = 'none';
+    populateMiembroCentroSelect();
+    if (id) {
+      const m = allMiembros.find(x => x.id === id);
+      if (m) {
+        document.getElementById('miembroNombre').value      = m.nombre;
+        document.getElementById('miembroCargo').value       = m.cargo;
+        document.getElementById('miembroDescripcion').value = m.descripcion || '';
+        document.getElementById('miembroCentro').value      = m.centro;
+        document.getElementById('miembroOrden').value       = m.orden;
+      }
+    } else {
+      document.getElementById('miembroNombre').value      = '';
+      document.getElementById('miembroCargo').value       = '';
+      document.getElementById('miembroDescripcion').value = '';
+      document.getElementById('miembroCentro').value      = '';
+      document.getElementById('miembroOrden').value       = '99';
+    }
+    openModal('miembroModal');
+  }
+
+  async function saveMiembro() {
+    const nombre      = document.getElementById('miembroNombre').value.trim();
+    const cargo       = document.getElementById('miembroCargo').value.trim();
+    const descripcion = document.getElementById('miembroDescripcion').value.trim();
+    const centro      = document.getElementById('miembroCentro').value;
+    const orden       = parseInt(document.getElementById('miembroOrden').value) || 99;
+    const msgDiv      = document.getElementById('miembroFormMsg');
+
+    if (!nombre || !cargo || !centro) {
+      msgDiv.className = 'alert alert-danger';
+      msgDiv.textContent = 'Nombre, cargo y centro son obligatorios.';
+      msgDiv.style.display = 'flex';
+      return;
+    }
+    msgDiv.style.display = 'none';
+    const btn = document.getElementById('saveMiembroBtn');
+    setLoading(btn, true);
+    try {
+      const data = { nombre, cargo, descripcion, centro, orden };
+      const res  = miembroToEdit
+        ? await apiCall('updateMiembro', { id: miembroToEdit, data: JSON.stringify(data) })
+        : await apiCall('createMiembro', { data: JSON.stringify(data) });
+      if (res.success) {
+        showNotification(miembroToEdit ? 'Miembro actualizado' : 'Miembro creado', 'success');
+        closeModal('miembroModal');
+        await loadMiembrosAdmin();
+      } else {
+        msgDiv.className = 'alert alert-danger';
+        msgDiv.textContent = res.error || 'Error al guardar';
+        msgDiv.style.display = 'flex';
+      }
+    } catch(e) {
+      msgDiv.className = 'alert alert-danger';
+      msgDiv.textContent = 'Error de conexión';
+      msgDiv.style.display = 'flex';
+    }
+    setLoading(btn, false);
+  }
+
+  function openDeleteMiembroModal(id, nombre) {
+    miembroToDelete = id;
+    const el = document.getElementById('deleteMiembroNombre');
+    if (el) el.textContent = nombre;
+    openModal('deleteMiembroModal');
+  }
+
+  async function confirmDeleteMiembro() {
+    if (!miembroToDelete) return;
+    const btn = document.getElementById('confirmDeleteMiembroBtn');
+    setLoading(btn, true);
+    const res = await apiCall('deleteMiembro', { id: miembroToDelete });
+    if (res.success) {
+      showNotification('Miembro eliminado', 'success');
+      closeModal('deleteMiembroModal');
+      await loadMiembrosAdmin();
+    } else {
+      showNotification(res.error || 'Error', 'error');
+    }
+    setLoading(btn, false);
+  }
+
+  function populateCentroFilter() {
+    const select = document.getElementById('filterCentro');
+    if (currentUser.role !== 'admin') {
+      select.innerHTML = `<option value="${currentUser.centro}">${currentUser.centro}</option>`;
+      select.disabled = true;
+    } else {
+      select.innerHTML = '<option value="">Todos los centros</option>' +
+        dynamicCentros.map(id => `<option value="${id}">${id}</option>`).join('');
+    }
+  }
+
+  function populateCentroSelects() {
+    const uploadSelect = document.getElementById('centro');
+    if (currentUser && currentUser.role !== 'admin') {
+      uploadSelect.innerHTML = `<option value="${currentUser.centro}">${currentUser.centro}</option>`;
+      uploadSelect.disabled = true;
+    } else {
+      uploadSelect.innerHTML = '<option value="">Selecciona el centro</option>' +
+        dynamicCentros.map(id => {
+          const info = CENTROS.find(c => c.id === id);
+          return `<option value="${id}">${id}${info ? ' - ' + info.name : ''}</option>`;
+        }).join('');
+      uploadSelect.disabled = false;
+    }
+    const editSelect = document.getElementById('editCentro');
+    editSelect.innerHTML = '<option value="">Selecciona el centro</option>' +
+      dynamicCentros.map(id => {
+        const info = CENTROS.find(c => c.id === id);
+        return `<option value="${id}">${id}${info ? ' - ' + info.name : ''}</option>`;
+      }).join('');
+  }
+
+  function populateTagSelect() {
+    const sel = document.getElementById('tag');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Selecciona el tipo</option>' +
+      dynamicTags.map(t => `<option value="${t}">${t}</option>`).join('');
+    if (cur) sel.value = cur;
+  }
+
+  function openModal(id)  { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  function setLoading(btn, loading) {
+    btn.querySelector('.btn-text').style.display  = loading ? 'none'         : 'inline';
+    btn.querySelector('.spinner').style.display   = loading ? 'inline-block' : 'none';
+    btn.disabled = loading;
+  }
+
+  function esc(text) {
+    if (!text) return '';
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1048576).toFixed(1) + ' MB';
+  }
+  </script>
+  <!-- ===== MODAL: Miembro ===== -->
+  <div class="modal-overlay" id="miembroModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="miembroModalTitle">Nuevo Miembro</h3>
+        <button class="modal-close" onclick="closeModal('miembroModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="miembroFormMsg" class="alert" style="display:none;"></div>
+        <div class="form-group">
+          <label class="form-label">Nombre completo *</label>
+          <input type="text" id="miembroNombre" class="form-input" placeholder="Ej: Guido Zack">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cargo *</label>
+          <input type="text" id="miembroCargo" class="form-input" placeholder="Ej: Director, Analista, Investigador">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea id="miembroDescripcion" class="form-input" rows="4" style="resize:vertical;" placeholder="Breve descripción del miembro..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Centro *</label>
+            <select id="miembroCentro" class="form-select">
+              <option value="">Seleccionar...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Orden</label>
+            <input type="number" id="miembroOrden" class="form-input" placeholder="1, 2, 3..." min="1" value="99">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-admin btn-admin-secondary" onclick="closeModal('miembroModal')">Cancelar</button>
+        <button class="btn-admin btn-admin-primary" id="saveMiembroBtn" onclick="saveMiembro()">
+          <span class="btn-text">Guardar</span>
+          <span class="spinner" style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Eliminar Miembro ===== -->
+  <div class="modal-overlay" id="deleteMiembroModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Eliminar Miembro</h3>
+        <button class="modal-close" onclick="closeModal('deleteMiembroModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar a <strong id="deleteMiembroNombre"></strong>?</p>
+        <p style="color:var(--muted);font-size:.875rem;margin-top:.5rem;">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-admin btn-admin-secondary" onclick="closeModal('deleteMiembroModal')">Cancelar</button>
+        <button class="btn-admin btn-admin-danger" id="confirmDeleteMiembroBtn" onclick="confirmDeleteMiembro()">
+          <span class="btn-text">Eliminar</span>
+          <span class="spinner" style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+</body>
+</html>
