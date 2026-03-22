@@ -2,21 +2,21 @@
 // reports-public.js — carga dinámica de informes desde la API
 // ============================================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbzV3tUwpjVWF69slTJhmuKdmsd7INboM746lLesj1mQjFc7c_Mq8OMwuHOLQb1R7pf8/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycby6Lb2jHPHYs8jsuNxZpM9b6OBIcH5y6isw8WRBidPSIlpdTOarYzKv1dnueEpll12R/exec';
 
 const CENTRO_COLORS = {
-  CEER: '#020995',
-  CEEIR: '#489bdc',
-  CEDHyS: '#2850bd',
-  OPER: '#780000',
-  OPAL: '#006D77',
-  OPSA: '#a64319',
-  CIREN: '#014b3e',
-  'Cíclica': '#0099cc'
+  CEER:    '#020995',
+  CEEIR:   '#489bdc',
+  CEDHyS:  '#2850bd',
+  OPER:    '#780000',
+  OPAL:    '#006D77',
+  OPSA:    '#a64319',
+  CIREN:   '#014b3e',
+  'Cíclica':'#0099cc'
 };
 
 // Fallback de tags por si la API de config tarda
-let TAGS_CACHE = ['Informe', 'Informe Especial', 'Análisis', 'Investigación', 'Documento de Trabajo', 'Policy Brief', 'Nota Técnica'];
+let TAGS_CACHE = ['Informe','Informe Especial','Análisis','Investigación','Documento de Trabajo','Policy Brief','Nota Técnica'];
 
 function formatMonthYear(dateStr) {
   if (!dateStr) return '';
@@ -47,7 +47,7 @@ async function loadCentroPublicaciones(centroId, centroSlug) {
   grid.innerHTML = spinner();
 
   try {
-    const res = await fetch(`${API_URL}?action=getReports&centro=${encodeURIComponent(centroId)}`);
+    const res  = await fetch(`${API_URL}?action=getReports&centro=${encodeURIComponent(centroId)}`);
     const data = await res.json();
 
     if (!data.success || !data.reports.length) {
@@ -81,7 +81,7 @@ async function loadUltimasPublicaciones() {
   grid.innerHTML = spinner();
 
   try {
-    const res = await fetch(`${API_URL}?action=getReports&centro=all`);
+    const res  = await fetch(`${API_URL}?action=getReports&centro=all`);
     const data = await res.json();
 
     if (!data.success || !data.reports.length) {
@@ -90,7 +90,7 @@ async function loadUltimasPublicaciones() {
     }
 
     const reports = data.reports.slice(0, 6);
-    const color = r => CENTRO_COLORS[r.centro] || '#3276f3';
+    const color   = r => CENTRO_COLORS[r.centro] || '#3276f3';
 
     grid.innerHTML = reports.map(r => `
       <div class="novedad-card">
@@ -102,8 +102,8 @@ async function loadUltimasPublicaciones() {
             <div class="novedad-date">${formatMonthYear(r.fecha)}</div>
             <h3 class="novedad-title">${esc(r.titulo)}</h3>
             ${r.descripcion
-        ? `<p class="novedad-excerpt">${esc(r.descripcion.length > 120 ? r.descripcion.slice(0, 120) + '…' : r.descripcion)}</p>`
-        : `<p class="novedad-excerpt">${esc(r.tag)}</p>`}
+              ? `<p class="novedad-excerpt">${esc(r.descripcion.length > 120 ? r.descripcion.slice(0,120)+'…' : r.descripcion)}</p>`
+              : `<p class="novedad-excerpt">${esc(r.tag)}</p>`}
           </div>
         </a>
       </div>
@@ -121,7 +121,7 @@ async function loadInformesDestacados() {
   grid.innerHTML = spinner();
 
   try {
-    const res = await fetch(`${API_URL}?action=getFeatured`);
+    const res  = await fetch(`${API_URL}?action=getFeatured`);
     const data = await res.json();
 
     if (!data.success || !data.reports.length) {
@@ -133,7 +133,7 @@ async function loadInformesDestacados() {
       <div class="informe-card">
         <div class="informe-meta">
           <span class="informe-date">${formatMonthYear(r.fecha)}</span>
-          <span class="publicacion-type-${(r.centro || '').toLowerCase()}">${esc(r.centro)}</span>
+          <span class="publicacion-type-${(r.centro||'').toLowerCase()}">${esc(r.centro)}</span>
         </div>
         <h3 class="informe-title">${esc(r.titulo)}</h3>
         <p class="informe-excerpt">${esc(r.descripcion || r.tag)}</p>
@@ -153,7 +153,7 @@ async function loadNotasCiclica() {
   grid.innerHTML = spinner();
 
   try {
-    const res = await fetch(`${API_URL}?action=getNotes&soloAprobadas=true`);
+    const res  = await fetch(`${API_URL}?action=getNotes&soloAprobadas=true`);
     const data = await res.json();
 
     if (!data.success || !data.notes.length) {
@@ -186,7 +186,7 @@ async function loadMiembros(centroId) {
   if (!section) return;
 
   try {
-    const res = await fetch(`${API_URL}?action=getMiembros&centro=${encodeURIComponent(centroId)}`);
+    const res  = await fetch(`${API_URL}?action=getMiembros&centro=${encodeURIComponent(centroId)}`);
     const data = await res.json();
 
     if (!data.success || !data.miembros.length) {
@@ -205,7 +205,7 @@ async function loadMiembros(centroId) {
         <p class="miembro-descripcion">${esc(m.descripcion)}</p>
       </div>
     `).join('');
-  } catch (e) {
+  } catch(e) {
     if (section) section.style.display = 'none';
   }
 }
