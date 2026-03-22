@@ -2,7 +2,7 @@
 // reports-public.js — carga dinámica de informes desde la API
 // ============================================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbxnrmiBLYNxO2oNUngjexv0LaXq_nM3kx5tpAlqC9q_SUSgjd5EhaOnbClpEOb-poLg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzV3tUwpjVWF69slTJhmuKdmsd7INboM746lLesj1mQjFc7c_Mq8OMwuHOLQb1R7pf8/exec';
 
 const CENTRO_COLORS = {
   CEER: '#020995',
