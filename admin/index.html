@@ -36,7 +36,7 @@
         <button class="admin-nav-link" data-view="miembros" id="miembrosNavLink" style="display:none;">
           <i class="fas fa-users"></i> Miembros
         </button>
-        <button class="admin-nav-link" data-view="users" id="usersNavLink" style="display:none;"><i class="fas fa-users"></i> Usuarios</button>
+        <button class="admin-nav-link" data-view="users" id="usersNavLink" style="display:none;"><i class="fas fa-shield-alt"></i> Usuarios</button>
         <button class="admin-nav-link" data-view="notas" id="notasNavLink" style="display:none;"><i class="fas fa-pen-nib"></i> Cíclica</button>
         <button class="admin-nav-link" data-view="config" id="configNavLink" style="display:none;"><i class="fas fa-cog"></i> Config</button>
       </nav>
@@ -292,8 +292,6 @@
         </div>
       </div>
 
-    </div><!-- /admin-container -->
-
       <!-- ===== VIEW: MIEMBROS ===== -->
       <div id="view-miembros" class="view" style="display:none;">
         <div class="page-header">
@@ -324,6 +322,7 @@
         </div>
       </div>
 
+    </div><!-- /admin-container -->
   </main>
 
   <!-- MODAL: Eliminar Informe -->
@@ -477,7 +476,8 @@
     document.getElementById('view-' + v).style.display = 'block';
     const btn = document.querySelector(`.admin-nav-link[data-view="${v}"]`);
     if (btn) btn.classList.add('active');
-    if (v === 'config') { loadFeaturedAdmin(); loadConfigUI(); }
+    if (v === 'config')   { loadFeaturedAdmin(); loadConfigUI(); }
+    if (v === 'miembros') { populateMiembrosCentroFilter(); loadMiembrosAdmin(); }
   }
 
   // ===== REPORTS =====
