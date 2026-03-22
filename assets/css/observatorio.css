@@ -7,49 +7,49 @@
   text-align: center;
 }
 
-.observatorio-hero-ceer{
+.observatorio-hero-ceer {
   background-color: var(--ceer);
   color: var(--white);
-  padding: calc(var(--spacing-3xl) + 80px) 0 var(--spacing-3xl);
+  padding: calc(var(--spacing-1xl) + 80px) 0 var(--spacing-1xl);
   text-align: center;
 }
 
-.observatorio-hero-ceeir{
+.observatorio-hero-ceeir {
   background-color: var(--ceeir);
   color: var(--white);
   padding: calc(var(--spacing-3xl) + 80px) 0 var(--spacing-3xl);
   text-align: center;
 }
 
-.observatorio-hero-cedhys{
+.observatorio-hero-cedhys {
   background-color: var(--cedhys);
   color: var(--white);
   padding: calc(var(--spacing-3xl) + 80px) 0 var(--spacing-3xl);
   text-align: center;
 }
 
-.observatorio-hero-opal{
+.observatorio-hero-opal {
   background-color: var(--opal);
   color: var(--white);
   padding: calc(var(--spacing-3xl) + 80px) 0 var(--spacing-3xl);
   text-align: center;
 }
 
-.observatorio-hero-opsa{
+.observatorio-hero-opsa {
   background-color: var(--opsa);
   color: var(--white);
   padding: calc(var(--spacing-3xl) + 80px) 0 var(--spacing-3xl);
   text-align: center;
 }
 
-.observatorio-hero-ciren{
+.observatorio-hero-ciren {
   background-color: var(--ciren);
   color: var(--white);
   padding: calc(var(--spacing-3xl) + 80px) 0 var(--spacing-3xl);
   text-align: center;
 }
 
-.observatorio-hero-oper{
+.observatorio-hero-oper {
   background-color: var(--oper);
   color: var(--white);
   padding: calc(var(--spacing-3xl) + 80px) 0 var(--spacing-3xl);
@@ -556,6 +556,7 @@
   .ejes-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .ejes-grid.ejes-grid--par {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -573,6 +574,7 @@
   .ejes-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+
   .ejes-grid.ejes-grid--par {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -586,10 +588,10 @@
   }
 
   .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-lg);
-}
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+  }
 
 }
 
@@ -619,15 +621,19 @@
   gap: var(--spacing-sm);
   transition: var(--transition-fast);
 }
-.publicacion-link-ciclica:hover { color: #004fa3; }
+
+.publicacion-link-ciclica:hover {
+  color: #004fa3;
+}
 
 .publicacion-card-ciclica {
-  background: rgba(255,255,255,0.92);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid #b3e0f5;
 }
+
 .publicacion-card-ciclica:hover {
   border-color: #0099cc;
-  box-shadow: 0 8px 32px rgba(0,153,204,.15);
+  box-shadow: 0 8px 32px rgba(0, 153, 204, .15);
 }
 
 .ciclica-section {
