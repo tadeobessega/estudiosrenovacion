@@ -1073,6 +1073,59 @@ section:not(.hero-slider) {
   }
 }
 
+/* ==================== MIEMBROS ==================== */
+.miembros {
+  padding: 5rem 0;
+  background: var(--background-color, #f8fafc);
+}
+
+.miembros-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem 2.5rem;
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 1024px) {
+  .miembros-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 720px) {
+  .miembros-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .miembros-grid { grid-template-columns: 1fr; }
+}
+
+.miembro-item {
+  background: transparent;
+  padding: 0.25rem 0;
+}
+
+.miembro-nombre {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-color, #1e293b);
+  margin: 0 0 0.35rem;
+}
+
+.miembro-cargo {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2563eb;
+  margin: 0 0 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.miembro-descripcion {
+  font-size: 0.9rem;
+  color: var(--text-muted, #64748b);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ==================== END MIEMBROS ==================== */
+
 /* Focus styles */
 .btn:focus,
 .nav-link:focus,
