@@ -556,6 +556,9 @@
   .ejes-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .ejes-grid.ejes-grid--par {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
   .publicaciones-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -569,6 +572,9 @@
 @media (min-width: 1024px) {
   .ejes-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .ejes-grid.ejes-grid--par {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .publicaciones-grid {
@@ -637,4 +643,13 @@
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 700;
+}
+
+/* ── Texto justificado ── */
+.section-description,
+.eje-description,
+.about-text p,
+.mision p,
+.content-text p {
+  text-align: justify;
 }
