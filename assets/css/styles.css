@@ -1126,6 +1126,25 @@ section:not(.hero-slider) {
 
 /* ==================== END MIEMBROS ==================== */
 
+
+/* ==================== REDES SOCIALES ==================== */
+.redes-sociales {
+  padding: 5rem 0;
+  background: #f8fafc;
+}
+
+.twitter-feed-wrapper {
+  margin-top: 2.5rem;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  background: #fff;
+}
+/* ==================== END REDES SOCIALES ==================== */
+
 /* Focus styles */
 .btn:focus,
 .nav-link:focus,
