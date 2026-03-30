@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="header-content">
@@ -22,7 +21,6 @@
                     </a>
                 </div>
                 
-                <!-- Desktop Navigation -->
                 <nav class="nav-desktop">
                     <ul class="nav-list">
                         <li><a href="../index.html#" class="nav-link">Inicio</a></li>
@@ -35,7 +33,6 @@
                     </ul>
                 </nav>
 
-                <!-- Mobile Menu Button -->
                 <button class="mobile-menu-btn" id="mobileMenuBtn">
                     <span class="hamburger"></span>
                     <span class="hamburger"></span>
@@ -43,7 +40,6 @@
                 </button>
             </div>
 
-            <!-- Mobile Navigation -->
             <nav class="nav-mobile" id="mobileNav">
                 <ul class="nav-mobile-list">
                     <li><a href="#inicio" class="nav-mobile-link">Inicio</a></li>
@@ -57,14 +53,11 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
-        <!-- Hero Section -->
         <section class="observatorio-hero-ceer">
             <div class="container">
                 <div class="hero-content">
                     <div class="hero-logo">
-                        <!-- Integrado logo específico de CEER -->
                         <img src="../assets/img/logo-ceer-positivo.png" alt="CEER" class="observatorio-logo-large">
                     </div>
                     <h2 class="hero-subtitle">Centro de Estudios Económicos Renovación</h2>
@@ -76,7 +69,6 @@
             </div>
         </section>
 
-        <!-- Misión Section -->
         <section class="mision">
             <div class="container">
                 <div class="section-content">
@@ -85,51 +77,78 @@
                         <p class="section-description">
                             Queremos facilitar el acceso a la economía a quienes no se especializan en ella, pero con un objetivo claro: no tenemos que bajar el nivel. Aspiramos a ser intermediarios entre aquellos que escriben la literatura y los programas económicos, y quienes los viven y buscan comprenderlos.
                         </p>
-                      
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Publicaciones Section -->
-<section class="publicaciones">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">Publicaciones Recientes</h2>
-            <p class="section-subtitle">Informes de coyuntura y temáticas especiales del CEER</p>
-        </div>
-
-        <div class="publicaciones-grid">
-            <!-- Cargado dinámicamente -->
-        </div>
-        </div>
+        <section id="monitor-economico" style="padding: 4rem 0;">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Monitor Económico</h2>
+                    <p class="section-subtitle">Principales indicadores en tiempo real</p>
+                </div>
+                <div class="ejes-grid" id="indicadores-container">
+                    <p style="text-align: center; grid-column: 1/-1;">Cargando indicadores oficiales...</p>
+                </div>
+            </div>
         </section>
 
+        <section style="padding: 2rem 0 4rem;">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Monitor Monetario</h2>
+                    <p class="section-subtitle">Seguimiento de variables monetarias y financieras</p>
+                </div>
+                <div style="text-align:center; margin-top:2rem;">
+                    <a href="https://marcoschaca.github.io/Dashboard-monetario/" target="_blank"
+                       style="display:inline-flex;align-items:center;gap:.65rem;
+                              background:#0000DE;color:#fff;
+                              padding:.85rem 2.25rem;border-radius:.5rem;
+                              font-family:Inter,sans-serif;font-size:1rem;font-weight:600;
+                              text-decoration:none;
+                              transition:opacity .2s,transform .2s;
+                              box-shadow:0 4px 16px rgba(0,0,222,.3);"
+                       onmouseover="this.style.opacity='.85';this.style.transform='translateY(-2px)'"
+                       onmouseout="this.style.opacity='1';this.style.transform='translateY(0)'">
+                        <i class="fas fa-chart-bar"></i> Ver Monitor Monetario
+                    </a>
+                </div>
+            </div>
+        </section>
 
+        <section class="publicaciones">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Publicaciones Recientes</h2>
+                    <p class="section-subtitle">Informes de coyuntura y temáticas especiales del CEER</p>
+                </div>
 
-        <!-- Redes Sociales Section -->
-        <section class="redes-sociales">
+                <div class="publicaciones-grid">
+                    </div>
+            </div>
+        </section>
+
+        <section class="redes-sociales" style="padding:5rem 0;">
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">El CEER en redes</h2>
                     <p class="section-subtitle">Seguinos en Twitter para estar al día</p>
                 </div>
-                <div class="curator-feed-wrapper">
-                    <!-- Place <div> tag where you want the feed to appear -->
-                    <div id="curator-feed-default-feed-layout"><a href="https://curator.io" target="_blank" class="crt-logo crt-tag">Powered by Curator.io</a></div>
-                    <script type="text/javascript">
-                    /* curator-feed-default-feed-layout */
-                    (function(){
-                    var i,e,d=document,s="script";i=d.createElement("script");i.async=1;i.charset="UTF-8";
-                    i.src="https://cdn.curator.io/published/5be55c4c-af43-405e-8545-dfa2a0dfe556.js";
-                    e=d.getElementsByTagName(s)[0];e.parentNode.insertBefore(i, e);
-                    })();
-                    </script>
-                </div>
+            </div>
+            <!-- Curator full width -->
+            <div style="margin-top:2.5rem;width:100%;">
+                <div id="curator-feed-default-feed-layout"><a href="https://curator.io" target="_blank" class="crt-logo crt-tag">Powered by Curator.io</a></div>
+                <script type="text/javascript">
+                (function(){
+                var i,e,d=document,s="script";i=d.createElement("script");i.async=1;i.charset="UTF-8";
+                i.src="https://cdn.curator.io/published/5be55c4c-af43-405e-8545-dfa2a0dfe556.js";
+                e=d.getElementsByTagName(s)[0];e.parentNode.insertBefore(i, e);
+                })();
+                </script>
             </div>
         </section>
 
-        <!-- Miembros Section — se oculta automáticamente si no hay datos -->
         <section class="miembros" style="display:none;">
             <div class="container">
                 <div class="section-header">
@@ -137,18 +156,15 @@
                     <p class="section-subtitle">El equipo detrás del centro</p>
                 </div>
                 <div class="miembros-grid">
-                    <!-- Cargado dinámicamente -->
-                </div>
+                    </div>
             </div>
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <!-- Logo principal en footer -->
                     <div class="footer-logo">
                         <a href="../index.html#">
                             <img src="../assets/img/logos.png" alt="Centro de Estudios Estratégicos" class="footer-logo-img">
@@ -174,19 +190,18 @@
                 <div class="footer-section">
                     <h4 class="footer-title">Observatorios</h4>
                     <ul class="footer-links">
-                        <li><a href="pages/ceeir.html">CEEIR</a></li>
-                        <li><a href="pages/ceer.html">CEER</a></li>
-                        <li><a href="pages/cedhys.html">CEDHyS</a></li>
-                        <li><a href="pages/opal.html">OPAL</a></li>
-                        <li><a href="pages/opsa.html">OPSA</a></li>                        
-                        <li><a href="pages/oper.html">OPER</a></li>                        
-                        <li><a href="pages/ciren.html">CIREN</a></li>
+                        <li><a href="ceeir.html">CEEIR</a></li>
+                        <li><a href="ceer.html">CEER</a></li>
+                        <li><a href="cedhys.html">CEDHyS</a></li>
+                        <li><a href="opal.html">OPAL</a></li>
+                        <li><a href="opsa.html">OPSA</a></li>                        
+                        <li><a href="oper.html">OPER</a></li>                        
+                        <li><a href="ciren.html">CIREN</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-section">
                     <h4 class="footer-title">Seguínos</h4>
-                    <!-- Redes sociales con iconos profesionales -->
                     <div class="footer-social">
                         <a href="https://www.instagram.com/estudiosrenovacion/?hl=es" class="social-link"><i class="fab fa-instagram"></i></a>
                     </div>
@@ -201,10 +216,10 @@
 
     <script src="../assets/js/main.js"></script>
     <script src="../assets/js/reports-public.js"></script>
-    <script>
+    <script src="../assets/js/indicadores.js"></script> <script>
       document.addEventListener('DOMContentLoaded', () => {
-        loadCentroPublicaciones('CEER', 'ceer');
-        loadMiembros('CEER');
+        if (typeof loadCentroPublicaciones === 'function') loadCentroPublicaciones('CEER', 'ceer');
+        if (typeof loadMiembros === 'function') loadMiembros('CEER');
       });
     </script>
 </body>
