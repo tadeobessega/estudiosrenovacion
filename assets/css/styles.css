@@ -905,6 +905,14 @@ section:not(.hero-slider) {
   color: var(--white);
 }
 
+.footer-content .footer-section:nth-child(2) {
+  text-align: center;
+}
+
+.footer-content .footer-section:nth-child(3) {
+  text-align: right;
+}
+
 .footer-links {
   list-style: none;
 }
