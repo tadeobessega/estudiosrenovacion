@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <header class="header">
         <div class="container">
@@ -20,7 +22,7 @@
                         <img src="../assets/img/logo-header.png" alt="Centro de Estudios Estratégicos" class="logo-img">
                     </a>
                 </div>
-                
+
                 <nav class="nav-desktop">
                     <ul class="nav-list">
                         <li><a href="../index.html#" class="nav-link">Inicio</a></li>
@@ -63,7 +65,15 @@
                     <h2 class="hero-subtitle">Centro de Estudios Económicos Renovación</h2>
                     <div class="hero-social">
                         <a href="https://x.com/ceerenovacion" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="https://www.linkedin.com/company/centro-de-estudios-econ%C3%B3micos-renovaci%C3%B3n/" class="social-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://www.instagram.com/ceerenovacion/" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/company/centro-de-estudios-econ%C3%B3micos-renovaci%C3%B3n/"
+                            class="social-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-link" id="ceer-mail-btn" title="ceer@estudiosrenovacion.com"
+                            onclick="(function(e){e.preventDefault();navigator.clipboard.writeText('ceer@estudiosrenovacion.com').then(function(){var t=document.getElementById('ceer-mail-tooltip');t.style.opacity='1';setTimeout(function(){t.style.opacity='0'},2000)});})(event)"
+                            style="position:relative;">
+                            <i class="fas fa-envelope"></i>
+                            <span id="ceer-mail-tooltip" style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;font-size:.75rem;padding:.3rem .6rem;border-radius:.35rem;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;font-family:Inter,sans-serif;">¡Copiado!</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -75,14 +85,17 @@
                     <div class="content-text">
                         <h2 class="section-title">Nuestra Misión</h2>
                         <p class="section-description">
-                            Queremos facilitar el acceso a la economía a quienes no se especializan en ella, pero con un objetivo claro: no tenemos que bajar el nivel. Aspiramos a ser intermediarios entre aquellos que escriben la literatura y los programas económicos, y quienes los viven y buscan comprenderlos.
+                            Queremos facilitar el acceso a la economía a quienes no se especializan en ella, pero con un
+                            objetivo claro: no tenemos que bajar el nivel. Aspiramos a ser intermediarios entre aquellos
+                            que escriben la literatura y los programas económicos, y quienes los viven y buscan
+                            comprenderlos.
                         </p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="monitor-economico" style="padding: 4rem 0;">
+        <section id="monitor-economico" style="padding: 4rem 0; background: var(--gray-50);">
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Monitor Económico</h2>
@@ -94,23 +107,22 @@
             </div>
         </section>
 
-        <section style="padding: 2rem 0 4rem;">
+        <section style="padding: 2rem 0 4rem; background: var(--ceer);">
             <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">Monitor Monetario</h2>
-                    <p class="section-subtitle">Seguimiento de variables monetarias y financieras</p>
-                </div>
-                <div style="text-align:center; margin-top:2rem;">
-                    <a href="https://marcoschaca.github.io/Dashboard-monetario/" target="_blank"
-                       style="display:inline-flex;align-items:center;gap:.65rem;
-                              background:#0000DE;color:#fff;
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+                    <div>
+                        <h2 class="section-title" style="color:#fff; text-align:left; margin-bottom:.25rem;">Monitor Monetario</h2>
+                        <p style="color:rgba(255,255,255,0.75); font-family:Inter,sans-serif; font-size:.95rem; margin:0;">Seguimiento de variables monetarias y financieras</p>
+                    </div>
+                    <a href="https://marcoschaca.github.io/Dashboard-monetario/" target="_blank" style="display:inline-flex;align-items:center;gap:.65rem;
+                              background:#fff;color:var(--ceer);
                               padding:.85rem 2.25rem;border-radius:.5rem;
                               font-family:Inter,sans-serif;font-size:1rem;font-weight:600;
-                              text-decoration:none;
+                              text-decoration:none;white-space:nowrap;
                               transition:opacity .2s,transform .2s;
-                              box-shadow:0 4px 16px rgba(0,0,222,.3);"
-                       onmouseover="this.style.opacity='.85';this.style.transform='translateY(-2px)'"
-                       onmouseout="this.style.opacity='1';this.style.transform='translateY(0)'">
+                              box-shadow:0 4px 16px rgba(0,0,0,.15);"
+                        onmouseover="this.style.opacity='.85';this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.opacity='1';this.style.transform='translateY(0)'">
                         <i class="fas fa-chart-bar"></i> Ver Monitor Monetario
                     </a>
                 </div>
@@ -125,7 +137,7 @@
                 </div>
 
                 <div class="publicaciones-grid">
-                    </div>
+                </div>
             </div>
         </section>
 
@@ -137,26 +149,27 @@
                 </div>
             </div>
             <!-- Curator full width -->
-            <div style="margin-top:2.5rem;width:100%;">
-                <div id="curator-feed-default-feed-layout"><a href="https://curator.io" target="_blank" class="crt-logo crt-tag">Powered by Curator.io</a></div>
+            <div style="margin-top:2.5rem;max-width:1200px;margin-left:auto;margin-right:auto;padding:0 2rem;">
+                <div id="curator-feed-default-feed-layout"><a href="https://curator.io" target="_blank"
+                        class="crt-logo crt-tag">Powered by Curator.io</a></div>
                 <script type="text/javascript">
-                (function(){
-                var i,e,d=document,s="script";i=d.createElement("script");i.async=1;i.charset="UTF-8";
-                i.src="https://cdn.curator.io/published/5be55c4c-af43-405e-8545-dfa2a0dfe556.js";
-                e=d.getElementsByTagName(s)[0];e.parentNode.insertBefore(i, e);
-                })();
+                    (function () {
+                        var i, e, d = document, s = "script"; i = d.createElement("script"); i.async = 1; i.charset = "UTF-8";
+                        i.src = "https://cdn.curator.io/published/5be55c4c-af43-405e-8545-dfa2a0dfe556.js";
+                        e = d.getElementsByTagName(s)[0]; e.parentNode.insertBefore(i, e);
+                    })();
                 </script>
             </div>
         </section>
 
-        <section class="miembros" style="display:none;">
+        <section class="miembros" style="display:none; background:#fff;">
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Miembros</h2>
                     <p class="section-subtitle">El equipo detrás del centro</p>
                 </div>
                 <div class="miembros-grid">
-                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -167,7 +180,8 @@
                 <div class="footer-section">
                     <div class="footer-logo">
                         <a href="../index.html#">
-                            <img src="../assets/img/logos.png" alt="Centro de Estudios Estratégicos" class="footer-logo-img">
+                            <img src="../assets/img/logos.png" alt="Centro de Estudios Estratégicos"
+                                class="footer-logo-img">
                         </a>
                     </div>
                     <p class="footer-description">
@@ -194,17 +208,11 @@
                         <li><a href="ceer.html">CEER</a></li>
                         <li><a href="cedhys.html">CEDHyS</a></li>
                         <li><a href="opal.html">OPAL</a></li>
-                        <li><a href="opsa.html">OPSA</a></li>                        
-                        <li><a href="oper.html">OPER</a></li>                        
+                        <li><a href="opsa.html">OPSA</a></li>
+                        <li><a href="oper.html">OPER</a></li>
                         <li><a href="ciren.html">CIREN</a></li>
                     </ul>
                 </div>
-
-                <div class="footer-section">
-                    <h4 class="footer-title">Seguínos</h4>
-                    <div class="footer-social">
-                        <a href="https://www.instagram.com/estudiosrenovacion/?hl=es" class="social-link"><i class="fab fa-instagram"></i></a>
-                    </div>
                 </div>
             </div>
 
@@ -216,11 +224,13 @@
 
     <script src="../assets/js/main.js"></script>
     <script src="../assets/js/reports-public.js"></script>
-    <script src="../assets/js/indicadores.js"></script> <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        if (typeof loadCentroPublicaciones === 'function') loadCentroPublicaciones('CEER', 'ceer');
-        if (typeof loadMiembros === 'function') loadMiembros('CEER');
-      });
+    <script src="../assets/js/indicadores.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof loadCentroPublicaciones === 'function') loadCentroPublicaciones('CEER', 'ceer');
+            if (typeof loadMiembros === 'function') loadMiembros('CEER');
+        });
     </script>
 </body>
+
 </html>
