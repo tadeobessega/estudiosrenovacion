@@ -15,39 +15,41 @@
     
     <style>
         @media (max-width: 768px) {
-            /* Forzamos al slider a adaptar su altura al contenido, evitando que colapse */
-            .hero-slider, .slider-container, .slide, .slide-content {
-                height: auto !important;
-                min-height: auto !important;
-            }
-            
-            /* Damos espacio arriba para el menú y un margen grande abajo exclusivo para los puntos */
-            .slide-content {
-                padding-top: 120px !important; 
-                padding-bottom: 80px !important; 
+            /* El contenedor de cada placa será nuestra referencia para fijar el botón */
+            .slide {
+                position: relative !important;
             }
 
-            /* Achicamos un poco los textos para mejorar la lectura y que no ocupen tantas líneas */
-            .slide-text h1 {
-                font-size: 2rem !important;
-                line-height: 1.1 !important;
-                margin-bottom: 15px !important;
+            /* Anulamos posiciones relativas intermedias para que el botón se guíe estrictamente por el slide completo */
+            .slide-content, .slide .container, .slide-text {
+                position: static !important;
             }
 
-            .slide-text p {
-                font-size: 1.1rem !important;
-                margin-bottom: 25px !important;
+            /* Le damos un margen gigante abajo al texto para que, por más largo que sea, NUNCA tape el botón */
+            .slide-text {
+                padding-bottom: 120px !important; 
             }
 
-            /* Clavamos los puntos en el espacio libre de 80px que dejamos abajo */
+            /* Clavamos el botón en una posición fija abajo, siempre centrado */
+            .slide-text .btn {
+                position: absolute !important;
+                bottom: 50px !important; /* Exactamente arriba de los puntos */
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                margin: 0 !important;
+                z-index: 50 !important;
+                white-space: nowrap !important;
+            }
+
+            /* Clavamos los puntos al fondo del todo */
             .slider-dots {
                 position: absolute !important;
-                bottom: 25px !important;
+                bottom: 15px !important;
                 left: 0 !important;
-                right: 0 !important;
-                z-index: 100 !important;
+                width: 100% !important;
                 display: flex !important;
                 justify-content: center !important;
+                z-index: 50 !important;
             }
         }
     </style>
