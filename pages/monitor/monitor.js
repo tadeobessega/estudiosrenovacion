@@ -9,8 +9,14 @@
   'use strict';
 
   /* ---------------- Paleta y formato ---------------- */
-  const C = { azul: '#2840a5', ambar: '#d6810c', cian: '#138282', violeta: '#473a9a', gris: '#9c9ea5', tinta: '#171a24', grilla: '#dfe1e5', sec: '#5d6069', rojo: '#af3e30' };
-  const SERIE = [C.azul, C.ambar, C.cian, C.violeta, C.gris];
+  // Paletas por tema (sistema de marca CEER): sobre claro y sobre azul.
+  const PALETAS = {
+    light: { azul: '#2840a5', ambar: '#d6810c', cian: '#138282', violeta: '#473a9a', gris: '#9c9ea5', tinta: '#171a24', grilla: '#dfe1e5', sec: '#5d6069', rojo: '#af3e30', tooltip: '#171a24', puntos: 'rgba(40,64,165,.55)' },
+    dark:  { azul: '#c0d0f9', ambar: '#f7ac4d', cian: '#57d4d4', violeta: '#a7a8df', gris: '#9c9ea5', tinta: '#f2f4fb', grilla: 'rgba(192,208,249,.16)', sec: '#c0d0f9', rojo: '#f08a7c', tooltip: '#0b1438', puntos: 'rgba(192,208,249,.6)' }
+  };
+  const temaActual = () => (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+  let C = PALETAS[temaActual()];
+  let SERIE = [C.azul, C.ambar, C.cian, C.violeta, C.gris];
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   const MES3 = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   const MONO = '"Cascadia Code", ui-monospace, Menlo, monospace';
@@ -90,13 +96,15 @@
       ctx.save();
       ctx.font = `600 12px ${SANS}`;
       ctx.textBaseline = 'middle';
-      items.forEach((it) => { ctx.fillStyle = it.color; ctx.fillText(it.txt, chartArea.right + 8, Math.min(Math.max(it.y, chartArea.top), chartArea.bottom)); });
+      const x0 = scales.y1 ? scales.y1.right + 6 : chartArea.right + 8;
+      items.forEach((it) => { ctx.fillStyle = it.color; ctx.fillText(it.txt, x0, Math.min(Math.max(it.y, chartArea.top), chartArea.bottom)); });
       ctx.restore();
     }
   };
   Chart.register(etiquetasFinales);
   Chart.defaults.font.family = SANS;
   Chart.defaults.color = C.sec;
+  function aplicarPaleta() { C = PALETAS[temaActual()]; SERIE = [C.azul, C.ambar, C.cian, C.violeta, C.gris]; Chart.defaults.color = C.sec; }
   Chart.defaults.animation = false;
 
   function anchoEtiquetas(labels) {
@@ -152,12 +160,12 @@
       options: {
         responsive: true, maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
-        layout: { padding: { right: finales ? anchoEtiquetas(cfg.series.filter((s) => !s.sinEtiqueta).map((s) => s.label)) + (cfg.eje2 ? 40 : 0) : 8, top: 4 } },
+        layout: { padding: { right: finales ? anchoEtiquetas(cfg.series.filter((s) => !s.sinEtiqueta).map((s) => s.label)) : 8, top: 4 } },
         scales,
         plugins: {
-          legend: { display: !finales, position: 'top', align: 'start', labels: { boxWidth: 10, boxHeight: 10, font: { size: 12, weight: '600' }, color: C.tinta } },
+          legend: { display: !finales && cfg.series.length > 1, position: 'bottom', align: 'start', labels: { boxWidth: 10, boxHeight: 10, padding: 14, font: { size: 12, weight: '600' }, color: C.tinta } },
           tooltip: {
-            backgroundColor: C.tinta, cornerRadius: 0, padding: 10, titleFont: { family: MONO, size: 12 }, bodyFont: { family: SANS, size: 12 },
+            backgroundColor: C.tooltip, cornerRadius: 0, padding: 10, titleFont: { family: MONO, size: 12 }, bodyFont: { family: SANS, size: 12 },
             callbacks: {
               title: (it) => (it.length ? (cfg.formatoTitulo || mesLargo)(it[0].label) : ''),
               label: (it) => ` ${it.dataset.label}: ${(cfg.formatoTooltip || ((v) => num(v, cfg.decimales ?? 1)))(it.raw)}`
@@ -190,7 +198,7 @@
         },
         plugins: {
           legend: { display: false },
-          tooltip: { backgroundColor: C.tinta, cornerRadius: 0, callbacks: { label: (it) => ` ${pct(it.raw, 1, true)}` } },
+          tooltip: { backgroundColor: C.tooltip, cornerRadius: 0, callbacks: { label: (it) => ` ${pct(it.raw, 1, true)}` } },
           etiquetasFinales: { activo: false }
         }
       },
@@ -279,33 +287,39 @@
     { id: 'actividad', nombre: 'Actividad' },
     { id: 'trabajo', nombre: 'Trabajo e ingresos' },
     { id: 'externo', nombre: 'Sector externo' },
-    { id: 'cambio', nombre: 'Tipo de cambio y riesgo' },
+    { id: 'cambio', nombre: 'Tipo de cambio' },
     { id: 'monetaria', nombre: 'Política monetaria' },
-    { id: 'bancos', nombre: 'Sector bancario' },
-    { id: 'generador', nombre: 'Generador de gráficos' }
+    { id: 'bancos', nombre: 'Bancos' },
+    { id: 'generador', nombre: 'Generador de gráficos', aparte: true }
   ];
 
   function crearPaneles() {
     const nav = document.getElementById('pestanas');
     const cont = document.getElementById('paneles');
-    cont.innerHTML = '';
+    cont.innerHTML = ''; nav.innerHTML = '';
     const inicial = (location.hash || '').slice(1);
     PANELES.forEach((p, i) => {
       const activo = inicial ? inicial === p.id : i === 0;
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'pestana' + (activo ? ' activa' : ''); b.textContent = p.nombre; b.setAttribute('role', 'tab'); b.dataset.panel = p.id;
-      b.addEventListener('click', () => mostrar(p.id));
-      nav.appendChild(b);
+      if (!p.aparte) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'pestana' + (activo ? ' activa' : ''); b.textContent = p.nombre; b.setAttribute('role', 'tab'); b.dataset.panel = p.id;
+        b.addEventListener('click', () => mostrar(p.id));
+        nav.appendChild(b);
+      }
       const sec = document.createElement('section');
       sec.className = 'panel' + (activo ? ' activo' : ''); sec.id = p.id;
       cont.appendChild(sec);
     });
   }
   function mostrar(id) {
+    const p = PANELES.find((x) => x.id === id) || PANELES[0];
+    document.getElementById('seccionActual').textContent = p.nombre;
+    document.getElementById('btnGenerador').classList.toggle('activa', id === 'generador');
     document.querySelectorAll('.pestana').forEach((b) => b.classList.toggle('activa', b.dataset.panel === id));
     document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('activo', p.id === id));
     history.replaceState(null, '', '#' + id);
     graficos.forEach((c) => c.resize());
+    window.scrollTo({ top: Math.min(window.scrollY, document.getElementById('paneles').offsetTop - 120), behavior: 'smooth' });
   }
   const bloque = (panel, html) => { const d = document.createElement('div'); d.innerHTML = html; while (d.firstChild) panel.appendChild(d.firstChild); };
   const grilla = (panel) => { const g = document.createElement('div'); g.className = 'graficos'; panel.appendChild(g); return g; };
@@ -582,10 +596,10 @@
       const ch = new Chart(document.getElementById('gGen'), {
         type: 'scatter',
         data: { datasets: [
-          { label: 'Observaciones', data: pts, backgroundColor: 'rgba(40,64,165,.55)', pointRadius: 3.5 },
+          { label: 'Observaciones', data: pts, backgroundColor: C.puntos, pointRadius: 3.5 },
           { type: 'line', label: 'Regresión', data: [{ x: x0, y: pend * x0 + ord }, { x: x1, y: pend * x1 + ord }], borderColor: C.ambar, borderWidth: 2, pointRadius: 0 }
         ] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, etiquetasFinales: { activo: false }, tooltip: { backgroundColor: C.tinta, cornerRadius: 0, callbacks: { label: (it) => (it.raw.f ? ` ${mesLargo(it.raw.f)}: (${num(it.raw.x, 2)}; ${num(it.raw.y, 2)})` : '') } } },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, etiquetasFinales: { activo: false }, tooltip: { backgroundColor: C.tooltip, cornerRadius: 0, callbacks: { label: (it) => (it.raw.f ? ` ${mesLargo(it.raw.f)}: (${num(it.raw.x, 2)}; ${num(it.raw.y, 2)})` : '') } } },
           scales: { x: { title: { display: true, text: D[k2][0] }, grid: { color: C.grilla }, ticks: { font: { family: MONO, size: 11 }, callback: (v) => compacto(v) } }, y: { title: { display: true, text: D[k1][0] }, grid: { color: C.grilla }, ticks: { font: { family: MONO, size: 11 }, callback: (v) => compacto(v) } } } }
       });
       ch.$cfg = { serieTiempo: false }; graficos.push(ch);
@@ -620,6 +634,20 @@
   }
 
   /* ---------------- Carga ---------------- */
+  function renderizar() {
+    const activo = (location.hash || '#precios').slice(1);
+    graficos.splice(0).forEach((c) => c.destroy());
+    aplicarPaleta();
+    crearPaneles();
+    claves();
+    [panelPrecios, panelActividad, panelTrabajo, panelExterno, panelCambio, panelMonetaria, panelBancos, panelGenerador].forEach((fn) => {
+      try { fn(); } catch (e) { console.error(fn.name, e); }
+    });
+    aplicarFechas();
+    if (!S.indecOk) bloque(document.getElementById('precios'), '<p class="estado error">No se pudieron cargar las series del INDEC. Probá de nuevo en unos minutos.</p>');
+    mostrar(PANELES.some((p) => p.id === activo) ? activo : 'precios');
+  }
+
   async function cargar() {
     crearPaneles();
     try {
@@ -652,20 +680,21 @@
       const series = (rIndec && rIndec.series) || {};
       Object.keys(series).forEach((k) => { S.indec[k] = alinear(series[k]); });
       S.ind = { ...series, items: rInd && rInd.items };
-      document.getElementById('estado') && document.getElementById('estado').remove();
-      claves();
-      const fallas = [];
-      [panelPrecios, panelActividad, panelTrabajo, panelExterno, panelCambio, panelMonetaria, panelBancos, panelGenerador].forEach((fn) => {
-        try { fn(); } catch (e) { console.error(fn.name, e); fallas.push(fn.name); }
-      });
-      aplicarFechas();
-      if (!rIndec || !rIndec.success) bloque(document.getElementById('precios'), '<p class="estado error">No se pudieron cargar las series del INDEC. Probá de nuevo en unos minutos.</p>');
+      S.indecOk = !!(rIndec && rIndec.success);
+      renderizar();
     } catch (e) {
       console.error(e);
       document.getElementById('paneles').innerHTML = '<p class="estado error">No se pudieron cargar los datos del monitor.</p>';
     }
   }
 
+  document.getElementById('btnGenerador').addEventListener('click', () => mostrar('generador'));
+  document.getElementById('btnTema').addEventListener('click', () => {
+    const t = temaActual() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('cer-theme', t); } catch (e) {}
+    if (S.fm.length) renderizar();
+  });
   document.getElementById('desde').addEventListener('change', aplicarFechas);
   document.getElementById('hasta').addEventListener('change', aplicarFechas);
   document.getElementById('limpiarFechas').addEventListener('click', () => { document.getElementById('desde').value = ''; document.getElementById('hasta').value = ''; aplicarFechas(); });
