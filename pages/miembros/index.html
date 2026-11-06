@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel de miembros · CEER</title>
+<link rel="icon" href="/pages/monitor/favicon-c.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code@5.3.0/index.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code@5.3.0/600.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code@5.3.0/700.css" rel="stylesheet">
+<style>
+  :root{
+    --azul-600:#2840a5; --azul-700:#1f3385; --azul-500:#3c59c0; --azul-200:#c0d0f9;
+    --cian-700:#138282; --lima-300:#e6f05a; --rojo-600:#af3e30;
+    --n50:#f6f7f9; --n200:#dfe1e5; --n400:#9c9ea5; --n600:#5d6069; --tinta:#171a24;
+    --mono:"Cascadia Code",ui-monospace,monospace; --sans:Inter,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:var(--n50);color:var(--tinta);
+       font-family:var(--sans);font-size:16px;line-height:1.5;hyphens:manual}
+  a{color:inherit}
+  .contenedor{width:100%;max-width:1120px;margin:0 auto;padding:0 32px}
+
+  /* cabecera */
+  header{flex-shrink:0;background:#fff;border-bottom:1px solid var(--n200)}
+  header .contenedor{height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .marca{display:flex;align-items:baseline;gap:14px;text-decoration:none;color:var(--tinta)}
+  .marca .logo{display:block;width:102px;height:24px;color:var(--azul-600);--cursor:#d6810c}
+  .marca .sep{align-self:center;width:1px;height:24px;background:var(--n200)}
+  .marca .producto{font-weight:600;font-size:20px;line-height:1}
+  nav{display:flex;align-items:center;gap:24px;font-size:14px;color:var(--n600)}
+  nav a{text-decoration:none;padding:4px 0;border-bottom:2px solid transparent}
+  nav a:hover{color:var(--tinta)}
+  nav a.activa{color:var(--tinta);font-weight:600;border-bottom-color:var(--azul-600)}
+  nav button{font:inherit;color:inherit;background:none;border:0;padding:4px 0;cursor:pointer}
+  nav button:hover{color:var(--tinta)}
+  #usuario{font-family:var(--mono);font-size:13px}
+
+  /* contenido */
+  main{flex:1 0 auto;padding:48px 0 64px}
+  main > .contenedor > :last-child, #cuerpo > :last-child{margin-bottom:0}
+  .volanta{margin:0 0 12px;font-size:16px;color:var(--n600)}
+  .volanta .barra{color:var(--azul-600)}
+  h1{margin:0 0 16px;font-family:var(--mono);font-weight:700;font-size:44px;line-height:52px;letter-spacing:-.01em}
+  .bajada{margin:0 0 32px;font-size:18px;line-height:28px;color:var(--n600)}
+
+  /* indicadores */
+  .indicadores{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:0 0 56px}
+  .indicador{background:#fff;border-top:3px solid var(--tinta);padding:24px;min-height:250px;display:flex;flex-direction:column}
+  .indicador .rotulo{font-size:15px;line-height:22px;color:var(--n600);min-height:44px}
+  .indicador .cifra{font-family:var(--mono);font-weight:600;font-size:72px;line-height:76px;margin:20px 0 12px;font-variant-numeric:tabular-nums}
+  .indicador .cifra.sin{font-size:28px;line-height:76px;color:var(--n400);font-weight:400}
+  .indicador .variacion{font-family:var(--mono);font-size:15px;color:var(--n600)}
+  .indicador .variacion.mal{color:var(--rojo-600)}
+  .indicador .pie{margin-top:auto;padding-top:16px;font-size:13px;color:var(--n400)}
+
+  /* accesos */
+  section{margin:0 0 48px}
+  h2{margin:0 0 20px;font-family:var(--mono);font-weight:700;font-size:26px;line-height:32px}
+  .accesos{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .acceso{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--n200);
+          padding:24px;text-decoration:none;min-height:190px;transition:border-color .15s}
+  .acceso:hover,.acceso:focus-visible{border-color:var(--azul-600);outline:none}
+  .acceso:hover h3,.acceso:focus-visible h3{text-decoration:underline;text-decoration-color:var(--azul-600);text-underline-offset:4px}
+  .acceso .tipo{font-size:13px;line-height:18px;height:22px;color:var(--n600);margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .acceso h3{margin:0 0 8px;font-family:var(--mono);font-weight:700;font-size:20px;line-height:26px}
+  .acceso p{margin:0;font-size:15px;line-height:22px;color:var(--n600)}
+  .acceso .destino{margin-top:auto;padding-top:16px;font-family:var(--mono);font-size:13px;color:var(--azul-600);
+                   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .acceso .destino::before{content:"// ";color:var(--cian-700)}
+  .etiqueta{font-size:12px;font-weight:600;line-height:1;padding:5px 8px;background:var(--lima-300);color:var(--tinta)}
+  .acceso.pendiente{border-style:dashed}
+
+  /* avisos */
+  .aviso{background:#fff;border-top:3px solid var(--tinta);padding:32px;margin:0}
+  .aviso h2{margin-bottom:12px}
+  .aviso p{margin:0 0 24px;color:var(--n600);font-size:16px}
+  .boton{display:inline-block;background:var(--azul-600);color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 20px}
+  .boton:hover{background:var(--azul-700)}
+  .cargando{height:250px;background:linear-gradient(90deg,#fff 0,#eef0f3 50%,#fff 100%);background-size:200% 100%;animation:brillo 1.2s infinite}
+  @keyframes brillo{to{background-position:-200% 0}}
+
+  /* pie */
+  footer{flex-shrink:0;background:var(--azul-600);color:#fff}
+  footer .contenedor{min-height:96px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-top:24px;padding-bottom:24px}
+  footer .firma{display:flex;align-items:baseline;gap:12px;font-size:15px}
+  footer .firma .logo{display:block;width:119px;height:28px;color:#fff;--cursor:#f7ac4d}
+  footer .links{display:flex;gap:24px;font-size:14px;color:var(--azul-200)}
+  footer .links a{text-decoration:none}
+  footer .links a:hover{color:#fff}
+  footer .links .mono{font-family:var(--mono)}
+
+  @media (max-width:720px){
+    .contenedor{padding:0 20px}
+    h1{font-size:34px;line-height:42px}
+    nav .ocultable{display:none}
+    .marca{gap:10px}
+    .marca .producto{font-size:16px;white-space:nowrap}
+    nav{gap:16px}
+    nav a.activa{display:none}
+    nav button{white-space:nowrap}
+    .indicador{min-height:0}
+    .indicador .rotulo{min-height:0}
+    footer .links{flex-wrap:wrap;gap:8px 20px}
+    .indicador .cifra{font-size:60px;line-height:66px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="contenedor">
+    <a class="marca" href="/pages/ceer" aria-label="CEER, ir a la página del centro">
+      <span class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 469 110" width="100%" height="100%" aria-hidden="true"><path fill="currentColor" d="M60.5 110Q31.6 110 15.8 95.8Q0 81.5 0 54.8Q0 28.8 14.4 14.4Q28.8 0 55.5 0Q71.9 0 83.7 6.4Q95.4 12.8 100.3 24.5L80.7 40.1Q76.3 33.2 69.5 29.4Q62.8 25.7 54.7 25.7Q42 25.7 34.9 33Q27.7 40.3 27.7 53.8Q27.7 68.7 36.9 76.5Q46 84.3 62.9 84.3Q70.1 84.3 77.2 83.6Q84.4 82.9 91.2 81.7L94 107Q85.9 108.8 77.3 109.4Q68.7 110 60.5 110ZM156.5 110Q129 110 114 95.8Q99 81.5 99 54.8Q99 28.8 111.8 14.4Q124.5 0 147.7 0Q170.4 0 182.8 13.3Q195.2 26.6 195.2 52Q195.2 59.2 194.6 65.7H116.8V46.9H168.6Q168.6 36.2 163.1 30.5Q157.7 24.8 147.9 24.8Q137.3 24.8 131.4 32.3Q125.6 39.9 125.6 53.8Q125.6 68.8 134.2 76.6Q142.9 84.4 158.9 84.4Q166.1 84.4 173.1 83.7Q180.1 82.9 187.4 81.6L190 107.2Q179.8 109 171.4 109.5Q163 110 156.5 110ZM255.5 110Q228 110 213 95.8Q198 81.5 198 54.8Q198 28.8 210.8 14.4Q223.5 0 246.7 0Q269.4 0 281.8 13.3Q294.2 26.6 294.2 52Q294.2 59.2 293.6 65.7H215.8V46.9H267.6Q267.6 36.2 262.1 30.5Q256.7 24.8 246.9 24.8Q236.3 24.8 230.4 32.3Q224.6 39.9 224.6 53.8Q224.6 68.8 233.2 76.6Q241.9 84.4 257.9 84.4Q265.1 84.4 272.1 83.7Q279.1 82.9 286.4 81.6L289 107.2Q278.8 109 270.4 109.5Q262 110 255.5 110ZM345.8 62.4 339.6 25.9H348.7Q350.3 0 375.8 0Q390.9 0 399 11.1Q407 22.2 407 43.1H380Q380 33.7 376.6 29.6Q373.1 25.5 365.5 25.5Q355.6 25.5 350.7 35.1Q345.8 44.7 345.8 62.4ZM296.4 108V84.8H370.6V108ZM318.8 108V2H341.8L345.8 32.4V108ZM300.4 25.2V2H340.4L342.4 25.2Z"/><rect fill="var(--cursor,#f7ac4d)" x="417" y="87" width="52" height="21"/></svg></span>
+      <span class="sep" aria-hidden="true"></span>
+      <span class="producto">Panel de miembros</span>
+    </a>
+    <nav>
+      <a class="activa" href="/pages/miembros/">Accesos</a>
+      <a class="ocultable" href="/pages/ceer">Sitio del CEER</a>
+      <span id="usuario" class="ocultable" hidden></span>
+      <button id="salir" type="button" hidden>Salir</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="contenedor" id="contenido">
+    <p class="volanta">Centro de Estudios Económicos Renovación <span class="barra">/</span> <span id="hoy"></span></p>
+    <h1>Panel de miembros del CEER</h1>
+    <p class="bajada">Accesos a los sitios, tableros, herramientas y archivos del centro, con el estado de las bases que se actualizan solas. Solo lo ven las cuentas del CEER.</p>
+    <div id="cuerpo"><div class="indicadores"><div class="cargando"></div><div class="cargando"></div><div class="cargando"></div></div></div>
+  </div>
+</main>
+
+<footer>
+  <div class="contenedor">
+    <div class="firma">
+      <span class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 469 110" width="100%" height="100%" aria-hidden="true"></svg></span>
+      <span>Centro de Estudios Económicos Renovación</span>
+    </div>
+    <div class="links">
+      <a class="mono" href="https://x.com/ceerenovacion" target="_blank" rel="noopener">@ceerenovacion</a>
+      <a class="mono" href="mailto:ceerenovacion@gmail.com">ceerenovacion@gmail.com</a>
+      <a href="/">estudiosrenovacion.com</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const RUTA = '/pages/miembros/';
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  // el logo del pie reutiliza el trazado de la cabecera
+  const svgCab = document.querySelector('header .logo svg');
+  const svgPie = document.querySelector('footer .logo svg');
+  svgPie.innerHTML = svgCab.innerHTML;
+
+  const hoy = new Date();
+  $('#hoy').textContent = `${hoy.getDate()} de ${MESES[hoy.getMonth()]} ${hoy.getFullYear()}`;
+
+  const dd = (iso) => { const [a, m, d] = String(iso).slice(0, 10).split('-'); return d && m ? `${d}/${m}` : ''; };
+  const ddaa = (iso) => { const [a, m, d] = String(iso).slice(0, 10).split('-'); return d && m && a ? `${d}/${m}/${a}` : ''; };
+  const hora = (iso) => { const t = String(iso).slice(11, 16); return t ? `${t} h` : ''; };
+  const num = (n) => Number(n).toLocaleString('es-AR');
+
+  const user = (() => { try { return JSON.parse(localStorage.getItem('adminUser') || 'null'); } catch { return null; } })();
+
+  function aviso(titulo, texto, boton) {
+    $('#cuerpo').innerHTML = `<div class="aviso"><h2>${esc(titulo)}</h2><p>${esc(texto)}</p>${boton || ''}</div>`;
+  }
+  const botonLogin = `<a class="boton" href="/admin/login.html?volver=${encodeURIComponent(RUTA)}">Iniciar sesión</a>`;
+
+  if (!user || !user.token) {
+    aviso('Iniciá sesión', 'Entrá con tu cuenta del sitio. Si no tenés una, registrate eligiendo el CEER y esperá a que un administrador la apruebe.', botonLogin);
+    return;
+  }
+
+  $('#usuario').textContent = user.email;
+  $('#usuario').hidden = false;
+  $('#salir').hidden = false;
+  $('#salir').addEventListener('click', async () => {
+    try { await fetch('/api', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + user.token }, body: JSON.stringify({ action: 'logout' }) }); } catch {}
+    try { localStorage.removeItem('adminUser'); } catch {}
+    location.reload();
+  });
+
+  function indicadores(d) {
+    const e = d.ipceer;
+    const tarjetas = [];
+    if (e && e.ultimo_dia) {
+      const atraso = Number(e.atraso_dias);
+      const linea = atraso >= 2
+        ? `<div class="variacion mal">${num(atraso)} días de atraso, revisá la PC</div>`
+        : `<div class="variacion">al día, corrida del ${dd(e.corrida)} a las ${hora(e.corrida)}</div>`;
+      tarjetas.push(`<div class="indicador"><div class="rotulo">Último día con precios en la base del IPCEER</div>
+        <div class="cifra">${dd(e.ultimo_dia)}</div>${linea}
+        <div class="pie">Fuente: SEPA, PC ${esc(e.pc || '')}.</div></div>`);
+      if (e.historico_faltan != null) {
+        tarjetas.push(`<div class="indicador"><div class="rotulo">Días que faltan cargar de la base histórica 2016-2018</div>
+          <div class="cifra">${num(e.historico_faltan)}</div>
+          <div class="variacion">según la corrida del ${dd(e.corrida)}</div>
+          <div class="pie">Fuente: SEPA, tarea IPCEER histórico.</div></div>`);
+      }
+    } else {
+      tarjetas.push(`<div class="indicador"><div class="rotulo">Último día con precios en la base del IPCEER</div>
+        <div class="cifra sin">sin datos aún</div><div class="pie">La PC todavía no informó su estado.</div></div>`);
+    }
+    const inf = d.informes || {};
+    tarjetas.push(`<div class="indicador"><div class="rotulo">Informes del CEER publicados en el sitio</div>
+      <div class="cifra">${num(inf.total || 0)}</div>
+      <div class="variacion">${inf.ultimo && inf.ultimo.fecha ? `último, del ${ddaa(inf.ultimo.fecha)}` : 'sin fecha del último'}</div>
+      <div class="pie">${inf.ultimo ? esc(inf.ultimo.titulo) : 'Fuente: base del sitio.'}</div></div>`);
+    return `<div class="indicadores">${tarjetas.join('')}</div>`;
+  }
+
+  function host(url) {
+    if (url.startsWith('/')) return 'estudiosrenovacion' + url.replace(/\/$/, '');
+    try { const u = new URL(url); return u.host.replace(/^www\./, '') + (u.pathname.length > 1 ? u.pathname.split('/').slice(0, 2).join('/') : ''); } catch { return url; }
+  }
+
+  function accesos(panel) {
+    return panel.map((s) => `<section><h2>${esc(s.seccion)}</h2><div class="accesos">${
+      s.accesos.map((a) => {
+        const externo = /^https?:/.test(a.url);
+        const pend = a.estado === 'pendiente';
+        return `<a class="acceso${pend ? ' pendiente' : ''}" href="${esc(a.url)}"${externo ? ' target="_blank" rel="noopener"' : ''}>
+          <div class="tipo"><span>${esc(a.tipo)}</span>${pend ? '<span class="etiqueta">Pendiente</span>' : ''}</div>
+          <h3>${esc(a.titulo)}</h3><p>${esc(a.descripcion)}</p>
+          <div class="destino">${esc(host(a.url))}</div></a>`;
+      }).join('')}</div></section>`).join('');
+  }
+
+  fetch('/api', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + user.token },
+    body: JSON.stringify({ action: 'getPanelCEER' })
+  }).then(async (r) => {
+    const d = await r.json().catch(() => ({}));
+    if (r.status === 401) {
+      try { localStorage.removeItem('adminUser'); } catch {}
+      aviso('Tu sesión venció', 'Volvé a iniciar sesión para ver el panel.', botonLogin);
+      return;
+    }
+    if (r.status === 403) {
+      aviso('Este panel es del CEER', 'Tu cuenta es de otro centro. Si sos del CEER, pedile a un administrador que cambie el centro de tu cuenta.', '<a class="boton" href="/admin/">Ir al panel de administración</a>');
+      return;
+    }
+    if (!d.success) { aviso('No se pudo cargar el panel', d.error || 'Probá de nuevo en un rato.', ''); return; }
+    $('#cuerpo').innerHTML = indicadores(d) + accesos(d.panel || []);
+  }).catch(() => aviso('No se pudo cargar el panel', 'No hay conexión con el servidor. Probá de nuevo en un rato.', ''));
+})();
+</script>
+</body>
+</html>

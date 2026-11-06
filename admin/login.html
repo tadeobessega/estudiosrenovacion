@@ -109,7 +109,10 @@
         });
 
         // Redirect if already logged in
-        if (localStorage.getItem('adminUser')) window.location.href = 'index.html';
+        // ?volver=/ruta/ lleva de vuelta a una página interna del sitio (solo rutas propias)
+        const volver = (() => { const v = new URLSearchParams(location.search).get('volver') || '';
+            return /^\/(?!\/)[\w\-\/.]*$/.test(v) ? v : 'index.html'; })();
+        if (localStorage.getItem('adminUser')) window.location.href = volver;
 
         // Login
         document.getElementById('loginForm').addEventListener('submit', async e => {
@@ -128,7 +131,7 @@
                 const res = await apiCall('login', { email, password });
                 if (res.success) {
                     localStorage.setItem('adminUser', JSON.stringify(res.user));
-                    window.location.href = 'index.html';
+                    window.location.href = volver;
                 } else {
                     errorDiv.textContent = res.error || 'Error al iniciar sesión';
                     errorDiv.style.display = 'block';
