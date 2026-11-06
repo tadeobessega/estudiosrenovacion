@@ -452,10 +452,13 @@ main > section:not(.hero-slider) + section:not(.hero-slider) { border-top: 1px s
   margin: 0 auto;
   padding: 0 4.5rem;
 }
-.slide-text {
-  max-width: 680px;
-  padding-left: 1.25rem;
-  border-left: 3px solid var(--slide-color, var(--accent));
+.slide-text { max-width: 680px; }
+/* Botón del slide con el color de cada centro (un poco más oscuro para que el texto blanco se lea) */
+.slide .btn-primary {
+  background: color-mix(in srgb, var(--slide-color, var(--accent)) 88%, #000);
+}
+.slide .btn-primary:hover {
+  background: color-mix(in srgb, var(--slide-color, var(--accent)) 72%, #000);
 }
 .slide-text h1 {
   font-size: clamp(1.9rem, 4.6vw, 3rem);
