@@ -7,7 +7,7 @@
    El resultado se guarda 3 horas en KV para no golpear las fuentes.
    ============================================================ */
 
-const CACHE_KEY = 'cache:indicadores:v3';
+const CACHE_KEY = 'cache:indicadores:v4';
 const CACHE_TTL = 3 * 60 * 60;
 const INDEC = 'https://api.indec.gob.ar/v1';
 const SERIES = 'https://apis.datos.gob.ar/series/api/series/';
@@ -110,7 +110,7 @@ async function bcra(id) {
 async function respaldoIPC() {
   const [m, a] = await Promise.all([bcra(27), bcra(28).catch(() => null)]);
   const { anio, mes } = fromISO(m.fecha);
-  return { valor: m.valor, sub: a ? { label: 'interanual', valor: a.valor } : null, periodo: mesLabel(anio, mes) };
+  return { valor: m.valor, sub: a ? { label: 'interanual', valor: a.valor } : null, periodo: mesLabel(anio, mes), iso: m.fecha.slice(0, 7) };
 }
 async function respaldoSerieVar(idMensual, idInteranual, notas = {}) {
   const ids = [idMensual && `${idMensual}:percent_change`, idInteranual && `${idInteranual}:percent_change_a_year_ago`].filter(Boolean).join(',');
@@ -163,7 +163,7 @@ async function construir(env) {
       if (d.diario || d.mensual) {
         const x = await bcra(d.diario || d.mensual);
         const { anio, mes } = fromISO(x.fecha);
-        return { ...base, valor: x.valor, periodo: d.diario ? `al ${diaLabel(x.fecha)}` : mesLabel(anio, mes), fuente: 'BCRA' };
+        return { ...base, valor: x.valor, periodo: d.diario ? `al ${diaLabel(x.fecha)}` : mesLabel(anio, mes), iso: x.fecha.slice(0, 10), fuente: 'BCRA' };
       }
       if (q) {
         try { return { ...base, ...(await d.indec(q)), fuente: 'INDEC' }; }

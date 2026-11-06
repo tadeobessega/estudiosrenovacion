@@ -632,7 +632,22 @@
       const num_ = (a) => (a || []).map((v) => (v == null ? null : Number(v)));
       Object.keys(raw.mensual).forEach((k) => { if (k !== 'fecha') S.m[k] = num_(raw.mensual[k]); });
       Object.keys(raw.diario).forEach((k) => { if (k !== 'fecha') S.d[k] = num_(raw.diario[k]); });
-      // Recortar fechas futuras vacías al final de la grilla mensual
+      // El bot completa hacia adelante (ffill) las series que no se actualizaron:
+      // se quitan esas colas repetidas para no mostrar datos que no existen.
+      ['emae', 'desempleo', 'ipc_mensual', 'ipc_interanual', 'ipc_index', 'rem_interanual'].forEach((k) => {
+        const a = S.m[k]; if (!a) return;
+        for (let i = a.length - 1; i > 0 && a[i] != null && a[i] === a[i - 1]; i--) a[i] = null;
+      });
+      // IPC: el último dato oficial es el que informa el BCRA hoy; lo posterior en el JSON no existe.
+      const ipcHoy = rInd && rInd.items && rInd.items.find((i) => i.id === 'ipc' && !i.error && i.iso);
+      if (ipcHoy) {
+        const j = S.fm.indexOf(ipcHoy.iso);
+        if (j >= 0) {
+          S.m.ipc_mensual[j] = ipcHoy.valor;
+          if (ipcHoy.sub) S.m.ipc_interanual[j] = ipcHoy.sub.valor;
+          for (let i = j + 1; i < S.fm.length; i++) { S.m.ipc_mensual[i] = null; S.m.ipc_interanual[i] = null; }
+        }
+      }
       const series = (rIndec && rIndec.series) || {};
       Object.keys(series).forEach((k) => { S.indec[k] = alinear(series[k]); });
       S.ind = { ...series, items: rInd && rInd.items };
