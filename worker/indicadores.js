@@ -7,7 +7,7 @@
    El resultado se guarda 3 horas en KV para no golpear las fuentes.
    ============================================================ */
 
-const CACHE_KEY = 'cache:indicadores:v2';
+const CACHE_KEY = 'cache:indicadores:v3';
 const CACHE_TTL = 3 * 60 * 60;
 const INDEC = 'https://api.indec.gob.ar/v1';
 const SERIES = 'https://apis.datos.gob.ar/series/api/series/';
@@ -95,7 +95,8 @@ async function indecPobreza(q) {
 
 /* ---------------- Respaldo sin clave ---------------- */
 async function serie(ids) {
-  const d = await getJSON(`${SERIES}?ids=${ids}&last=3&format=json`);
+  const desde = new Date(Date.now() - 800 * 864e5).toISOString().slice(0, 10);
+  const d = await getJSON(`${SERIES}?ids=${ids}&start_date=${desde}&limit=1000&format=json`);
   return d.data; // [[fecha, v1, v2...], ...] ordenado ascendente
 }
 const ultimoNoNulo = (data, col) => { for (let i = data.length - 1; i >= 0; i--) if (data[i][col] != null) return data[i]; return null; };
@@ -120,14 +121,16 @@ async function respaldoSerieVar(idMensual, idInteranual, notas = {}) {
   if (!base) throw new Error('serie vacía');
   const { anio, mes } = fromISO(base[0]);
   const principal = rm ? rm[1] * 100 : ra[1] * 100;
-  const sub = rm && ra && ra[0] === rm[0] ? { label: 'interanual', valor: ra[idMensual ? 2 : 1] * 100 } : null;
+  const mismo = rm && idInteranual ? data.find((f) => f[0] === rm[0]) : null;
+  const sub = mismo && mismo[2] != null ? { label: 'interanual', valor: mismo[2] * 100 } : null;
   return { valor: principal, sub, periodo: mesLabel(anio, mes), ...notas };
 }
 async function respaldoDesocupacion() {
   const data = await serie('42.3_EPH_PUNTUATAL_0_M_30');
   const r = ultimoNoNulo(data, 1);
   const { anio, mes } = fromISO(r[0]);
-  return { valor: +r[1], periodo: `${Math.ceil(mes / 3)}° trim. ${anio}` };
+  const v = +r[1];
+  return { valor: v < 1 ? v * 100 : v, periodo: `${Math.ceil(mes / 3)}° trim. ${anio}` };
 }
 
 /* ---------------- Armado ---------------- */
