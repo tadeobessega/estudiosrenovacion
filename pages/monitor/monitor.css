@@ -227,3 +227,17 @@ h1.titulo { font-family: var(--mono); font-weight: 700; font-size: 44px; line-he
   .grafico .lienzo { min-height: 260px; }
   .fechas { width: 100%; }
 }
+
+/* ---------- Animaciones del generador (lógica del tablero de Presupuesto CABA) ---------- */
+.revela { opacity: 0; transform: translateY(16px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.revela.in { opacity: 1; transform: none; }
+.reproductor { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 16px 0 8px; }
+.reproductor button { font: 600 13px var(--sans); background: var(--acento); color: #fff; border: 0; padding: 7px 14px; cursor: pointer; }
+.reproductor button:hover { background: var(--azul-700); }
+.reproductor .fecha { font-family: var(--mono); font-size: 22px; font-weight: 700; min-width: 9ch; color: var(--texto); }
+.reproductor input[type=range] { flex: 1; min-width: 180px; accent-color: var(--acento); }
+.gen-resumen { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--linea); border: 1px solid var(--linea); margin-top: 16px; }
+.gen-resumen div { background: var(--fondo); padding: 10px 12px; }
+.gen-resumen span { display: block; font-size: 12px; color: var(--sec); }
+.gen-resumen b { font-family: var(--mono); font-size: 20px; font-weight: 600; color: var(--texto); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .revela { opacity: 1; transform: none; transition: none; } }

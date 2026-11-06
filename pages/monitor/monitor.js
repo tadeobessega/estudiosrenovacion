@@ -34,11 +34,11 @@
     if (a >= 1e4) return num(v / 1e3, 0) + ' mil';
     return num(v, a < 10 ? 1 : 0);
   };
-  const mesLargo = (ym) => { const [y, m] = ym.split('-'); return `${MESES[+m - 1]} ${y}`; };
-  const mesCorto = (ym) => { const [y, m] = ym.split('-'); return `${MES3[+m - 1]} ${y.slice(2)}`; };
-  const trimestre = (ym) => { const [y, m] = ym.split('-'); return `${Math.ceil(+m / 3)}T ${y}`; };
+  const mesLargo = (ym) => { if (typeof ym !== 'string') return ''; const [y, m] = ym.split('-'); return `${MESES[+m - 1]} ${y}`; };
+  const mesCorto = (ym) => { if (typeof ym !== 'string') return ''; const [y, m] = ym.split('-'); return `${MES3[+m - 1]} ${y.slice(2)}`; };
+  const trimestre = (ym) => { if (typeof ym !== 'string') return ''; const [y, m] = ym.split('-'); return `${Math.ceil(+m / 3)}T ${y}`; };
   // La serie semestral de la EPH viene fechada al mes siguiente al cierre del semestre (2025-01 = 2.º semestre 2024).
-  const semestre = (ym) => { let [y, m] = ym.split('-').map(Number); m -= 6; if (m < 1) { m += 12; y -= 1; } return `${m <= 6 ? 1 : 2}S ${y}`; };
+  const semestre = (ym) => { if (typeof ym !== 'string') return ''; let [y, m] = ym.split('-').map(Number); m -= 6; if (m < 1) { m += 12; y -= 1; } return `${m <= 6 ? 1 : 2}S ${y}`; };
   const flecha = (v) => (v > 0 ? '▲' : v < 0 ? '▼' : '');
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -106,6 +106,68 @@
   Chart.defaults.color = C.sec;
   function aplicarPaleta() { C = PALETAS[temaActual()]; SERIE = [C.azul, C.ambar, C.cian, C.violeta, C.gris]; Chart.defaults.color = C.sec; }
   Chart.defaults.animation = false;
+
+  /* ---------------- Animaciones ----------------
+     Misma lógica que el tablero de Presupuesto CABA (tadeobessega/presupuesto-caba):
+     - la tarjeta aparece subiendo cuando entra en pantalla (IntersectionObserver, umbral 18%);
+     - el gráfico se dibuja recién ahí, 900 ms con easeOutQuart, y después se apagan las animaciones;
+     - los cambios de datos se animan 700 ms;
+     - las cifras cuentan desde cero (1,1 s, curva cúbica);
+     - un reproductor recorre la serie en el tiempo (botón, fecha grande y deslizador);
+     - todo respeta "reducir movimiento" del sistema. */
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const IO = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    IO.unobserve(e.target); e.target.classList.add('in');
+    if (e.target._alEntrar) e.target._alEntrar();
+  }), { threshold: 0.18 }) : null;
+  function alVer(el, fn) {
+    el.classList.add('revela'); el._alEntrar = fn;
+    if (!IO || RM) { el.classList.add('in'); if (fn) fn(); return; }
+    IO.observe(el);
+  }
+  function contar(el, hasta, fmt, dur = 1100) {
+    if (!el) return;
+    if (RM || !isFinite(hasta)) { el.textContent = fmt(hasta); return; }
+    const t0 = performance.now();
+    const paso = (t) => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(hasta * e); if (k < 1) requestAnimationFrame(paso); };
+    requestAnimationFrame(paso);
+  }
+  function animarEntrada(ch, dur = 900) {
+    if (RM || !ch) return;
+    ch.options.animation = { duration: dur, easing: 'easeOutQuart' };
+    ch.reset(); ch.update();
+    setTimeout(() => { if (ch.canvas) ch.options.animation = false; }, dur + 100);
+  }
+  function animarCambio(ch, dur = 700) {
+    if (RM) { ch.update('none'); return; }
+    ch.options.animation = { duration: dur, easing: 'easeOutQuart' };
+    ch.update();
+    setTimeout(() => { if (ch.canvas) ch.options.animation = false; }, dur + 100);
+  }
+
+  /* Reproductor: recorre el gráfico mes a mes. paso(i) dibuja hasta el índice i; fin() deja todo completo. */
+  function reproductor(tarjeta, { desde, hasta, rotulo, paso, fin, alEmpezar }) {
+    const bar = document.createElement('div');
+    bar.className = 'reproductor';
+    bar.innerHTML = `<button type="button">▶ Reproducir</button><span class="fecha"></span><input type="range" min="${desde}" max="${hasta}" step="1" value="${hasta}" aria-label="Fecha">`;
+    tarjeta.querySelector('.lienzo').before(bar);
+    const btn = bar.querySelector('button'), sl = bar.querySelector('input'), lab = bar.querySelector('.fecha');
+    let tm = null, i = hasta, preparado = false;
+    const salto = Math.max(1, Math.ceil((hasta - desde) / 160));
+    lab.textContent = rotulo(hasta);
+    const preparar = () => { if (!preparado) { preparado = true; if (alEmpezar) alEmpezar(); } };
+    const ir = (k) => { i = k; sl.value = k; lab.textContent = rotulo(k); preparar(); if (k >= hasta) { fin(); preparado = false; } else paso(k); };
+    const parar = () => { clearInterval(tm); tm = null; btn.textContent = '▶ Reproducir'; };
+    btn.addEventListener('click', () => {
+      if (tm) { parar(); return; }
+      btn.textContent = '❚❚ Pausa';
+      if (i >= hasta) i = desde - salto;
+      tm = setInterval(() => { const k = Math.min(hasta, i + salto); ir(k); if (k >= hasta) parar(); }, RM ? 0 : 50);
+    });
+    sl.addEventListener('input', () => { parar(); ir(+sl.value); });
+    return { parar };
+  }
 
   function anchoEtiquetas(labels) {
     const c = document.createElement('canvas').getContext('2d');
@@ -635,7 +697,9 @@
       const pend = (n * sxy - sx * sy) / (n * sxx - sx * sx), ord = (sy - pend * sx) / n;
       const r2 = Math.pow((n * sxy - sx * sy) / Math.sqrt((n * sxx - sx * sx) * (n * syy - sy * sy)), 2) || 0;
       const xs = pts.map((p) => p.x), x0 = Math.min(...xs), x1 = Math.max(...xs);
-      out.appendChild(tarjetaGrafico({ id: 'gGen', titulo: `${D[k1][0]} y ${D[k2][0]}`, unidad: `Observaciones mensuales; R² = ${num(r2, 3)}`, fuente: `CEER en base a ${fuentes}`, ancho: true, alto: true }));
+      const tarjeta = tarjetaGrafico({ id: 'gGen', titulo: `${D[k1][0]} y ${D[k2][0]}`, unidad: 'Observaciones mensuales y recta de regresión', fuente: `CEER en base a ${fuentes}`, ancho: true, alto: true });
+      tarjeta.querySelector('.lienzo').insertAdjacentHTML('beforebegin', `<div class="gen-resumen"><div><span>R²</span><b data-r2>0</b></div><div><span>Pendiente</span><b data-pend>0</b></div><div><span>Observaciones</span><b data-n>0</b></div></div>`);
+      out.appendChild(tarjeta);
       const ch = new Chart(document.getElementById('gGen'), {
         type: 'scatter',
         data: { datasets: [
@@ -646,11 +710,49 @@
           scales: { x: { title: { display: true, text: D[k2][0] }, grid: { color: C.grilla }, ticks: { font: { family: MONO, size: 11 }, callback: (v) => compacto(v) } }, y: { title: { display: true, text: D[k1][0] }, grid: { color: C.grilla }, ticks: { font: { family: MONO, size: 11 }, callback: (v) => compacto(v) } } } }
       });
       ch.$cfg = { serieTiempo: false }; graficos.push(ch);
+      // reproductor: los puntos aparecen en orden cronológico y la recta se recalcula
+      const ordenados = [...pts].sort((p, q) => (p.f < q.f ? -1 : 1));
+      const rx = ch.scales.x, ry = ch.scales.y;
+      const fijar = () => { Object.assign(ch.options.scales.x, { min: rx.min, max: rx.max }); Object.assign(ch.options.scales.y, { min: ry.min, max: ry.max }); };
+      const recta = (ps) => {
+        const m = ps.length; if (m < 3) return [];
+        let a1 = 0, b1 = 0, c1 = 0, d1 = 0; ps.forEach((p) => { a1 += p.x; b1 += p.y; c1 += p.x * p.y; d1 += p.x * p.x; });
+        const pe = (m * c1 - a1 * b1) / (m * d1 - a1 * a1), or = (b1 - pe * a1) / m;
+        const xa = Math.min(...ps.map((p) => p.x)), xb = Math.max(...ps.map((p) => p.x));
+        return [{ x: xa, y: pe * xa + or }, { x: xb, y: pe * xb + or }];
+      };
+      reproductor(tarjeta, {
+        desde: 0, hasta: ordenados.length - 1,
+        rotulo: (k) => mesLargo(ordenados[k].f),
+        alEmpezar: fijar,
+        paso: (k) => { const vis = ordenados.slice(0, k + 1); ch.data.datasets[0].data = vis; ch.data.datasets[1].data = recta(vis); ch.update('none'); },
+        fin: () => { ch.data.datasets[0].data = pts; ch.data.datasets[1].data = [{ x: x0, y: pend * x0 + ord }, { x: x1, y: pend * x1 + ord }]; animarCambio(ch, 400); }
+      });
+      alVer(tarjeta, () => {
+        animarEntrada(ch);
+        contar(tarjeta.querySelector('[data-r2]'), r2, (v) => num(v, 3));
+        contar(tarjeta.querySelector('[data-pend]'), pend, (v) => num(v, 3));
+        contar(tarjeta.querySelector('[data-n]'), n, (v) => num(Math.round(v), 0));
+      });
     } else {
       const series = [{ label: D[k1][0], data: a, tipo: document.getElementById('genT1').value === 'barras' ? 'bar' : undefined }];
       if (dos) series.push({ label: D[k2][0], data: b, eje: 'y1', tipo: document.getElementById('genT2').value === 'barras' ? 'bar' : undefined });
-      serieTiempo({ id: 'gGen', titulo: dos ? `${D[k1][0]} y ${D[k2][0]}` : D[k1][0], unidad: dos ? 'Serie 1 en el eje izquierdo, serie 2 en el derecho' : '', fuente: `CEER en base a ${fuentes}`, ancho: true, alto: true, eje2: dos, etiquetas: false, series }, out);
+      const ch = serieTiempo({ id: 'gGen', titulo: dos ? `${D[k1][0]} y ${D[k2][0]}` : D[k1][0], unidad: dos ? 'Serie 1 en el eje izquierdo, serie 2 en el derecho' : '', fuente: `CEER en base a ${fuentes}`, ancho: true, alto: true, eje2: dos, etiquetas: false, series }, out);
       aplicarFechas();
+      const tarjeta = ch.canvas.closest('.grafico');
+      // reproductor: la serie avanza mes a mes con los ejes fijos
+      const orig = ch.data.datasets.map((ds) => ds.data.slice());
+      const i0 = ch.options.scales.x.min ?? 0, i1 = ch.options.scales.x.max ?? (ch.data.labels.length - 1);
+      const fijar = () => ['y', 'y1'].forEach((e) => { if (ch.scales[e]) Object.assign(ch.options.scales[e], { min: ch.scales[e].min, max: ch.scales[e].max }); });
+      const soltar = () => ['y', 'y1'].forEach((e) => { if (ch.options.scales[e]) { delete ch.options.scales[e].min; delete ch.options.scales[e].max; } });
+      reproductor(tarjeta, {
+        desde: i0, hasta: i1,
+        rotulo: (k) => mesLargo(ch.data.labels[k]),
+        alEmpezar: fijar,
+        paso: (k) => { ch.data.datasets.forEach((ds, j) => { ds.data = orig[j].map((v, t) => (t <= k ? v : null)); }); ch.update('none'); },
+        fin: () => { ch.data.datasets.forEach((ds, j) => { ds.data = orig[j].slice(); }); soltar(); ch.update('none'); }
+      });
+      alVer(tarjeta, () => animarEntrada(ch));
     }
     out.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
