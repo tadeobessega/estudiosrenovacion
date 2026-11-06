@@ -11,7 +11,6 @@
 import SEED_SQL from './sql/seed.sql';
 import { getIndicadores, indecMuestra } from './indicadores.js';
 import { getSeriesINDEC } from './series-indec.js';
-import { PANEL_CEER, estadoIPCEER } from './panel-ceer.js';
 
 const SESSION_DAYS = 14;
 const MAX_PDF_BYTES = 24 * 1024 * 1024; // KV admite hasta 25 MiB por valor
@@ -171,20 +170,6 @@ async function handleApi(request, env, url) {
     const canTouchCentro = (centro) => isAdmin || centro === me.centro;
 
     switch (action) {
-      case 'getPanelCEER': {
-        // Panel de miembros del CEER: solo cuentas aprobadas del CEER o administradores
-        if (!isAdmin && me.centro !== 'CEER') return fail('El panel es solo para miembros del CEER', 403);
-        const [ipceer, informes] = await Promise.all([
-          estadoIPCEER(),
-          db.prepare("SELECT titulo, fecha FROM reports WHERE centro = 'CEER' ORDER BY fecha DESC").all()
-        ]);
-        return ok({
-          panel: PANEL_CEER,
-          user: toUser(me),
-          ipceer,
-          informes: { total: informes.results.length, ultimo: informes.results[0] || null }
-        });
-      }
       case 'logout': {
         const token = (request.headers.get('authorization') || '').slice(7).trim();
         await db.prepare('DELETE FROM sessions WHERE token = ?').bind(token).run();
