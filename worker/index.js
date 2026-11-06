@@ -10,6 +10,7 @@
    ============================================================ */
 import SEED_SQL from './sql/seed.sql';
 import { getIndicadores, indecMuestra } from './indicadores.js';
+import { getSeriesINDEC } from './series-indec.js';
 
 const SESSION_DAYS = 14;
 const MAX_PDF_BYTES = 24 * 1024 * 1024; // KV admite hasta 25 MiB por valor
@@ -124,6 +125,8 @@ async function handleApi(request, env, url) {
         const { results } = await q.all();
         return ok({ miembros: results });
       }
+      case 'getSeriesINDEC':
+        return json({ success: true, ...(await getSeriesINDEC(env)) }, 200);
       case 'getIndicadores':
         return json({ success: true, ...(await getIndicadores(env)) }, 200);
       case 'getConfig': {
