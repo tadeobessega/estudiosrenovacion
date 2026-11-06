@@ -18,7 +18,7 @@
           if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
           document.documentElement.setAttribute('data-theme', t); })();
     </script>
-    <link rel="stylesheet" href="monitor.css?v=20261105c">
+    <link rel="stylesheet" href="monitor.css?v=20261105d">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
@@ -36,7 +36,7 @@
                 <span class="sep"></span>
                 <span class="producto">Monitor económico</span>
             </a>
-            <nav class="pestanas" role="tablist" aria-label="Secciones del monitor" id="pestanas"></nav>
+            <button class="tabflecha izq" type="button" aria-label="Ver secciones anteriores" hidden>‹</button><nav class="pestanas" role="tablist" aria-label="Secciones del monitor" id="pestanas"></nav><button class="tabflecha der" type="button" aria-label="Ver más secciones" hidden>›</button>
             <div class="acciones">
                 <button type="button" class="btn-generador" id="btnGenerador">Generador de gráficos</button>
                 <button type="button" class="btn-tema" id="btnTema" aria-label="Cambiar modo claro u oscuro" title="Modo claro / oscuro">
@@ -90,6 +90,6 @@
         </div>
     </footer>
 
-    <script src="monitor.js?v=20261105d"></script>
+    <script src="monitor.js?v=20261105e"></script>
 </body>
 </html>

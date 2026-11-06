@@ -318,6 +318,9 @@
     document.querySelectorAll('.pestana').forEach((b) => b.classList.toggle('activa', b.dataset.panel === id));
     document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('activo', p.id === id));
     history.replaceState(null, '', '#' + id);
+    const b = document.querySelector(`.pestana[data-panel="${id}"]`);
+    if (b) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (window._actFlechas) window._actFlechas();
     graficos.forEach((c) => c.resize());
     window.scrollTo({ top: Math.min(window.scrollY, document.getElementById('paneles').offsetTop - 120), behavior: 'smooth' });
   }
@@ -689,6 +692,18 @@
   }
 
   document.getElementById('btnGenerador').addEventListener('click', () => mostrar('generador'));
+  // Flechas para deslizar las pestañas cuando no entran (como en el IPCEER)
+  (function () {
+    const nav = document.getElementById('pestanas');
+    const izq = document.querySelector('.tabflecha.izq'), der = document.querySelector('.tabflecha.der');
+    const act = () => { izq.hidden = nav.scrollLeft <= 2; der.hidden = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 2; };
+    izq.addEventListener('click', () => nav.scrollBy({ left: -240 }));
+    der.addEventListener('click', () => nav.scrollBy({ left: 240 }));
+    nav.addEventListener('scroll', act, { passive: true });
+    window.addEventListener('resize', act);
+    new MutationObserver(act).observe(nav, { childList: true });
+    window._actFlechas = act;
+  })();
   document.getElementById('btnTema').addEventListener('click', () => {
     const t = temaActual() === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', t);
