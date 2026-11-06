@@ -29,14 +29,14 @@
   }
 
   function renderCard(data) {
-    let color = 'var(--gray-900)';
-    if (data.valor.includes('+')) color = '#34d399';
-    if (data.valor.includes('-')) color = '#f87171';
+    let cls = '';
+    if (data.valor.includes('+')) cls = ' is-up';
+    if (data.valor.includes('-')) cls = ' is-down';
     return `
       <div class="eje-card fade-in-up">
-        <h3 class="eje-title" style="color:var(--cer-cyan);font-size:.95rem;margin-bottom:.5rem;">${data.titulo}</h3>
-        <div style="font-size:2.1rem;font-weight:800;color:${color};margin-bottom:.4rem;">${data.valor}</div>
-        <span style="font-size:.8rem;color:var(--gray-500);"><i class="fas fa-clock"></i> Actualizado: ${data.fecha}</span>
+        <h3 class="indicador-titulo">${data.titulo}</h3>
+        <div class="indicador-valor${cls}">${data.valor}</div>
+        <span class="indicador-fecha"><i class="far fa-clock"></i> Actualizado: ${data.fecha}</span>
       </div>`;
   }
 

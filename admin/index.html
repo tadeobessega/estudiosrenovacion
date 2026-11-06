@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../assets/css/admin.css?v=20260910c">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=20261105">
 </head>
 <body class="admin-page">
 
@@ -24,7 +24,6 @@
           <i class="fas fa-users"></i> Miembros
         </button>
         <button class="admin-nav-link" data-view="users" id="usersNavLink" style="display:none;"><i class="fas fa-shield-alt"></i> Usuarios</button>
-        <button class="admin-nav-link" data-view="notas" id="notasNavLink" style="display:none;"><i class="fas fa-pen-nib"></i> Cíclica</button>
         <button class="admin-nav-link" data-view="config" id="configNavLink" style="display:none;"><i class="fas fa-cog"></i> Config</button>
       </nav>
     </div>
@@ -36,6 +35,9 @@
           <div class="admin-user-role" id="userRole">Cargando...</div>
         </div>
       </div>
+      <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openPasswordModal()" title="Cambiar contraseña">
+        <i class="fas fa-key"></i>
+      </button>
       <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="logout()">
         <i class="fas fa-sign-out-alt"></i> Salir
       </button>
@@ -232,26 +234,6 @@
         </div>
       </div>
 
-      <!-- ===== VIEW: NOTAS CÍCLICA ===== -->
-      <div id="view-notas" class="view" style="display:none;">
-        <div class="page-header">
-          <h1 class="page-title">Cíclica — Redacción</h1>
-          <p class="page-subtitle">La gestión de notas de opinión se hace desde el editor de Cíclica</p>
-        </div>
-        <div class="admin-card">
-          <div style="padding:2rem;text-align:center;">
-            <i class="fas fa-pen-nib" style="font-size:2rem;color:var(--ap);opacity:.7;"></i>
-            <p style="margin:1rem 0 1.5rem;max-width:520px;margin-left:auto;margin-right:auto;color:var(--muted);">
-              Cíclica ahora tiene su propio panel: cargás y formateás las notas (título, subtítulo,
-              cuerpo, imágenes), importás el Word que manda cada autor, y elegís qué se publica y qué se destaca.
-            </p>
-            <a href="ciclica.html" class="btn-admin btn-admin-primary" style="display:inline-flex;">
-              <i class="fas fa-arrow-up-right-from-square"></i> Abrir el editor de Cíclica
-            </a>
-          </div>
-        </div>
-      </div>
-
       <!-- ===== VIEW: CONFIG ===== -->
       <div id="view-config" class="view" style="display:none;">
         <div class="page-header">
@@ -351,6 +333,23 @@
     </div>
   </div>
 
+  <!-- MODAL: Cambiar contraseña -->
+  <div class="modal-overlay" id="passwordModal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Cambiar contraseña</h3><button class="modal-close" onclick="closeModal('passwordModal')">&times;</button></div>
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label" for="pwCurrent">Contraseña actual</label><input type="password" id="pwCurrent" class="form-input" autocomplete="current-password"></div>
+        <div class="form-group"><label class="form-label" for="pwNew">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pwNew" class="form-input" autocomplete="new-password"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-admin btn-admin-secondary" onclick="closeModal('passwordModal')">Cancelar</button>
+        <button class="btn-admin btn-admin-primary" id="savePwBtn" onclick="savePassword()">
+          <span class="btn-text">Guardar</span><span class="spinner" style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Editar Usuario -->
   <div class="modal-overlay" id="editUserModal">
     <div class="modal">
@@ -388,8 +387,8 @@
     </div>
   </div>
 
-  <script src="../assets/js/data-source.js?v=20260910c"></script>
-  <script src="../assets/js/admin-config.js?v=20260910c"></script>
+  <script src="../assets/js/data-source.js?v=20261105"></script>
+  <script src="../assets/js/admin-config.js?v=20261105"></script>
   <script>
   function isPending(u) {
     const v = u.approved;
@@ -400,7 +399,6 @@
   let currentUser    = null;
   let allReports     = [];
   let allUsers       = [];
-  let allNotes       = [];
   let reportToDelete = null;
   let userToEdit     = null;
   let userToDelete   = null;
@@ -428,7 +426,6 @@
       document.getElementById('configNavLink').style.display = 'inline-flex';
       document.getElementById('pendingUsersCard').style.display = 'block';
     }
-    // Cíclica oculto: se gestiona aparte en admin/ciclica.html (no se muestra el link de nav)
 
     // Nav tabs
     document.querySelectorAll('.admin-nav-link[data-view]').forEach(btn => {
@@ -852,67 +849,6 @@
     setLoading(btn, false);
   }
 
-  // ===== NOTAS CÍCLICA =====
-  async function loadNotes() {
-    try {
-      const res = await apiCall('getNotes', { soloAprobadas: 'false' });
-      if (res.success) { allNotes = res.notes; renderNotes(); }
-    } catch(e) {}
-  }
-
-  function renderNotes() {
-    const pending  = allNotes.filter(n => !n.aprobado);
-    const approved = allNotes.filter(n => n.aprobado);
-    document.getElementById('notasPendingCount').textContent = pending.length;
-    renderNoteList('notasPendingContainer',  pending,  true);
-    renderNoteList('notasApprovedContainer', approved, false);
-    renderNoteList('notasAllContainer',      allNotes, null);
-  }
-
-  function renderNoteList(containerId, notes, showApproval) {
-    const container = document.getElementById(containerId);
-    if (!notes.length) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-pen-nib"></i></div><h3 class="empty-state-title">No hay notas</h3></div>`;
-      return;
-    }
-    container.innerHTML = `<div style="overflow-x:auto;"><table class="admin-table">
-      <thead><tr><th>Título</th><th>Descripción</th><th>Autor</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
-      <tbody>${notes.map(n => `<tr>
-        <td><strong>${esc(n.titulo)}</strong></td>
-        <td style="max-width:220px;font-size:.8rem;color:var(--admin-text-muted);">${esc(n.descripcion ? (n.descripcion.length>100?n.descripcion.slice(0,100)+'…':n.descripcion) : '—')}</td>
-        <td>${esc(n.email_autor || '—')}</td>
-        <td>${formatDateShort(n.fecha)}</td>
-        <td>${n.aprobado ? '<span class="badge badge-success">Aprobada</span>' : '<span class="badge badge-warning">Pendiente</span>'}</td>
-        <td><div class="table-actions">
-          ${n.pdf_url ? `<a href="${n.pdf_url}" target="_blank" rel="noopener" class="btn-admin btn-admin-secondary btn-admin-sm" title="Abrir documento"><i class="fas fa-file-lines"></i></a>` : ''}
-          ${(showApproval === true || (showApproval === null && !n.aprobado)) ? `
-            <button class="btn-admin btn-admin-success btn-admin-sm" onclick="approveNota('${n.id}')"><i class="fas fa-check"></i> Aprobar</button>
-            <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="rejectNota('${n.id}')"><i class="fas fa-times"></i> Rechazar</button>` : ''}
-          ${currentUser.role === 'admin' ? `<button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteNota('${n.id}')"><i class="fas fa-trash"></i></button>` : ''}
-        </div></td>
-      </tr>`).join('')}</tbody></table></div>`;
-  }
-
-  async function approveNota(id) {
-    const res = await apiCall('approveNote', { id });
-    if (res.success) { showNotification('Nota aprobada y publicada', 'success'); await loadNotes(); }
-    else showNotification(res.error || 'Error', 'error');
-  }
-
-  async function rejectNota(id) {
-    if (!confirm('¿Rechazar y eliminar esta nota?')) return;
-    const res = await apiCall('rejectNote', { id });
-    if (res.success) { showNotification('Nota rechazada', 'success'); await loadNotes(); }
-    else showNotification(res.error || 'Error', 'error');
-  }
-
-  async function deleteNota(id) {
-    if (!confirm('¿Eliminar esta nota permanentemente?')) return;
-    const res = await apiCall('deleteNote', { id });
-    if (res.success) { showNotification('Nota eliminada', 'success'); await loadNotes(); }
-    else showNotification(res.error || 'Error', 'error');
-  }
-
   // ===== CONFIG =====
   async function loadConfigUI() {
     await loadDynamicConfig();
@@ -1223,6 +1159,23 @@
     sel.innerHTML = '<option value="">Selecciona el tipo</option>' +
       dynamicTags.map(t => `<option value="${t}">${t}</option>`).join('');
     if (cur) sel.value = cur;
+  }
+
+  function openPasswordModal() {
+    document.getElementById('pwCurrent').value = '';
+    document.getElementById('pwNew').value = '';
+    openModal('passwordModal');
+  }
+  async function savePassword() {
+    const btn = document.getElementById('savePwBtn');
+    setLoading(btn, true);
+    const res = await apiCall('changePassword', {
+      currentPassword: document.getElementById('pwCurrent').value,
+      newPassword: document.getElementById('pwNew').value
+    });
+    setLoading(btn, false);
+    if (res.success) { showNotification('Contraseña actualizada', 'success'); closeModal('passwordModal'); }
+    else showNotification(res.error || 'No se pudo cambiar la contraseña', 'error');
   }
 
   function openModal(id)  { document.getElementById(id).classList.add('active'); }

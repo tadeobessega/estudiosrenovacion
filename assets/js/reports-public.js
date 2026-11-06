@@ -1,6 +1,6 @@
 /* ============================================================
-   reports-public.js — pinta los informes en el sitio público
-   Los datos vienen de assets/js/data-source.js (planilla de Google).
+   reports-public.js: pinta los informes en el sitio público
+   Los datos vienen de assets/js/data-source.js (API /api sobre D1).
    ============================================================ */
 
 const CENTRO_COLORS = {
@@ -10,8 +10,7 @@ const CENTRO_COLORS = {
   OPER:    '#e0564b',
   OPAL:    '#16b7c2',
   OPSA:    '#e07a3c',
-  CIREN:   '#14bd92',
-  'Cíclica': '#2fb8e6'
+  CIREN:   '#14bd92'
 };
 
 // Ruta a las subpáginas (funciona desde la raíz y desde /pages/)
@@ -159,12 +158,12 @@ async function loadMiembros(centroId) {
 // Estilos de estado para las grillas
 document.head.insertAdjacentHTML('beforeend', `<style>
   @keyframes cer-spin { to { transform: rotate(360deg); } }
-  .grid-state { grid-column: 1/-1; text-align: center; padding: 3rem 1rem; color: var(--gray-500, #9494c0); }
-  .grid-state--error { color: #f87171; }
+  .grid-state { grid-column: 1/-1; text-align: center; padding: 3rem 1rem; color: var(--muted, #8b90b5); }
+  .grid-state--error { color: var(--negative, #f87171); }
   .grid-spinner {
     width: 34px; height: 34px; margin: 0 auto 1rem;
-    border: 3px solid rgba(255,255,255,.12);
-    border-top-color: var(--cer-cyan, #22d3ee);
+    border: 3px solid var(--line, rgba(255,255,255,.12));
+    border-top-color: var(--accent, #3a45dc);
     border-radius: 50%;
     animation: cer-spin .8s linear infinite;
   }

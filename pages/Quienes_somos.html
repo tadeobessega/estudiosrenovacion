@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>¿Quiénes somos?</title>
+    <script>
+        // Tema: el guardado o, si no hay, el del sistema. Va antes del CSS para no parpadear.
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('cer-theme'); } catch (e) {}
+            if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <link rel="icon" type="image/png" href="../assets/img/favicon.png">
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/observatorio.css">
@@ -31,6 +40,7 @@
                         <li><a href="../index.html#quienes-somos" class="nav-link">¿Quiénes somos?</a></li>
                         <li><a href="../index.html#novedades" class="nav-link">Novedades</a></li>
                         <li><a href="../index.html#contacto" class="nav-link">Contacto</a></li>
+                        <li><a href="https://ciclica.com.ar/" class="nav-link nav-link-ciclica" target="_blank" rel="noopener">Cíclica <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a></li>
                     </ul>
                 </nav>
 
@@ -51,6 +61,7 @@
                     <li><a href="../index.html#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
                     <li><a href="../index.html#novedades" class="nav-mobile-link">Novedades</a></li>
                     <li><a href="../index.html#contacto" class="nav-mobile-link">Contacto</a></li>
+                    <li><a href="https://ciclica.com.ar/" class="nav-mobile-link nav-mobile-link-ciclica" target="_blank" rel="noopener">Cíclica</a></li>
                 </ul>
             </nav>
         </div>

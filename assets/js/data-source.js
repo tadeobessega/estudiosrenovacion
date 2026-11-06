@@ -1,7 +1,7 @@
 /* ============================================================
-   Centros de Estudios Renovación — cliente de datos
-   Sitio 100% estático (GitHub Pages). Los datos vienen del
-   Web App de Google Apps Script del equipo.
+   Centros de Estudios Renovación: cliente de datos
+   Los datos vienen de la API del Worker de Cloudflare (/api),
+   que lee de la base D1.
 
    Incluye una caché en sessionStorage (TTL corto) para que la
    navegación entre páginas no vuelva a pegarle al backend en
@@ -11,8 +11,8 @@
 (function (global) {
   'use strict';
 
-  // Web App de Apps Script (lectura + escritura del panel).
-  var API = 'https://script.google.com/macros/s/AKfycbz0a0VXQPcGS41kWw0-77v51ddlxdTbN0NDhkToZeyMjJlwsleF8yoKkudhcee7sgXv/exec';
+  // API del Worker (mismo dominio que el sitio).
+  var API = '/api';
   global.CER_API = API;
 
   // ---- Caché ligera -----------------------------------------
@@ -55,7 +55,7 @@
         return d;
       })
       .catch(function (err) {
-        // Apps Script devuelve páginas de error transitorias: reintentamos.
+        // Errores de red transitorios: reintentamos un par de veces.
         if ((tries || 0) < 2) {
           return new Promise(function (res) { setTimeout(res, 900); })
             .then(function () { return fetchJSON(url, (tries || 0) + 1); });
@@ -93,13 +93,7 @@
   function getMiembros(c, opts)  { return apiGet('getMiembros', { centro: c || 'all' }, opts).then(function (d) { return d.miembros || []; }); }
   function getConfig(key, opts)  { return apiGet('getConfig', { key: key }, opts).then(function (d) { return d.value || ''; }); }
   function getUsers(opts)        { return apiGet('getUsers', {}, opts).then(function (d) { return d.users || []; }); }
-  function getNotes(only, opts)  { return apiGet('getNotes', { soloAprobadas: only ? 'true' : 'false' }, opts).then(function (d) { return d.notes || []; }); }
 
-  function getNoteById(id, opts) {
-    return getNotes(true, opts).then(function (notes) {
-      return notes.filter(function (n) { return String(n.id) === String(id); })[0] || null;
-    });
-  }
 
   global.CERData = {
     api: API,
@@ -109,8 +103,6 @@
     getFeatured: getFeatured,
     getMiembros: getMiembros,
     getConfig: getConfig,
-    getUsers: getUsers,
-    getNotes: getNotes,
-    getNoteById: getNoteById
+    getUsers: getUsers
   };
 })(window);

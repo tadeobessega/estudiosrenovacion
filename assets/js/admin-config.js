@@ -1,12 +1,10 @@
 /* ============================================================
-   admin-config.js — configuración y llamadas del panel
-   Sitio estático + Web App de Apps Script (mismo que data-source.js).
-   Requiere que data-source.js se cargue antes (define window.CER_API).
+   admin-config.js: configuración y llamadas del panel
+   Habla con la API del Worker (/api, base D1). Las escrituras
+   viajan con el token de sesión que devuelve el login.
    ============================================================ */
 
-const API_URL = (typeof window !== 'undefined' && window.CER_API)
-  ? window.CER_API
-  : 'https://script.google.com/macros/s/AKfycbz0a0VXQPcGS41kWw0-77v51ddlxdTbN0NDhkToZeyMjJlwsleF8yoKkudhcee7sgXv/exec';
+const API_URL = (typeof window !== 'undefined' && window.CER_API) ? window.CER_API : '/api';
 
 const CENTROS = [
   { id: 'CEER',    name: 'Centro de Estudios Económicos Renovación',            color: '#3a3aff' },
@@ -34,44 +32,54 @@ function formatDateShort(s) {
 
 function checkAuth() {
   const user = JSON.parse(localStorage.getItem('adminUser') || 'null');
-  if (!user) { window.location.href = 'login.html'; return null; }
+  if (!user || !user.token) { localStorage.removeItem('adminUser'); window.location.href = 'login.html'; return null; }
   return user;
 }
 function logout() {
+  apiCall('logout').catch(() => {});
   localStorage.removeItem('adminUser');
   window.location.href = 'login.html';
 }
 
+function authHeaders() {
+  const u = JSON.parse(localStorage.getItem('adminUser') || 'null');
+  return u && u.token ? { Authorization: 'Bearer ' + u.token } : {};
+}
+
+async function handleAuthError(res, data) {
+  // Sesión vencida: volvemos al login (salvo que ya estemos ahí).
+  if (res.status === 401 && !/login\.html$/.test(location.pathname)) {
+    localStorage.removeItem('adminUser');
+    location.href = 'login.html';
+  }
+  return data;
+}
+
 async function apiCall(action, params = {}) {
-  const qs = new URLSearchParams({ action, ...params });
   let res;
   try {
-    res = await fetch(`${API_URL}?${qs.toString()}`);
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ action, ...params })
+    });
   } catch (e) {
     return { success: false, error: 'No se pudo conectar con el servidor.' };
   }
-  try {
-    return await res.json();
-  } catch (e) {
-    return { success: false, error: 'Respuesta no válida del servidor.' };
-  }
+  let data;
+  try { data = await res.json(); }
+  catch (e) { return { success: false, error: 'Respuesta no válida del servidor.' }; }
+  return handleAuthError(res, data);
 }
 
 async function uploadPDF(file) {
-  const b64 = await new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result).split(',')[1]);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
+  const fd = new FormData();
+  fd.append('action', 'uploadPDF');
+  fd.append('file', file, file.name);
   try {
-    const res = await fetch(`${API_URL}?action=uploadPDF`, {
-      method: 'POST',
-      body: JSON.stringify({ fileName: file.name, fileData: b64 })
-    });
-    const text = await res.text();
-    try { return JSON.parse(text); }
-    catch { return { success: false, error: 'Respuesta inválida: ' + text.substring(0, 200) }; }
+    const res = await fetch(API_URL, { method: 'POST', headers: authHeaders(), body: fd });
+    const data = await res.json();
+    return handleAuthError(res, data);
   } catch (e) {
     return { success: false, error: 'No se pudo subir el archivo.' };
   }
