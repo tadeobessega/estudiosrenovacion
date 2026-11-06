@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es" data-page="informe">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe — Centros de Estudios Renovación</title>
+    <meta name="description" content="Informe publicado por la red de Centros de Estudios Renovación.">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Informe — Centros de Estudios Renovación">
+    <meta property="og:description" content="Informe publicado por la red de Centros de Estudios Renovación.">
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css?v=20260916">
+    <link rel="stylesheet" href="../assets/css/observatorio.css?v=20260916">
+    <style>
+        .informe-page {
+            padding: calc(80px + 3rem) 0 5rem;
+            background: var(--cer-bg);
+            background-image: var(--cer-pattern);
+            min-height: 70vh;
+        }
+        .informe-wrap { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+        .informe-back {
+            display: inline-flex; align-items: center; gap: .5rem;
+            color: var(--gray-500); font-size: .875rem; font-weight: 500;
+            margin-bottom: 2rem; transition: color .15s;
+        }
+        .informe-back:hover { color: var(--cer-cyan); }
+
+        .informe-tags { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1.1rem; }
+        .informe-chip {
+            font-size: .74rem; font-weight: 700; letter-spacing: .04em;
+            padding: 3px 12px; border-radius: 999px; text-transform: uppercase;
+        }
+        .informe-chip--centro { background: var(--cer-cyan); color: #04121a; }
+        .informe-chip--tag { background: rgba(255,255,255,.08); color: var(--gray-600); }
+        .informe-chip--date { color: var(--gray-500); font-weight: 500; letter-spacing: 0; text-transform: none; font-size: .82rem; }
+
+        .informe-h1 {
+            font-size: clamp(1.8rem, 4.2vw, 2.8rem);
+            font-weight: 800; letter-spacing: -.02em; line-height: 1.15;
+            color: var(--white); margin-bottom: 1.1rem;
+        }
+        .informe-lead {
+            font-size: 1.06rem; line-height: 1.75; color: var(--gray-700);
+            margin-bottom: 2rem;
+        }
+
+        .informe-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 2.5rem; }
+        .informe-btn {
+            display: inline-flex; align-items: center; gap: .55rem;
+            padding: .8rem 1.5rem; border-radius: .55rem;
+            font-size: .95rem; font-weight: 700; cursor: pointer;
+            transition: transform .18s, box-shadow .18s, background .18s;
+        }
+        .informe-btn--primary { background: linear-gradient(135deg, var(--cer-cyan), #0e93b3); color: #04121a; }
+        .informe-btn--primary:hover { transform: translateY(-2px); box-shadow: 0 14px 32px -12px rgba(34,211,238,.6); }
+        .informe-btn--ghost { background: rgba(255,255,255,.06); color: var(--gray-700); border: 1px solid var(--line); }
+        .informe-btn--ghost:hover { background: rgba(255,255,255,.12); color: var(--white); }
+
+        .informe-viewer {
+            position: relative; width: 100%; aspect-ratio: 4 / 5;
+            border-radius: .9rem; overflow: hidden;
+            border: 1px solid var(--line); background: var(--cer-surface);
+        }
+        @media (min-width: 720px) { .informe-viewer { aspect-ratio: 16 / 11; } }
+        .informe-viewer iframe { width: 100%; height: 100%; border: 0; }
+
+        .informe-state { text-align: center; padding: 4rem 1rem; color: var(--gray-500); }
+        .informe-state .spin {
+            width: 38px; height: 38px; margin: 0 auto 1.2rem;
+            border: 3px solid rgba(255,255,255,.12); border-top-color: var(--cer-cyan);
+            border-radius: 50%; animation: cer-spin .8s linear infinite;
+        }
+        @keyframes cer-spin { to { transform: rotate(360deg); } }
+        .informe-hint { margin-top: 1rem; font-size: .85rem; color: var(--gray-500); }
+        .toast {
+            position: fixed; left: 50%; bottom: 2rem; transform: translateX(-50%) translateY(20px);
+            background: var(--cer-cyan); color: #04121a; font-weight: 700; font-size: .9rem;
+            padding: .7rem 1.3rem; border-radius: .55rem; opacity: 0; pointer-events: none;
+            transition: opacity .2s, transform .2s; z-index: 9999;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html#inicio" aria-label="Centros de Estudios Renovación — inicio"><img src="../assets/img/logos.png" alt="Centros de Estudios Renovación" class="logo-img"></a>
+                </div>
+                <nav class="nav-desktop" aria-label="Principal">
+                    <ul class="nav-list">
+                        <li><a href="../index.html#inicio" class="nav-link">Inicio</a></li>
+                        <li><a href="../index.html#observatorios" class="nav-link">Observatorios</a></li>
+                        <li><a href="../index.html#novedades" class="nav-link">Novedades</a></li>
+                        <li><a href="../index.html#informes" class="nav-link">Informes</a></li>
+                        <li><a href="../index.html#quienes-somos" class="nav-link">¿Quiénes somos?</a></li>
+                        <li><a href="../index.html#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú" aria-controls="mobileNav" aria-expanded="false">
+                    <span class="hamburger"></span><span class="hamburger"></span><span class="hamburger"></span>
+                </button>
+            </div>
+            <nav class="nav-mobile" id="mobileNav" aria-label="Menú móvil">
+                <ul>
+                    <li><a href="../index.html#inicio" class="nav-mobile-link">Inicio</a></li>
+                    <li><a href="../index.html#observatorios" class="nav-mobile-link">Observatorios</a></li>
+                    <li><a href="../index.html#novedades" class="nav-mobile-link">Novedades</a></li>
+                    <li><a href="../index.html#informes" class="nav-mobile-link">Informes</a></li>
+                    <li><a href="../index.html#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
+                    <li><a href="../index.html#contacto" class="nav-mobile-link">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <article class="informe-page">
+            <div class="informe-wrap" id="informeContent">
+                <div class="informe-state">
+                    <div class="spin"></div>
+                    <p>Cargando informe…</p>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo"><img src="../assets/img/logos.png" alt="Centros de Estudios Renovación" class="footer-logo-img"></div>
+                    <p class="footer-description">Red de centros y observatorios de investigación y análisis.</p>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Enlaces</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html#inicio">Inicio</a></li>
+                        <li><a href="../index.html#observatorios">Observatorios</a></li>
+                        <li><a href="../index.html#novedades">Novedades</a></li>
+                        <li><a href="../index.html#informes">Informes</a></li>
+                        <li><a href="../index.html#quienes-somos">¿Quiénes somos?</a></li>
+                        <li><a href="../index.html#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Observatorios</h4>
+                    <ul class="footer-links">
+                        <li><a href="ceeir.html">CEEIR</a></li>
+                        <li><a href="ceer.html">CEER</a></li>
+                        <li><a href="cedhys.html">CEDHyS</a></li>
+                        <li><a href="opsa.html">OPSA</a></li>
+                        <li><a href="opal.html">OPAL</a></li>
+                        <li><a href="oper.html">OPER</a></li>
+                        <li><a href="ciren.html">CIREN</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Seguinos</h4>
+                    <div class="footer-social">
+                        <a href="https://www.instagram.com/estudiosrenovacion/?hl=es" class="social-link" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Centros de Estudios Renovación. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast" id="toast">Enlace copiado</div>
+
+    <script src="../assets/js/main.js?v=20260916"></script>
+    <script src="../assets/js/data-source.js?v=20260916"></script>
+    <script>
+        const CENTRO_SLUG = {
+            'CEER': 'ceer', 'CEEIR': 'ceeir', 'CEDHyS': 'cedhys', 'OPER': 'oper',
+            'OPAL': 'opal', 'OPSA': 'opsa', 'CIREN': 'ciren', 'Cíclica': 'ciclica'
+        };
+
+        function esc(t) {
+            if (t == null) return '';
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+        function formatDate(s) {
+            if (!s) return '';
+            const d = new Date(s);
+            return isNaN(d) ? s : d.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        function driveId(url) {
+            if (!url) return '';
+            const m = String(url).match(/\/d\/([-\w]{20,})/) || String(url).match(/[?&]id=([-\w]{20,})/);
+            return m ? m[1] : '';
+        }
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 1800);
+        }
+        async function copyLink() {
+            try {
+                await navigator.clipboard.writeText(location.href);
+                toast('Enlace copiado');
+            } catch (e) {
+                prompt('Copiá el enlace de este informe:', location.href);
+            }
+        }
+
+        function renderError(msg) {
+            document.getElementById('informeContent').innerHTML = `
+                <a href="../index.html#informes" class="informe-back"><i class="fas fa-arrow-left"></i> Volver a Informes</a>
+                <div class="informe-state">
+                    <i class="fas fa-file-circle-question" style="font-size:2.5rem;opacity:.3;display:block;margin-bottom:1rem;"></i>
+                    <p>${esc(msg)}</p>
+                </div>`;
+        }
+
+        async function init() {
+            const id = new URLSearchParams(location.search).get('id');
+            if (!id) { renderError('No se indicó qué informe mostrar.'); return; }
+
+            let r;
+            try {
+                r = await CERData.getReportById(id);
+            } catch (e) {
+                renderError('No se pudo cargar el informe. Probá de nuevo en un momento.');
+                return;
+            }
+            if (!r) { renderError('No encontramos este informe. Puede que haya sido movido o eliminado.'); return; }
+
+            const slug = CENTRO_SLUG[r.centro] || '';
+            const centroHref = slug ? `${slug}.html` : '../index.html#informes';
+            const fid = driveId(r.pdf_url);
+            const preview = fid ? `https://drive.google.com/file/d/${fid}/preview` : '';
+
+            document.title = `${r.titulo} — Centros de Estudios Renovación`;
+            const md = document.querySelector('meta[name="description"]');
+            if (md && r.descripcion) md.setAttribute('content', r.descripcion.slice(0, 180));
+
+            document.getElementById('informeContent').innerHTML = `
+                <a href="${centroHref}" class="informe-back"><i class="fas fa-arrow-left"></i> ${slug ? esc(r.centro) : 'Volver a Informes'}</a>
+                <div class="informe-tags">
+                    <span class="informe-chip informe-chip--centro">${esc(r.centro)}</span>
+                    ${r.tag ? `<span class="informe-chip informe-chip--tag">${esc(r.tag)}</span>` : ''}
+                    <span class="informe-chip informe-chip--date">${formatDate(r.fecha)}</span>
+                </div>
+                <h1 class="informe-h1">${esc(r.titulo)}</h1>
+                ${r.descripcion ? `<p class="informe-lead">${esc(r.descripcion)}</p>` : ''}
+                <div class="informe-actions">
+                    ${r.pdf_url ? `<a href="${encodeURI(r.pdf_url)}" target="_blank" rel="noopener" class="informe-btn informe-btn--primary"><i class="fas fa-file-arrow-down"></i> Descargar PDF</a>` : ''}
+                    <button class="informe-btn informe-btn--ghost" onclick="copyLink()"><i class="fas fa-link"></i> Compartir</button>
+                </div>
+                ${preview ? `
+                    <div class="informe-viewer">
+                        <iframe src="${preview}" loading="lazy" allow="autoplay" title="Vista previa del informe"></iframe>
+                    </div>
+                    <p class="informe-hint">Si la vista previa no carga, usá el botón “Descargar PDF”.</p>
+                ` : (r.pdf_url ? `<p class="informe-hint">Abrí el documento con el botón de arriba.</p>` : `<p class="informe-hint">El documento todavía no está disponible.</p>`)}
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

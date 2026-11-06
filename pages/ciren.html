@@ -1,31 +1,31 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-page="ciren">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CIREN - Centro de Estudios Científicos Renovación</title>
-    <meta name="description" content="CIREN - Centro de Estudios Científicos Renovación">
+    <title>CIREN — Centro de Estudios Científicos Renovación</title>
+    <meta name="description" content="CIREN — Centro de Estudios Científicos Renovación, parte de la red de Centros de Estudios Renovación.">
     <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="../assets/css/observatorio.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css?v=20260916">
+    <link rel="stylesheet" href="../assets/css/observatorio.css?v=20260916">
 </head>
+
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <a href="../index.html#">
-                        <img src="../assets/img/logo-header.png" alt="Centro de Estudios Estratégicos" class="logo-img">
-                    </a>
+                    <a href="../index.html#inicio" aria-label="Centros de Estudios Renovación — inicio"><img src="../assets/img/logos.png" alt="Centros de Estudios Renovación" class="logo-img"></a>
                 </div>
-                
-                <!-- Desktop Navigation -->
-                <nav class="nav-desktop">
+                <nav class="nav-desktop" aria-label="Principal">
                     <ul class="nav-list">
-                        <li><a href="../index.html#" class="nav-link">Inicio</a></li>
+                        
+                        <li><a href="../index.html#inicio" class="nav-link">Inicio</a></li>
                         <li><a href="../index.html#observatorios" class="nav-link">Observatorios</a></li>
                         <li><a href="../index.html#novedades" class="nav-link">Novedades</a></li>
                         <li><a href="../index.html#informes" class="nav-link">Informes</a></li>
@@ -33,131 +33,118 @@
                         <li><a href="../index.html#contacto" class="nav-link">Contacto</a></li>
                     </ul>
                 </nav>
-
-                <!-- Mobile Menu Button -->
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <span class="hamburger"></span>
-                    <span class="hamburger"></span>
-                    <span class="hamburger"></span>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú" aria-controls="mobileNav" aria-expanded="false">
+                    <span class="hamburger"></span><span class="hamburger"></span><span class="hamburger"></span>
                 </button>
             </div>
-
-            <!-- Mobile Navigation -->
-            <nav class="nav-mobile" id="mobileNav">
-                <ul class="nav-mobile-list">
-                    <li><a href="#inicio" class="nav-mobile-link">Inicio</a></li>
-                    <li><a href="#observatorios" class="nav-mobile-link">Observatorios</a></li>
-                    <li><a href="#informes" class="nav-mobile-link">Informes</a></li>
-                    <li><a href="#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
-                    <li><a href="#novedades" class="nav-mobile-link">Novedades</a></li>
-                    <li><a href="#contacto" class="nav-mobile-link">Contacto</a></li>
+            <nav class="nav-mobile" id="mobileNav" aria-label="Menú móvil">
+                <ul>
+                    
+                    <li><a href="../index.html#inicio" class="nav-mobile-link">Inicio</a></li>
+                    <li><a href="../index.html#observatorios" class="nav-mobile-link">Observatorios</a></li>
+                    <li><a href="../index.html#novedades" class="nav-mobile-link">Novedades</a></li>
+                    <li><a href="../index.html#informes" class="nav-mobile-link">Informes</a></li>
+                    <li><a href="../index.html#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
+                    <li><a href="../index.html#contacto" class="nav-mobile-link">Contacto</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- Main Content -->
-<main>
-    <section class="observatorio-hero-ciren">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-logo">
-                    <img src="../assets/img/ciren-logo.png" alt="CIREN" class="observatorio-logo-large">
-                </div>
-                <h1 class="hero-title">CIREN</h1>
-                <h2 class="hero-subtitle">Centro de Estudios Científicos Renovación</h2>
-                <div class="hero-social">
-                    <a href="https://www.instagram.com/ciren_ok/?hl=es" class="social-link" target="_blank"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="mision">
-        <div class="container">
-            <div class="section-content">
-                <div class="content-text">
-                    <h2 class="section-title">Nuestra Misión</h2>
-                    <p class="section-description">
-                        Nuestro enfoque es fomentar el ecosistema de innovación del país, articulando los sectores público, privado y académico para potenciar el talento nacional y proveer de soluciones tecnológicas a los desafíos contemporáneos.
- Buscamos generar conocimiento estratégico para el desarrollo nacional.
-                    </p>
-
-                </div>
-                <div class="content-image">
-                    <img src="../assets/img/ciren-logo.png" alt="CIREN" class="about-image">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="ejes-tematicos">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Ejes Temáticos</h2>
-                <p class="section-subtitle">Pilares de investigación en Ciencia, Tecnología e Innovación</p>
-            </div>
-
-            <div class="ejes-grid ejes-grid--par">
-                
-                <div class="eje-card">
-                    <div class="eje-icon-ciren">
-                        <i class="fas fa-microchip"></i>
+    <main>
+        <section class="observatorio-hero-ciren">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-logo">
+                        <img src="../assets/img/ciren-logo.png" alt="CIREN" class="observatorio-logo-large">
                     </div>
-                    <h3 class="eje-title">Desarrollo e Innovación</h3>
-                    <p class="eje-description">
-                        Análisis de las políticas de I+D y estrategias para la creación de valor y competitividad a través de la tecnología.
-                    </p>
-                </div>
-
-                <div class="eje-card">
-                    <div class="eje-icon-ciren">
-                        <i class="fas fa-network-wired"></i>
+                    <h1 class="hero-title">CIREN</h1>
+                    <h2 class="hero-subtitle">Centro de Estudios Científicos Renovación</h2>
+                    <div class="hero-social">
+                        <a href="https://www.instagram.com/ciren_ok/?hl=es" class="social-link" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     </div>
-                    <h3 class="eje-title">Ecosistemas Tecnológicos</h3>
-                    <p class="eje-description">
-                        Análisis de la articulación entre universidades, empresas y el sector público para fortalecer la transferencia de conocimiento.
-                    </p>
                 </div>
-
             </div>
-        </div>
-    </section>
+        </section>
 
-        <!-- Miembros Section — se oculta automáticamente si no hay datos -->
+        <section class="mision">
+            <div class="container">
+                <div class="section-content">
+                    <div class="content-text">
+                        <h2 class="section-title">Nuestra Misión</h2>
+                        <p class="section-description">
+                            Fomentar el ecosistema de innovación del país, articulando los sectores público, privado y
+                            académico para potenciar el talento nacional y aportar soluciones tecnológicas a los desafíos
+                            contemporáneos. Buscamos generar conocimiento estratégico para el desarrollo nacional.
+                        </p>
+                    </div>
+                    <div class="content-image">
+                        <img src="../assets/img/ciren-logo.png" alt="CIREN" class="about-image">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="ejes-tematicos">
+            <span class="cer-orb cer-orb--primary cer-orb--a"></span>
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Ejes Temáticos</h2>
+                    <p class="section-subtitle">Pilares de investigación en ciencia, tecnología e innovación</p>
+                </div>
+                <div class="ejes-grid ejes-grid--par">
+                    <div class="eje-card">
+                        <div class="eje-icon-ciren"><i class="fas fa-microchip"></i></div>
+                        <h3 class="eje-title">Desarrollo e Innovación</h3>
+                        <p class="eje-description">
+                            Análisis de las políticas de I+D y estrategias para la creación de valor y competitividad a
+                            través de la tecnología.
+                        </p>
+                    </div>
+                    <div class="eje-card">
+                        <div class="eje-icon-ciren"><i class="fas fa-network-wired"></i></div>
+                        <h3 class="eje-title">Ecosistemas Tecnológicos</h3>
+                        <p class="eje-description">
+                            Análisis de la articulación entre universidades, empresas y sector público para fortalecer la
+                            transferencia de conocimiento.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="publicaciones">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Publicaciones Recientes</h2>
+                    <p class="section-subtitle">Investigaciones y análisis del CIREN</p>
+                </div>
+                <div class="publicaciones-grid"></div>
+            </div>
+        </section>
+
         <section class="miembros" style="display:none;">
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Miembros</h2>
                     <p class="section-subtitle">El equipo detrás del centro</p>
                 </div>
-                <div class="miembros-grid">
-                    <!-- Cargado dinámicamente -->
-                </div>
+                <div class="miembros-grid"></div>
             </div>
         </section>
-</main>
+    </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <!-- Logo principal en footer -->
-                    <div class="footer-logo">
-                        <a href="../index.html#">
-                            <img src="../assets/img/logos.png" alt="Centro de Estudios Estratégicos" class="footer-logo-img">
-                        </a>
-                    </div>
-                    <p class="footer-description">
-                        Centro de investigación dedicado al análisis multidisciplinario.
-                    </p>
+                    <div class="footer-logo"><img src="../assets/img/logos.png" alt="Centros de Estudios Renovación" class="footer-logo-img"></div>
+                    <p class="footer-description">Red de centros y observatorios de investigación y análisis.</p>
                 </div>
-
                 <div class="footer-section">
-                    <h4 class="footer-title">Enlaces Rápidos</h4>
+                    <h4 class="footer-title">Enlaces</h4>
                     <ul class="footer-links">
-                        <li><a href="../index.html#">Inicio</a></li>
+                        <li><a href="../index.html#inicio">Inicio</a></li>
                         <li><a href="../index.html#observatorios">Observatorios</a></li>
                         <li><a href="../index.html#novedades">Novedades</a></li>
                         <li><a href="../index.html#informes">Informes</a></li>
@@ -165,18 +152,23 @@
                         <li><a href="../index.html#contacto">Contacto</a></li>
                     </ul>
                 </div>
-
                 <div class="footer-section">
                     <h4 class="footer-title">Observatorios</h4>
                     <ul class="footer-links">
-                        <li><a href="pages/ceeir.html">CEEIR</a></li>
-                        <li><a href="pages/ceer.html">CEER</a></li>
-                        <li><a href="pages/cedhys.html">CEDHyS</a></li>
-                        <li><a href="pages/opal.html">OPAL</a></li>
-                        <li><a href="pages/opsa.html">OPSA</a></li>                        
-                        <li><a href="pages/oper.html">OPER</a></li>                        
-                        <li><a href="pages/ciren.html">CIREN</a></li>
+                        <li><a href="ceeir.html">CEEIR</a></li>
+                        <li><a href="ceer.html">CEER</a></li>
+                        <li><a href="cedhys.html">CEDHyS</a></li>
+                        <li><a href="opsa.html">OPSA</a></li>
+                        <li><a href="opal.html">OPAL</a></li>
+                        <li><a href="oper.html">OPER</a></li>
+                        <li><a href="ciren.html">CIREN</a></li>
                     </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Seguinos</h4>
+                    <div class="footer-social">
+                        <a href="https://www.instagram.com/estudiosrenovacion/?hl=es" class="social-link" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -185,13 +177,15 @@
         </div>
     </footer>
 
-    <script src="../assets/js/main.js"></script>
-    <script src="../assets/js/reports-public.js"></script>
+    <script src="../assets/js/main.js?v=20260916"></script>
+    <script src="../assets/js/data-source.js?v=20260916"></script>
+    <script src="../assets/js/reports-public.js?v=20260916"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        loadCentroPublicaciones('CIREN', 'ciren');
-        loadMiembros('CIREN');
-      });
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCentroPublicaciones('CIREN', 'ciren');
+            loadMiembros('CIREN');
+        });
     </script>
 </body>
+
 </html>

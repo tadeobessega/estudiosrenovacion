@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard CEER</title>
+    <link rel="icon" type="image/png" href="ceer_azul_tab.png">
+    <link rel="apple-touch-icon" href="ceer_azul.png">
+    <meta name="theme-color" content="#2121E2">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* REGLA DE ORO PARA EVITAR QUE SE ROMPA EL ANCHO EN CELULARES */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* PALETA OFICIAL CEER */
+            --ceer-principal: #2121E2;
+            --ceer-informes: #0000DE;
+            --ceer-morado: #4404C5;
+
+            /* TONOS DERIVADOS PARA MÁS VARIABLES */
+            --ceer-azul-claro: #5C5CFF;
+            --ceer-morado-claro: #8A52FF;
+
+            --ceer-fondo: #FAFAFA;
+            --ceer-tarjeta: #F2F2F2;
+
+            --gray-border: #e5e7eb;
+            --gray-text: #4b5563;
+            --gray-dark: #111827;
+
+            /* FUENTE ÚNICA OFICIAL */
+            --font-texto: 'Inter', sans-serif;
+        }
+
+        html,
+        body {
+            font-family: var(--font-texto);
+            background-color: var(--ceer-fondo);
+            color: var(--gray-dark);
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            /* BLOQUEO DE SCROLL HORIZONTAL */
+        }
+
+        /* HEADER CEER CON LOGO */
+        .header {
+            background: linear-gradient(90deg, #210052 0%, #1B1BBE 39%, #2121E2 65%, #069FFF 100%);
+            color: rgba(255, 255, 255, 0.96);
+            padding: 1.5rem 1rem;
+            width: 100%;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-ceer {
+            height: 70px;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-family: var(--font-texto);
+            font-weight: 800;
+            font-size: 2.2rem;
+            margin: 0 0 0.4rem 0;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-family: var(--font-texto);
+            font-weight: 500;
+            font-size: 1rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+            width: 100%;
+        }
+
+        /* LOADER */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--ceer-fondo);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .spinner {
+            border: 4px solid var(--ceer-tarjeta);
+            border-top: 4px solid var(--ceer-principal);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-box {
+            color: #ef4444;
+            background: #fee2e2;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 1px solid #f87171;
+            display: none;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        /* BOTONES DE VISTA (MOBILE/PC) */
+        .view-toggles {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-toggle {
+            background: transparent;
+            border: 1.5px solid var(--ceer-principal);
+            color: var(--ceer-principal);
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: var(--font-texto);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-toggle.active {
+            background: var(--ceer-principal);
+            color: white;
+        }
+
+        /* FILTROS DE FECHA */
+        .time-filters {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            margin: 0 auto 2rem auto;
+            background: white;
+            padding: 1.2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .date-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-text);
+        }
+
+        .date-input {
+            border: 1px solid var(--gray-border);
+            background-color: var(--ceer-fondo);
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            font-weight: 600;
+            outline: none;
+            width: 140px;
+            font-family: var(--font-texto);
+            color: var(--gray-dark);
+        }
+
+        .date-input:focus {
+            border-color: var(--ceer-principal);
+            background-color: white;
+        }
+
+        .btn-action {
+            background: var(--ceer-principal);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: var(--font-texto);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-action:hover {
+            background: var(--ceer-informes);
+        }
+
+        /* TABS ESTILO NAVEGACIÓN INFERIOR */
+        .tabs-header {
+            display: flex;
+            gap: 1.5rem;
+            border-bottom: 2px solid var(--gray-border);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 0.8rem 0.5rem;
+            font-size: 1.05rem;
+            font-family: var(--font-texto);
+            font-weight: 700;
+            color: var(--gray-text);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover {
+            color: var(--ceer-principal);
+        }
+
+        .tab-btn.active {
+            color: var(--ceer-informes);
+            border-bottom-color: var(--ceer-informes);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* TARJETAS DE GRÁFICOS */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--ceer-tarjeta);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            width: 100%;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            padding-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .chart-title {
+            font-size: 1.15rem;
+            font-family: var(--font-texto);
+            font-weight: 800;
+            color: #111827;
+            margin: 0;
+        }
+
+        .card-tools {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .card-tools button {
+            background: white;
+            border: 1px solid var(--gray-border);
+            color: var(--ceer-principal);
+            border-radius: 6px;
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .card-tools button:hover {
+            background: var(--ceer-principal);
+            color: white;
+            border-color: var(--ceer-principal);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* GENERADOR PRO */
+        .generator-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            width: 100%;
+        }
+
+        .gen-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-family: var(--font-texto);
+            font-weight: 700;
+            font-size: 1rem;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--gray-border);
+            padding-bottom: 1rem;
+        }
+
+        .gen-vars-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .gen-var-box {
+            background: var(--ceer-tarjeta);
+            padding: 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--gray-border);
+            transition: 0.3s;
+        }
+
+        .gen-control-group {
+            margin-bottom: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            font-family: var(--font-texto);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .gen-select {
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--gray-border);
+            font-family: var(--font-texto);
+            font-weight: 500;
+            outline: none;
+            background: white;
+        }
+
+        .btn-action-gen {
+            background: var(--ceer-morado);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-family: var(--font-texto);
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            font-size: 1.05rem;
+        }
+
+        .btn-action-gen:hover {
+            background: var(--ceer-informes);
+        }
+
+        /* FOOTER */
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 1rem;
+            border-top: 1px solid var(--gray-border);
+            margin-top: 3rem;
+            background-color: white;
+            color: var(--gray-text);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .footer a {
+            color: var(--ceer-principal);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .footer-redes {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        .footer-redes a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--ceer-principal);
+            color: white !important;
+            font-size: 0.85rem;
+            text-decoration: none !important;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .footer-redes a:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+            text-decoration: none !important;
+        }
+
+        /* MODO CELULAR ESTRICTO Y DEFINITIVO */
+        body.mobile-mode .header {
+            padding: 1.2rem 1rem;
+        }
+
+        body.mobile-mode .header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.8rem;
+        }
+
+        body.mobile-mode .logo-ceer {
+            height: 50px;
+        }
+
+        body.mobile-mode .header h1 {
+            font-size: 1.8rem;
+        }
+
+        body.mobile-mode .chart-grid {
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
+        }
+
+        body.mobile-mode .gen-vars-container {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        body.mobile-mode .time-filters {
+            flex-direction: column;
+            padding: 1.2rem;
+        }
+
+        body.mobile-mode .date-input-group {
+            width: 100%;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        body.mobile-mode .date-input {
+            width: 60%;
+        }
+
+        body.mobile-mode .time-filters .btn-action {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        body.mobile-mode .chart-container {
+            height: 320px;
+        }
+
+        body.mobile-mode .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        body.mobile-mode .tab-btn {
+            padding: 0.8rem 0.4rem;
+            font-size: 0.95rem;
+        }
+
+        body.mobile-mode .chart-card {
+            padding: 1.2rem;
+        }
+
+        body.mobile-mode .generator-panel {
+            padding: 1.2rem;
+        }
+
+        /* FOOTER PRINCIPAL */
+        .footer-principal {
+            background: #111827;
+            color: #9ca3af;
+            padding: 1.5rem 1rem;
+            font-family: var(--font-texto);
+        }
+
+        .footer-principal .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer-logo-img {
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+        }
+
+        .footer-description {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #9ca3af;
+        }
+
+        .footer-title {
+            color: #f9fafb;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #f9fafb;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .footer-social .social-link {
+            color: #9ca3af;
+            font-size: 1.2rem;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+
+        .footer-social .social-link:hover {
+            color: #f9fafb;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loader">
+        <div class="spinner" id="spinnerIcon"></div>
+        <h2 style="color:var(--ceer-informes); margin-bottom: 0.5rem; font-family:var(--font-texto); font-weight:800;">
+            Cargando Dashboard...</h2>
+        <p id="loader-text" style="color:var(--gray-text); font-weight: 500;">Conectando con servidores</p>
+        <div id="errorBox" class="error-box">
+            <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i><br>
+            Error de conexión.<br>No se pudo cargar el archivo de datos históricos.
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>Monitor económico</h1>
+                <p>Fuentes: BCRA, BLS, FRED y Ámbito Financiero</p>
+            </div>
+            <img src="ceer blanco 1.png" alt="Logo CEER" class="logo-ceer">
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="view-toggles">
+            <button onclick="setMode('desktop')" id="btnDesktop" class="btn-toggle active"
+                aria-label="Cambiar a vista de computadora"><i class="fas fa-desktop"></i> Vista PC</button>
+            <button onclick="setMode('mobile')" id="btnMobile" class="btn-toggle"
+                aria-label="Cambiar a vista de celular"><i class="fas fa-mobile-alt"></i> Vista Celular</button>
+        </div>
+
+        <div class="time-filters">
+            <div class="date-input-group"><label for="dateStart">Desde:</label><input type="date" id="dateStart"
+                    class="date-input" onchange="filtrarTexto()" aria-label="Fecha de inicio"></div>
+            <div class="date-input-group"><label for="dateEnd">Hasta:</label><input type="date" id="dateEnd"
+                    class="date-input" onchange="filtrarTexto()" aria-label="Fecha de fin"></div>
+            <button class="btn-action"
+                onclick="document.getElementById('dateStart').value='';document.getElementById('dateEnd').value='';filtrarTexto()"
+                aria-label="Restablecer fechas"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+
+        <div class="tabs-header" role="tablist">
+            <button class="tab-btn active" role="tab" aria-selected="true" onclick="verTab(event,'bancarias')"><i
+                    class="fas fa-university"></i> Sector Bancario</button>
+            <button class="tab-btn" role="tab" aria-selected="false" onclick="verTab(event,'macro')"><i
+                    class="fas fa-globe"></i> Macroeconomía</button>
+            <button class="tab-btn" role="tab" aria-selected="false" onclick="verTab(event,'monetarias')"><i
+                    class="fas fa-coins"></i> Política Monetaria</button>
+            <button class="tab-btn" role="tab" aria-selected="false" onclick="verTab(event,'generador')"
+                style="color:var(--ceer-morado);"><i class="fas fa-magic"></i> Generador</button>
+        </div>
+
+        <div id="bancarias" class="tab-content active">
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Préstamos Privados (ARS Reales)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartPrestamos')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartPrestamos')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartPrestamos" aria-label="Gráfico de préstamos privados"
+                            role="img"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Depósitos Privados (ARS Reales)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartDepositos')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartDepositos')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartDepositos" aria-label="Gráfico de depósitos privados"
+                            role="img"></canvas></div>
+                </div>
+                <div class="chart-card" style="grid-column:1/-1;">
+                    <div class="card-header">
+                        <h3 class="chart-title">Préstamos vs Depósitos (M. USD Nominales)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartUSD')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartUSD')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartUSD"
+                            aria-label="Gráfico de préstamos vs depósitos en USD" role="img"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="macro" class="tab-content">
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Riesgo País (Puntos Básicos)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartRiesgoPais')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartRiesgoPais')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartRiesgoPais"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Brecha Cambiaria: Blue, MEP y CCL (%)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartBrecha')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartBrecha')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartBrecha"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Tipo de Cambio Real (Gral. Base 100)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartITCRM')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartITCRM')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartITCRM"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Reservas vs. Compras BCRA (M. USD Reales)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartReservas')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartReservas')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartReservas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Devaluación Mayorista vs Inflación (%)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartCarrera')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartCarrera')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartCarrera"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Expectativas: IPC Real vs Proyección REM 12m</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartIPC')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartIPC')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartIPC"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Tasa de la FED (EFFR %)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartFED')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartFED')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartFED"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="monetarias" class="tab-content">
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Base Monetaria vs M2 (ARS Reales)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartAgregados')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartAgregados')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartAgregados"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3 class="chart-title">Mapa de Tasas TEA vs IPC Mensual</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartTasas')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartTasas')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartTasas"></canvas></div>
+                </div>
+                <div class="chart-card" style="grid-column:1/-1;">
+                    <div class="card-header">
+                        <h3 class="chart-title">Seguimiento Diario Tasas (Último Año Hábil)</h3>
+                        <div class="card-tools"><button onclick="dlPNG('chartDiario')"
+                                aria-label="Descargar gráfico en formato PNG" title="Descargar PNG"><i
+                                    class="fas fa-camera"></i></button><button onclick="dlCSV('chartDiario')"
+                                aria-label="Descargar datos en formato CSV" title="Descargar CSV"><i
+                                    class="fas fa-file-csv"></i></button></div>
+                    </div>
+                    <div class="chart-container"><canvas id="chartDiario"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="generador" class="tab-content">
+            <div class="generator-panel">
+                <div class="gen-header">
+                    <div><span style="color:var(--gray-text);">Variables: </span><label><input type="radio"
+                                name="numVars" value="1" checked onchange="toggleModoGen()" aria-label="Una variable">
+                            1</label>&nbsp;&nbsp;<label><input type="radio" name="numVars" value="2"
+                                onchange="toggleModoGen()" aria-label="Dos variables"> 2</label></div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;color:var(--ceer-informes);"><i
+                            class="fas fa-chart-line"></i> <select id="genModo" class="gen-select"
+                            style="padding:0.3rem;" onchange="toggleModoGen()" aria-label="Modo de gráfico">
+                            <option value="series">Línea de Tiempo</option>
+                            <option value="scatter">Gráfico de Correlación (X vs Y)</option>
+                        </select></div>
+                </div>
+
+                <div class="gen-vars-container">
+                    <div class="gen-var-box">
+                        <h4 style="margin:0 0 1rem 0;color:var(--ceer-informes);">Variable 1 (Eje Y)</h4>
+                        <div class="gen-control-group"><label for="genSelect1">Métrica:</label><select id="genSelect1"
+                                class="gen-select" onchange="chkDef(1)" aria-label="Seleccionar métrica 1"></select>
+                        </div>
+                        <div class="gen-control-group" id="wrapType1"><label for="genType1">Gráfico:</label><select
+                                id="genType1" class="gen-select" aria-label="Tipo de gráfico 1">
+                                <option value="line">Línea</option>
+                                <option value="area">Área Pintada</option>
+                                <option value="bar">Barras</option>
+                            </select></div>
+                        <div class="gen-control-group"><label for="genNom1">Nominalidad:</label><select id="genNom1"
+                                class="gen-select" aria-label="Nominalidad 1">
+                                <option value="corriente" selected>Precios Corrientes (Nominales)</option>
+                                <option value="constante">Precios Constantes (Reales)</option>
+                            </select></div>
+                    </div>
+                    <div class="gen-var-box" id="panelVar2" style="opacity:0.5;pointer-events:none;">
+                        <h4 style="margin:0 0 1rem 0;color:var(--ceer-informes);">Variable 2 (Eje X en Correlación)</h4>
+                        <div class="gen-control-group"><label for="genSelect2">Métrica:</label><select id="genSelect2"
+                                class="gen-select" onchange="chkDef(2)" aria-label="Seleccionar métrica 2"></select>
+                        </div>
+                        <div class="gen-control-group" id="wrapType2"><label for="genType2">Gráfico:</label><select
+                                id="genType2" class="gen-select" aria-label="Tipo de gráfico 2">
+                                <option value="line">Línea</option>
+                                <option value="area">Área Pintada</option>
+                                <option value="bar">Barras</option>
+                            </select></div>
+                        <div class="gen-control-group"><label for="genNom2">Nominalidad:</label><select id="genNom2"
+                                class="gen-select" aria-label="Nominalidad 2">
+                                <option value="corriente" selected>Precios Corrientes (Nominales)</option>
+                                <option value="constante">Precios Constantes (Reales)</option>
+                            </select></div><label id="wrapAxis2"
+                            style="margin-top:0.8rem;display:flex;gap:0.5rem;font-weight:600;"><input type="checkbox"
+                                id="genAxis2" checked aria-label="Usar eje secundario"> Eje Secundario</label>
+                    </div>
+                </div>
+                <button class="btn-action-gen" onclick="crearGen()" aria-label="Dibujar Análisis"><i
+                        class="fas fa-chart-pie"></i> Dibujar Análisis</button>
+            </div>
+            <div class="chart-card" id="resultadoGenerador" style="display:none;">
+                <div class="card-header">
+                    <h3 class="chart-title">Resultado Analítico</h3>
+                    <div class="card-tools"><button onclick="dlPNG('chartGenerador')"
+                            aria-label="Descargar gráfico generado en formato PNG" title="Descargar PNG"><i
+                                class="fas fa-camera"></i></button><button onclick="dlCSV('chartGenerador')"
+                            aria-label="Descargar datos generados en formato CSV" title="Descargar CSV"><i
+                                class="fas fa-file-csv"></i></button></div>
+                </div>
+                <div class="chart-container" id="canvasContainer"><canvas id="chartGenerador"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div
+            style="max-width:1200px; margin:0 auto; width:100%; display:flex; align-items:center; justify-content:space-between;">
+            <p style="margin: 0;">
+                <i class="fas fa-envelope"
+                    style="color: var(--ceer-principal); margin-right: 0.5rem; font-size: 1.1rem;"></i>
+                Contacto: <a href="mailto:ceer@estudiosrenovacion.com">ceer@estudiosrenovacion.com</a>
+            </p>
+            <div class="footer-redes">
+                <a href="https://x.com/ceerenovacion" title="Twitter / X"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.linkedin.com/company/centro-de-estudios-econ%C3%B3micos-renovaci%C3%B3n/"
+                    title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://www.instagram.com/ceerenovacion/" title="Instagram"><i
+                        class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <footer class="footer-principal">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <a href="../../index.html#inicio">
+                            <img src="../../assets/img/ceer-logo.png" alt="CEER" class="footer-logo-img">
+                        </a>
+                    </div>
+                    <p class="footer-description">
+                        Centros de Estudios Renovación.
+                        <a href="../ceer.html" style="color:#c7c7ff;">← Volver al CEER</a>
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">Enlaces Rápidos</h4>
+                    <ul class="footer-links">
+                        <li><a href="../../index.html#inicio">Inicio</a></li>
+                        <li><a href="../../index.html#observatorios">Observatorios</a></li>
+                        <li><a href="../../index.html#novedades">Novedades</a></li>
+                        <li><a href="../../index.html#informes">Informes</a></li>
+                        <li><a href="../../index.html#quienes-somos">¿Quiénes somos?</a></li>
+                        <li><a href="../../index.html#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">Observatorios</h4>
+                    <ul class="footer-links">
+                        <li><a href="../ceeir.html">CEEIR</a></li>
+                        <li><a href="../ceer.html">CEER</a></li>
+                        <li><a href="../cedhys.html">CEDHyS</a></li>
+                        <li><a href="../opal.html">OPAL</a></li>
+                        <li><a href="../opsa.html">OPSA</a></li>
+                        <li><a href="../oper.html">OPER</a></li>
+                        <li><a href="../ciren.html">CIREN</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Centros de Estudios Renovación. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const C_PRINCIPAL = '#1A1AE6';
+        const C_INFORMES = '#06B6D4'; //24BBF2
+        const C_MORADO = '#5021BA'; // 4404C5
+        const C_AZUL_CLARO = '#7C4AED'; // A984FE
+        const C_MORADO_CLARO = '#8A52FF'; // 8A52FF
+        const C_TEXT = '#111827';
+
+        // Paleta de fondos — modificar acá para cambiar toda la jerarquía de colores
+        const BG_PAGINA = '#FAFAFA'; // fondo de página y body
+        const BG_TARJETA = '#F2F2F2'; // fondo de card y canvas del gráfico
+        const BG_GRAFICO = '#FAFAFA'; // área interior del gráfico (plugin chartAreaBg)
+
+        Chart.register({ id: 'customCanvasBackgroundColor', beforeDraw: (c) => { const ctx = c.canvas.getContext('2d'); ctx.save(); ctx.globalCompositeOperation = 'destination-over'; ctx.fillStyle = BG_TARJETA; ctx.fillRect(0, 0, c.width, c.height); ctx.restore(); } });
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.font.weight = '600';
+        Chart.defaults.color = C_TEXT;
+
+        window.allCharts = []; window.data_m = {}; window.fechas_m = []; window.cGen = null;
+
+        const DICT = {
+            'bandas': { l: 'Bandas Cambiarias (ARS/USD)', cD: true, isU: false },
+            'riesgo_pais': { l: 'Riesgo País (Puntos Básicos)', cD: false, isU: false },
+            'tasa_fed': { l: 'Tasa FED (EFFR %)', cD: false, isU: false },
+            'tc_minorista': { l: 'T.C. Minorista (ARS/USD)', cD: true, isU: false }, 'tc_mayorista': { l: 'T.C. Mayorista (ARS/USD)', cD: true, isU: false },
+            'dolar_mep': { l: 'Dólar MEP (ARS/USD)', cD: true, isU: false }, 'dolar_blue': { l: 'Dólar Blue (ARS/USD)', cD: true, isU: false }, 'dolar_ccl': { l: 'Dólar CCL (ARS/USD)', cD: true, isU: false },
+            'brecha_mep': { l: 'Brecha MEP (%)', cD: false, isU: false }, 'brecha_blue': { l: 'Brecha Blue (%)', cD: false, isU: false }, 'brecha_ccl': { l: 'Brecha CCL (%)', cD: false, isU: false },
+            'itcrm': { l: 'ITCRM General (Base 100)', cD: false, isU: false }, 'tcr_brasil': { l: 'TCR Brasil', cD: false, isU: false }, 'tcr_usa': { l: 'TCR EE.UU.', cD: false, isU: false }, 'tcr_zona_euro': { l: 'TCR Euro', cD: false, isU: false }, 'tcr_china': { l: 'TCR China', cD: false, isU: false }, 'tcr_mexico': { l: 'TCR México', cD: false, isU: false }, 'tcr_chile': { l: 'TCR Chile', cD: false, isU: false }, 'tcr_uruguay': { l: 'TCR Uruguay', cD: false, isU: false },
+            'base_monetaria': { l: 'Base Monetaria (ARS)', cD: true, isU: false }, 'circulacion_monetaria': { l: 'Circulación Monetaria (ARS)', cD: true, isU: false }, 'billetes_monedas': { l: 'Billetes Público (ARS)', cD: true, isU: false }, 'm2': { l: 'M2 Total (ARS)', cD: true, isU: false }, 'm2_transaccional': { l: 'M2 Transaccional (ARS)', cD: true, isU: false }, 'pases_pasivos': { l: 'Pases Pasivos (ARS)', cD: true, isU: false }, 'lefi': { l: 'LEFI (ARS)', cD: true, isU: false },
+            'tarjetas': { l: 'Préstamos: Tarjetas (ARS)', cD: true, isU: false }, 'personales': { l: 'Préstamos: Personales (ARS)', cD: true, isU: false }, 'hipotecarios': { l: 'Préstamos: Hipotecarios (ARS)', cD: true, isU: false }, 'prendarios': { l: 'Préstamos: Prendarios (ARS)', cD: true, isU: false }, 'plazo_fijo': { l: 'Depósitos: Plazo Fijo (ARS)', cD: true, isU: false }, 'ca': { l: 'Cajas Ahorro (ARS)', cD: true, isU: false }, 'cc': { l: 'Cuentas Ctes (ARS)', cD: true, isU: false },
+            'depositos_usd': { l: 'Depósitos Privados (USD)', cD: true, isU: true }, 'prestamos_usd': { l: 'Préstamos Privados (USD)', cD: true, isU: true }, 'reservas': { l: 'Reservas Brutas BCRA (USD)', cD: true, isU: true }, 'compra_divisas': { l: 'Compras BCRA (USD)', cD: true, isU: true },
+            'tc_mayorista_var': { l: 'Devaluación (%)', cD: false, isU: false }, 'ipc_mensual': { l: 'IPC Mensual (%)', cD: false, isU: false }, 'ipc_interanual': { l: 'IPC Interanual (%)', cD: false, isU: false }, 'rem_interanual': { l: 'REM 12m (%)', cD: false, isU: false },
+            'tasa_politica_tea': { l: 'Tasa Política (TEA %)', cD: false, isU: false }, 'badlar_tea': { l: 'BADLAR (TEA %)', cD: false, isU: false }, 'tamar_tea': { l: 'TAMAR (TEA %)', cD: false, isU: false }
+        };
+
+        function setMode(m) {
+            document.body.classList.toggle('mobile-mode', m === 'mobile');
+            if (document.getElementById('btnMobile')) {
+                document.getElementById('btnMobile').classList.toggle('active', m === 'mobile');
+                document.getElementById('btnDesktop').classList.toggle('active', m === 'desktop');
+            }
+            if (window.allCharts) window.allCharts.forEach(c => { if (c.canvas) c.resize(); });
+        }
+
+        function verTab(e, id) { document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); e.currentTarget.classList.add('active'); window.allCharts.forEach(c => c.update()); }
+
+function filtrarTexto(){
+        let s=document.getElementById('dateStart').value, e=document.getElementById('dateEnd').value;
+        let st_m=window.fechas_m[0], en_m=window.fechas_m[window.fechas_m.length-1];
+        let st_d=window.fechas_d[0], en_d=window.fechas_d[window.fechas_d.length-1];
+        if(s){ let s_m=s.substring(0,7); st_m=window.fechas_m.find(f=>f>=s_m)||st_m; st_d=window.fechas_d.find(f=>f>=s)||st_d; }
+        if(e){ let e_m=e.substring(0,7); en_m=[...window.fechas_m].reverse().find(f=>f<=e_m)||en_m; en_d=[...window.fechas_d].reverse().find(f=>f<=e)||en_d; }
+        
+        window.allCharts.forEach(c=>{
+            try {
+                if(c.options.scales.x && c.config.type !== 'scatter'){
+                    c.options.scales.x.min = (c.canvas.id==='chartDiario')?st_d:st_m;
+                    c.options.scales.x.max = (c.canvas.id==='chartDiario')?en_d:en_m;
+                    
+                    // BUSCAR DONDE TODAS LAS LÍNEAS TENGAN DATOS AL MISMO TIEMPO (Intersección)
+                    if (c.data.labels && c.data.labels.length > 0) {
+                        let indicesInicio = [];
+                        if (c.data.datasets) {
+                            c.data.datasets.forEach(ds => {
+                                if (ds.data && Array.isArray(ds.data)) {
+                                    let idx = ds.data.findIndex(val => val !== null && val !== undefined && !Number.isNaN(val));
+                                    if(idx !== -1) indicesInicio.push(idx);
+                                }
+                            });
+                        }
+                        
+                        // Aplicar recorte automático si el usuario no fijó fecha manual "Desde"
+                        if (indicesInicio.length > 0 && !s) {
+                            // Math.max toma el inicio más "tardío" entre todas las variables del gráfico
+                            let inicioComun = Math.max(...indicesInicio);
+                            c.options.scales.x.min = c.data.labels[inicioComun];
+                        }
+                    }
+                    c.update();
+                }
+            } catch (err) {
+                console.error("Error ajustando fechas:", err);
+            }
+        });
+    }
+        function initGen() {
+            [1, 2].forEach(i => {
+                const sel = document.getElementById(`genSelect${i}`);
+                sel.innerHTML = '<option value="" disabled selected>-- Seleccione una Métrica --</option>';
+                for (let k in DICT) sel.appendChild(new Option(DICT[k].l, k));
+            });
+        }
+
+        function chkDef(n) {
+            const val = document.getElementById(`genSelect${n}`).value;
+            if (val) document.getElementById(`genNom${n}`).disabled = !DICT[val].cD;
+        }
+
+        function toggleModoGen() {
+            let isSc = document.getElementById('genModo').value === 'scatter';
+            if (isSc) {
+                document.querySelector('input[name="numVars"][value="2"]').checked = true;
+                document.querySelector('input[name="numVars"][value="1"]').disabled = true;
+            } else {
+                document.querySelector('input[name="numVars"][value="1"]').disabled = false;
+            }
+            let v2 = document.querySelector('input[name="numVars"]:checked').value === '2';
+            document.getElementById('panelVar2').style.opacity = v2 ? 1 : 0.5;
+            document.getElementById('panelVar2').style.pointerEvents = v2 ? 'auto' : 'none';
+
+            document.getElementById('wrapType1').style.display = isSc ? 'none' : 'flex';
+            document.getElementById('wrapType2').style.display = isSc ? 'none' : 'flex';
+            document.getElementById('wrapAxis2').style.display = isSc ? 'none' : 'flex';
+        }
+
+        function crearGen() {
+            try {
+                let v1_val = document.getElementById('genSelect1').value;
+                if (!v1_val) { alert("Por favor, seleccioná al menos una métrica para la Variable 1."); return; }
+
+                if (document.querySelector('input[name="numVars"]:checked').value === '2') {
+                    let v2_val = document.getElementById('genSelect2').value;
+                    if (!v2_val) { alert("Por favor, seleccioná la métrica para la Variable 2."); return; }
+                }
+
+                document.getElementById('resultadoGenerador').style.display = 'block';
+
+                if (window.cGen) {
+                    window.allCharts = window.allCharts.filter(c => c !== window.cGen);
+                    window.cGen.destroy();
+                    window.cGen = null;
+                }
+                document.getElementById('canvasContainer').innerHTML = '<canvas id="chartGenerador"></canvas>';
+
+                const getD = (n) => {
+                    const v = document.getElementById(`genSelect${n}`).value;
+                    const quiereCorriente = document.getElementById(`genNom${n}`).value === 'corriente';
+
+                    if (v === 'bandas') {
+                        let d_inf = window.data_m['banda_inferior' + (quiereCorriente ? '_corriente' : '')] || window.data_m['banda_inferior'];
+                        let d_sup = window.data_m['banda_superior' + (quiereCorriente ? '_corriente' : '')] || window.data_m['banda_superior'];
+                        return { isBanda: true, l: DICT[v].l + (quiereCorriente ? ' (Nominal)' : ''), d_inf: d_inf || [], d_sup: d_sup || [], t: 'line' };
+                    }
+
+                    let dataFinal = window.data_m[v] || [];
+                    if (DICT[v].cD && quiereCorriente) { dataFinal = window.data_m[v + '_corriente'] || window.data_m[v] || []; }
+                    return { isBanda: false, l: DICT[v].l + (DICT[v].cD && quiereCorriente ? ' (Nominal)' : ''), d: dataFinal, t: document.getElementById(`genType${n}`).value };
+                };
+
+                let sources = new Set();
+                const addSrc = (v, n) => {
+                    if (v === 'riesgo_pais') sources.add('Ámbito');
+                    else if (v === 'tasa_fed') sources.add('NY Fed');
+                    else {
+                        sources.add('BCRA');
+                        if (DICT[v].isU && document.getElementById(`genNom${n}`).value === 'constante') sources.add('BLS');
+                    }
+                };
+
+                addSrc(v1_val, 1);
+                if (document.querySelector('input[name="numVars"]:checked').value === '2') addSrc(document.getElementById('genSelect2').value, 2);
+
+                let sArr = Array.from(sources);
+                let fuenteSTR = 'Fuente: CEER en base a ' + (sArr.length === 1 ? sArr[0] : sArr.length === 2 ? sArr[0] + ' y ' + sArr[1] : sArr[0] + ', ' + sArr[1] + ' y ' + sArr[2]);
+
+                let isSc = document.getElementById('genModo').value === 'scatter';
+                let d1 = getD(1);
+
+                if (isSc) {
+                    let d2 = getD(2);
+                    if (d1.isBanda || d2.isBanda) {
+                        alert("Las Bandas Cambiarias no se pueden usar en Gráficos de Correlación. Elegí Línea de Tiempo o cambiá la métrica."); return;
+                    }
+
+                    let pts = [];
+                    for (let i = 0; i < Math.min(d1.d.length, d2.d.length); i++) {
+                        if (d1.d[i] != null && d2.d[i] != null) pts.push({ y: d1.d[i], x: d2.d[i], label: window.fechas_m[i] });
+                    }
+
+                    if (pts.length < 2) {
+                        alert("No hay suficientes datos superpuestos en el tiempo entre ambas variables para calcular una correlación.");
+                        return;
+                    }
+
+                    let n = pts.length, sX = 0, sY = 0, sXY = 0, sXX = 0, sYY = 0;
+                    pts.forEach(p => { sX += p.x; sY += p.y; sXY += p.x * p.y; sXX += p.x * p.x; sYY += p.y * p.y; });
+                    let slope = (n * sXY - sX * sY) / (n * sXX - sX * sX); let intercept = (sY - slope * sX) / n;
+                    let r2 = Math.pow((n * sXY - sX * sY) / Math.sqrt((n * sXX - sX * sX) * (n * sYY - sY * sY)), 2);
+                    if (isNaN(r2)) r2 = 0;
+
+                    let minX = Math.min(...pts.map(p => p.x)), maxX = Math.max(...pts.map(p => p.x));
+
+                    let d = [
+                        { type: 'scatter', label: 'Observaciones', data: pts, backgroundColor: 'rgba(33,33,226,0.6)', pointRadius: 5, hoverRadius: 8 },
+                        { type: 'line', label: `Regresión (R² = ${r2.toFixed(4)})`, data: [{ x: minX, y: slope * minX + intercept }, { x: maxX, y: slope * maxX + intercept }], borderColor: C_MORADO, borderWidth: 3, pointRadius: 0, fill: false }
+                    ];
+
+                    window.cGen = buildC('chartGenerador', d, { x: { type: 'linear', position: 'bottom', title: { display: true, text: d2.l, font: { family: "'Inter', sans-serif", weight: '600' } } }, y: { title: { display: true, text: d1.l, font: { family: "'Inter', sans-serif", weight: '600' } } } }, false, true, fuenteSTR);
+                } else {
+                    let d = [];
+
+                    const addDataset = (dObj, colorMain, yAxisID) => {
+                        if (dObj.isBanda) {
+                            let colorBg = colorMain === C_PRINCIPAL ? 'rgba(33,33,226,0.1)' : 'rgba(0,0,222,0.1)';
+                            d.push({ label: dObj.l + ' (Sup)', data: dObj.d_sup, borderColor: colorMain, backgroundColor: 'transparent', type: 'line', borderWidth: 2.5, yAxisID: yAxisID, pointRadius: 0 });
+                            d.push({ label: dObj.l + ' (Inf)', data: dObj.d_inf, borderColor: colorMain, backgroundColor: colorBg, type: 'line', borderWidth: 2.5, yAxisID: yAxisID, fill: '-1', pointRadius: 0 });
+                        } else {
+                            let bg = dObj.t !== 'line' ? (colorMain === C_PRINCIPAL ? 'rgba(33,33,226,0.2)' : 'rgba(68,4,197,0.2)') : null;
+                            d.push({ label: dObj.l, data: dObj.d, borderColor: colorMain, backgroundColor: bg, type: dObj.t === 'area' ? 'line' : dObj.t, fill: dObj.t === 'area', borderWidth: 2.5, yAxisID: yAxisID });
+                        }
+                    };
+
+                    addDataset(d1, C_PRINCIPAL, 'y');
+                    let y1 = { display: false };
+                    if (document.querySelector('input[name="numVars"]:checked').value === '2') {
+                        let d2 = getD(2), u2 = document.getElementById('genAxis2').checked;
+                        addDataset(d2, C_MORADO, u2 ? 'y1' : 'y');
+                        if (u2) y1 = { type: 'linear', position: 'right', grid: { display: false }, border: { display: false }, ticks: { maxTicksLimit: 5, font: { family: "'Inter', sans-serif", weight: '400' } } };
+                    }
+                    window.cGen = buildC('chartGenerador', d, { y1: y1 }, false, false, fuenteSTR);
+                    filtrarTexto();
+                }
+                document.getElementById('resultadoGenerador').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                alert("Oops! Ocurrió un error al generar el gráfico. Detalle técnico: " + error.message);
+            }
+        }
+
+        // Plugin para fondo blanco solo en el área del gráfico (entre ejes), como Excel
+        const chartAreaBgPlugin = {
+            id: 'chartAreaBg',
+            beforeDraw(chart) {
+                const { ctx, chartArea } = chart;
+                if (!chartArea) return;
+                ctx.save();
+                ctx.fillStyle = BG_GRAFICO;
+                ctx.fillRect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
+                ctx.restore();
+            }
+        };
+        Chart.register(chartAreaBgPlugin);
+
+        // Plugin para logo CEER en esquina inferior derecha de cada gráfico
+        const ceerLogoPlugin = {
+            id: 'ceerLogo',
+            afterDraw(chart) {
+                const ctx = chart.ctx;
+                const img = window._ceerLogoImg;
+                if (!img || !img.complete) return;
+                const { chartArea } = chart;
+                if (!chartArea) return;
+                const logoH = 22;
+                const logoW = img.naturalWidth * (logoH / img.naturalHeight);
+                const x = chartArea.right - logoW;
+                const y = chart.height - logoH - 4;
+                ctx.save();
+                ctx.globalAlpha = 0.85;
+                ctx.drawImage(img, x, y, logoW, logoH);
+                ctx.restore();
+            }
+        };
+        Chart.register(ceerLogoPlugin);
+
+        // Plugin para agregar espacio debajo de la leyenda
+        Chart.register({
+            id: 'legendBottomPadding',
+            beforeInit(chart) {
+                const origFit = chart.legend.fit.bind(chart.legend);
+                chart.legend.fit = function () { origFit(); this.height += 16; };
+            }
+        });
+
+        // Precargar el logo CEER azul
+        window._ceerLogoImg = new Image();
+        window._ceerLogoImg.src = 'ceer_azul.png';
+
+        function buildC(id, datasets, extraScales = {}, stacked = false, isSc = false, fStr = 'Fuente: CEER en base a BCRA') {
+            let s = { x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45, autoSkip: true, maxTicksLimit: 12, font: { family: "'Inter', sans-serif", weight: '400' } } }, y: { grid: { color: 'rgba(0,0,0,0.06)' }, border: { display: false }, stacked: stacked, ticks: { maxTicksLimit: 5, font: { family: "'Inter', sans-serif", weight: '400' } } } }; Object.assign(s, extraScales);
+            let lbls = isSc ? undefined : (id === 'chartDiario' ? window.fechas_d : window.fechas_m);
+            let c = new Chart(document.getElementById(id).getContext('2d'), {
+                type: isSc ? 'scatter' : 'line',
+                data: { labels: lbls, datasets: datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: isSc ? 'nearest' : 'index', intersect: false }, spanGaps: true,
+                    elements: { point: { radius: isSc ? 5 : 0, hitRadius: 10, hoverRadius: 6 } }, scales: s,
+                    plugins: {
+                        tooltip: { backgroundColor: 'rgba(33,33,226,0.95)', padding: 12, titleFont: { family: "'Inter', sans-serif", size: 13 }, bodyFont: { family: "'Inter', sans-serif", size: 13 }, cornerRadius: 8, callbacks: isSc ? { label: (ctx) => `${ctx.raw.label}: (${ctx.raw.x.toFixed(2)}, ${ctx.raw.y.toFixed(2)})` } : {} },
+                        subtitle: { display: true, text: fStr, position: 'bottom', align: 'start', font: { family: "'Inter', sans-serif", style: 'italic', weight: '600', size: 11, color: '#6b7280' }, padding: { top: 22 } },
+                        legend: {
+                            labels: { usePointStyle: true, boxWidth: 8, padding: 15, font: { family: "'Inter', sans-serif", weight: '600' } }
+                        }
+                    }
+                }
+            });
+            window.allCharts.push(c); return c;
+        }
+
+        function dlPNG(id) {
+            const cv = document.getElementById(id);
+            // Buscar la card contenedora para incluir título
+            const card = cv.closest('.chart-card');
+            if (card && typeof html2canvas !== 'undefined') {
+                html2canvas(card, { backgroundColor: BG_TARJETA, scale: 2, useCORS: true }).then(canvas => {
+                    const a = document.createElement('a'); a.href = canvas.toDataURL('image/png'); a.download = id + '_ceer.png'; a.click();
+                });
+            } else {
+                // Fallback: solo el canvas si html2canvas no está disponible
+                const a = document.createElement('a'); a.href = cv.toDataURL('image/png'); a.download = id + '_ceer.png'; a.click();
+            }
+        }
+
+        function dlCSV(id) {
+            const c = Chart.getChart(id); if (!c) return;
+            const d = c.data.datasets; let csv = '';
+            if (c.config.type === 'scatter') {
+                csv = `"Mes","${c.options.scales.x.title.text} (X)","${c.options.scales.y.title.text} (Y)"\n`;
+                d[0].data.forEach(p => csv += `"${p.label}",${p.x},${p.y}\n`);
+            } else {
+                const l = c.data.labels; let sI = c.options.scales.x.min ? l.findIndex(x => x >= c.options.scales.x.min) : 0, eI = c.options.scales.x.max ? l.findLastIndex(x => x <= c.options.scales.x.max) : l.length - 1;
+                if (sI === -1) sI = 0; if (eI === -1) eI = l.length - 1;
+                csv = 'Fecha'; d.forEach(x => csv += `,"${x.label}"`); csv += '\n';
+                for (let i = sI; i <= eI; i++) { csv += l[i]; d.forEach(x => { let v = x.data[i]; csv += ',' + (v !== null && v !== undefined ? v : ''); }); csv += '\n'; }
+            }
+            const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = id + '_ceer.csv'; a.click();
+        }
+
+        async function load() {
+            try {
+                const res = await fetch(`datos_historicos.json?v=${new Date().getTime()}`);
+                if (!res.ok) throw new Error('HTTP Error ' + res.status);
+
+                const rawText = await res.text();
+                const raw = JSON.parse(rawText.replace(/NaN/g, "null"));
+
+                window.fechas_m = raw.mensual.fecha || []; window.fechas_d = raw.diario.fecha || []; const cln = (a) => a ? a.map(v => v === null ? null : Number(v)) : [];
+                for (let k in raw.mensual) window.data_m[k] = cln(raw.mensual[k]); const m = (k) => window.data_m[k] || []; const d = (k) => cln(raw.diario[k]);
+
+                const getNom = (k) => window.data_m[k + '_corriente'] ? window.data_m[k + '_corriente'] : (window.data_m[k] || []);
+
+                // APLICANDO COLORES OFICIALES Y DERIVADOS
+                buildC('chartPrestamos', [
+                    { label: 'Prendarios', data: m('prendarios'), backgroundColor: C_PRINCIPAL, fill: true, stacked: true, borderWidth: 0 },
+                    { label: 'Hipotecarios', data: m('hipotecarios'), backgroundColor: C_INFORMES, fill: true, stacked: true, borderWidth: 0 },
+                    { label: 'Personales', data: m('personales'), backgroundColor: C_MORADO, fill: true, stacked: true, borderWidth: 0 },
+                    { label: 'Tarjetas', data: m('tarjetas'), backgroundColor: C_AZUL_CLARO, fill: true, stacked: true, borderWidth: 0 }
+                ], {}, true);
+
+                buildC('chartDepositos', [
+                    { label: 'Plazo Fijo', data: m('plazo_fijo'), backgroundColor: C_PRINCIPAL, fill: true, stacked: true, borderWidth: 0 },
+                    { label: 'Cajas Ahorro', data: m('ca'), backgroundColor: C_INFORMES, fill: true, stacked: true, borderWidth: 0 },
+                    { label: 'Cuentas Ctes', data: m('cc'), backgroundColor: C_MORADO, fill: true, stacked: true, borderWidth: 0 }
+                ], {}, true);
+
+                buildC('chartUSD', [{ label: 'Depósitos (USD Nominales)', data: getNom('depositos_usd'), borderColor: C_MORADO, borderWidth: 2.5, fill: false }, { label: 'Préstamos (USD Nominales)', data: getNom('prestamos_usd'), borderColor: C_PRINCIPAL, borderWidth: 2.5, fill: false }]);
+
+                buildC('chartRiesgoPais', [{ label: 'Riesgo País', data: m('riesgo_pais'), borderColor: C_PRINCIPAL, fill: false, borderWidth: 2.5 }], {}, false, false, 'Fuente: CEER en base a Ámbito / ArgentinaDatos');
+
+                buildC('chartBrecha', [
+                    { label: 'Brecha Blue (%)', data: m('brecha_blue'), borderColor: C_PRINCIPAL, fill: false, yAxisID: 'y', borderWidth: 2.5 },
+                    { label: 'Brecha MEP (%)', data: m('brecha_mep'), borderColor: C_INFORMES, fill: false, yAxisID: 'y', borderWidth: 2.5 },
+                    { label: 'Brecha CCL (%)', data: m('brecha_ccl'), borderColor: C_MORADO, fill: false, yAxisID: 'y', borderWidth: 2.5 }
+                ]);
+
+                buildC('chartITCRM', [{ label: 'ITCRM General', data: m('itcrm'), borderColor: C_PRINCIPAL, fill: false, borderWidth: 2.5 }]);
+                buildC('chartReservas', [{ label: 'Reservas Brutas', data: m('reservas'), borderColor: C_PRINCIPAL, yAxisID: 'y', borderWidth: 2.5, fill: false }, { label: 'Compras BCRA', data: m('compra_divisas'), type: 'bar', yAxisID: 'y1', backgroundColor: C_MORADO_CLARO, borderRadius: 4 }], { y1: { type: 'linear', position: 'right', grid: { display: false }, border: { display: false }, ticks: { maxTicksLimit: 5, font: { family: "'Inter', sans-serif", weight: '400' } } } }, false, false, 'Fuente: CEER en base a BCRA y BLS');
+                buildC('chartCarrera', [{ label: 'Devaluación (%)', data: m('tc_mayorista_var'), borderColor: C_PRINCIPAL, fill: false, borderWidth: 2.5 }, { label: 'IPC (%)', data: m('ipc_mensual'), borderColor: C_MORADO, fill: false, borderWidth: 2.5 }]);
+                buildC('chartIPC', [{ label: 'IPC Interanual', data: m('ipc_interanual'), borderColor: C_PRINCIPAL, fill: false, borderWidth: 2.5 }, { label: 'REM 12m', data: m('rem_interanual'), borderColor: C_MORADO, borderDash: [5, 5], fill: false, borderWidth: 2.5 }]);
+                buildC('chartFED', [{ label: 'Tasa FED (EFFR %)', data: m('tasa_fed'), borderColor: C_PRINCIPAL, fill: false, borderWidth: 2.5 }], {}, false, false, 'Fuente: CEER en base a NY Fed');
+
+                buildC('chartAgregados', [{ label: 'M2', data: m('m2'), borderColor: C_MORADO, fill: false, borderWidth: 2.5 }, { label: 'Base Monetaria', data: m('base_monetaria'), borderColor: C_PRINCIPAL, fill: false, borderWidth: 2.5 }]);
+                buildC('chartTasas', [{label:'Tasa Política',data:m('tasa_politica_tea'),borderColor:C_PRINCIPAL,fill:false,borderWidth:2.5,yAxisID:'y'},{label:'BADLAR',data:m('badlar_tea'),borderColor:C_INFORMES,fill:false,borderWidth:2.5,yAxisID:'y'},{label:'IPC Interanual',data:m('ipc_interanual'),backgroundColor:'rgba(68,4,197,0.7)',type:'bar',yAxisID:'y',borderRadius:4}], {});
+                buildC('chartDiario', [{ label: 'BADLAR', data: d('badlar_tea'), borderColor: C_PRINCIPAL, fill: false, borderWidth: 2 }, { label: 'TAMAR', data: d('tamar_tea'), borderColor: C_MORADO, fill: false, borderWidth: 2 }]);
+
+                initGen();
+                filtrarTexto();
+
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+
+            } catch (error) {
+                console.error("Error crítico al cargar el Dashboard:", error);
+                document.getElementById('spinnerIcon').style.display = 'none';
+                document.getElementById('loader-text').style.display = 'none';
+                document.getElementById('errorBox').style.display = 'block';
+            }
+        }
+
+        // Auto-detectar dispositivo móvil
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth <= 768) {
+                document.body.classList.add('mobile-mode');
+            }
+            load();
+        });
+    </script>
+
+</body>
+
+</html>
