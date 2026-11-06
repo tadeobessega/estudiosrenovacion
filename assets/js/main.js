@@ -7,6 +7,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const mobileMenuBtn = document.getElementById("mobileMenuBtn");
   const mobileNav = document.getElementById("mobileNav");
 
+  /* ---------- Modo claro / oscuro ---------- */
+  const root = document.documentElement;
+  const headerContent = document.querySelector(".header-content");
+  if (headerContent && !document.querySelector(".theme-toggle")) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "theme-toggle";
+    btn.innerHTML = '<i class="fas fa-sun" aria-hidden="true"></i><i class="fas fa-moon" aria-hidden="true"></i>';
+    const label = () => {
+      const dark = root.getAttribute("data-theme") !== "light";
+      btn.setAttribute("aria-label", dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
+      btn.title = btn.getAttribute("aria-label");
+    };
+    btn.addEventListener("click", () => {
+      const next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("cer-theme", next); } catch (e) {}
+      label();
+    });
+    label();
+    // Botón y hamburguesa juntos a la derecha
+    const actions = document.createElement("div");
+    actions.className = "header-actions";
+    actions.appendChild(btn);
+    if (mobileMenuBtn) actions.appendChild(mobileMenuBtn);
+    headerContent.appendChild(actions);
+  }
+
   /* ---------- Menú móvil ---------- */
   if (mobileMenuBtn && mobileNav) {
     const closeMenu = () => {
@@ -59,7 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const y = window.pageYOffset || document.documentElement.scrollTop;
 
     if (header) {
-      header.classList.toggle("is-scrolled", y > 10);
       if (y > lastScroll && y > 160) header.classList.add("is-hidden");
       else header.classList.remove("is-hidden");
     }

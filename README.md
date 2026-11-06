@@ -1,65 +1,63 @@
-# CER — Centro de Estudios Estratégicos Renovación
+# CER: Centros de Estudios Renovación
 
-Sitio institucional del CER y su red de centros y observatorios
-(CEER, CEEIR, CEDHyS, OPSA, OPAL, OPER, CIREN) + la revista *Cíclica*.
+Sitio institucional de la red de centros y observatorios
+(CEER, CEEIR, CEDHyS, OPSA, OPAL, OPER, CIREN). La revista *Cíclica* vive aparte,
+en <https://ciclica.com.ar/> (el botón celeste del menú lleva ahí).
 
 ## Cómo funciona
 
-Sitio **100 % estático** (HTML/CSS/JS) pensado para **GitHub Pages**.
-Los datos (informes, miembros, notas, config) y el panel de administración
-usan el **Web App de Google Apps Script** del equipo — la URL está en
-`assets/js/data-source.js` (`CER_API`). El backend no vive en este repo.
+Todo corre en **Cloudflare Workers** (plan gratuito):
+
+| Pieza | Qué es | Dónde |
+|---|---|---|
+| Sitio | HTML/CSS/JS estático | `index.html`, `pages/`, `admin/`, `assets/` → se copia a `dist/` |
+| API | Worker que lee y escribe la base | `worker/index.js` (rutas `/api` y `/files/*`) |
+| Base | **D1** (SQLite): informes, miembros, usuarios, sesiones, config | `estudiosrenovacion-db` |
+| PDF | **Workers KV**: los PDF que se suben desde el panel | `estudiosrenovacion-archivos` |
+
+La configuración está en `wrangler.jsonc`. El esquema de la base está en
+`worker/sql/schema.sql`; `worker/sql/seed.sql` tiene los datos que venían de la
+planilla de Google y se cargan solos la primera vez que el Worker atiende `/api`.
+Los informes viejos siguen apuntando a sus PDF en Drive; los nuevos quedan en KV
+y se sirven desde `/files/...`.
 
 ```
-index.html                 Portada
-pages/                      Una página por centro + Cíclica + ¿Quiénes somos?
-pages/monitor/             Dashboard económico del CEER (Chart.js) + bot de datos
-admin/                      Panel de administración
-assets/css/                 styles.css (diseño CER), observatorio.css, admin.css
-assets/js/
-  data-source.js            Cliente de datos (define CER_API y window.CERData)
-  reports-public.js         Pinta informes / miembros en el sitio público
-  admin-config.js           Llamadas del panel (login, alta/edición, subida de PDF)
-  main.js                    Slider, menú, scroll
-  indicadores.js             Tarjetas de indicadores del CEER (APIs del BCRA / datos.gob.ar)
-.github/workflows/monitor-datos.yml   Actualiza a diario los datos del dashboard
+index.html, pages/, admin/, assets/   Sitio
+pages/monitor/                        Dashboard económico del CEER (bot en Python)
+worker/index.js                       API + archivos
+worker/sql/                           Esquema y datos iniciales
+scripts/build.mjs                     Copia el sitio a dist/
+wrangler.jsonc                        Config del Worker (D1, KV, assets)
 ```
 
-## Ver el sitio localmente
+## Deploy
 
-> ⚠️ No abras los `.html` con doble clic (como `file://` el navegador bloquea las
-> llamadas al Apps Script). Servilo por HTTP:
+Cloudflare (Workers Builds) está conectado al repo:
+
+- **Build command:** `pnpm run build`
+- **Deploy command:** `npx wrangler deploy`
+
+Cada push a la rama de producción vuelve a publicar.
+
+## Desarrollo local
 
 ```
-npx serve .
+pnpm install
+pnpm run dev        # build + wrangler dev en http://localhost:8787
 ```
-o
-```
-python -m http.server 8000
-```
-y abrí `http://localhost:8000`.
 
-## Publicar (GitHub Pages)
+`wrangler dev` usa una base D1 local vacía: para probar, creá las tablas con
+`npx wrangler d1 execute estudiosrenovacion-db --local --file worker/sql/schema.sql`.
 
-Este repo es `tadeobessega.github.io` → GitHub Pages sirve lo que está en la
-rama `main`, en `https://tadeobessega.github.io/`.
+## Panel de administración
 
-1. Mergeá esta rama a `main` (o subí estos archivos a `main`).
-2. Settings → Pages → *Source: Deploy from a branch* → `main` / `/ (root)`.
-3. En 1–2 min queda online.
-
-El `.nojekyll` evita que GitHub procese el sitio con Jekyll.
+`/admin/login.html`. Las contraseñas se guardan con PBKDF2 (nunca en texto plano)
+y cada usuario puede cambiar la suya desde el ícono de llave. Los usuarios nuevos
+se registran y un administrador los aprueba.
 
 ## Diseño
 
-Tema oscuro "cobalto profundo": fondo casi negro azulado, orbes de luz azul,
-patrón de flechas. Todo el color está en tokens CSS (`--cer-*` en `styles.css`;
-`admin.css` para el panel).
-
-> **Logo provisional:** hasta tener un isotipo propio del CER se usa el logo del
-> CEER (`assets/img/ceer-logo.png`).
-
-## Dashboard del CEER (`pages/monitor/`)
-
-Ver `pages/monitor/README.md`. El workflow `monitor-datos.yml` corre el bot y
-commitea `datos_historicos.json` una vez por día (o a mano desde *Actions*).
+Tema cobalto con **modo oscuro y modo claro** (botón en el header; arranca según
+la preferencia del sistema y recuerda la elección). Todo el color está en tokens
+CSS al principio de `assets/css/styles.css`; el espaciado usa una sola escala
+(`--section-y`, `--section-head`, `--grid-gap`, `--card-pad`).

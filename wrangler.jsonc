@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "estudiosrenovacion",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api", "/api/*", "/files/*"]
+  },
+  "rules": [{ "type": "Text", "globs": ["**/*.sql"], "fallthrough": true }],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "estudiosrenovacion-db", "database_id": "a48c0a52-4543-4da4-b833-000d082e2fd0" }
+  ],
+  "kv_namespaces": [
+    { "binding": "FILES", "id": "85faf611136c46dd9d0e19e9ffdc4d5b" }
+  ],
+  "observability": { "enabled": true }
+}

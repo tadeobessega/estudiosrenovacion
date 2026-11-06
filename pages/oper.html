@@ -4,15 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPER — Observatorio de Políticas Educativas Renovación</title>
-    <meta name="description" content="OPER — Observatorio de Políticas Educativas Renovación, parte de la red de Centros de Estudios Renovación.">
+    <title>OPER | Observatorio de Políticas Educativas Renovación</title>
+    <meta name="description" content="OPER. Observatorio de Políticas Educativas Renovación, parte de la red de Centros de Estudios Renovación.">
+    <script>
+        // Tema: el guardado o, si no hay, el del sistema. Va antes del CSS para no parpadear.
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('cer-theme'); } catch (e) {}
+            if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <link rel="icon" type="image/png" href="../assets/img/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=20260916">
-    <link rel="stylesheet" href="../assets/css/observatorio.css?v=20260916">
+    <link rel="stylesheet" href="../assets/css/styles.css?v=20261105">
+    <link rel="stylesheet" href="../assets/css/observatorio.css?v=20261105">
 </head>
 
 <body>
@@ -20,17 +29,17 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <a href="../index.html#inicio" aria-label="Centros de Estudios Renovación — inicio"><img src="../assets/img/logos.png" alt="Centros de Estudios Renovación" class="logo-img"></a>
+                    <a href="../index.html#inicio" aria-label="Centros de Estudios Renovación, inicio"><img src="../assets/img/logos.png" alt="Centros de Estudios Renovación" class="logo-img"></a>
                 </div>
                 <nav class="nav-desktop" aria-label="Principal">
                     <ul class="nav-list">
-                        
                         <li><a href="../index.html#inicio" class="nav-link">Inicio</a></li>
                         <li><a href="../index.html#observatorios" class="nav-link">Observatorios</a></li>
                         <li><a href="../index.html#novedades" class="nav-link">Novedades</a></li>
                         <li><a href="../index.html#informes" class="nav-link">Informes</a></li>
                         <li><a href="../index.html#quienes-somos" class="nav-link">¿Quiénes somos?</a></li>
                         <li><a href="../index.html#contacto" class="nav-link">Contacto</a></li>
+                        <li><a href="https://ciclica.com.ar/" class="nav-link nav-link-ciclica" target="_blank" rel="noopener">Cíclica <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a></li>
                     </ul>
                 </nav>
                 <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú" aria-controls="mobileNav" aria-expanded="false">
@@ -39,13 +48,13 @@
             </div>
             <nav class="nav-mobile" id="mobileNav" aria-label="Menú móvil">
                 <ul>
-                    
                     <li><a href="../index.html#inicio" class="nav-mobile-link">Inicio</a></li>
                     <li><a href="../index.html#observatorios" class="nav-mobile-link">Observatorios</a></li>
                     <li><a href="../index.html#novedades" class="nav-mobile-link">Novedades</a></li>
                     <li><a href="../index.html#informes" class="nav-mobile-link">Informes</a></li>
                     <li><a href="../index.html#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
                     <li><a href="../index.html#contacto" class="nav-mobile-link">Contacto</a></li>
+                    <li><a href="https://ciclica.com.ar/" class="nav-mobile-link nav-mobile-link-ciclica" target="_blank" rel="noopener">Cíclica</a></li>
                 </ul>
             </nav>
         </div>
@@ -88,7 +97,6 @@
         </section>
 
         <section class="ejes-tematicos">
-            <span class="cer-orb cer-orb--primary cer-orb--a"></span>
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Ejes Temáticos</h2>
@@ -195,9 +203,9 @@
         </div>
     </footer>
 
-    <script src="../assets/js/main.js?v=20260916"></script>
-    <script src="../assets/js/data-source.js?v=20260916"></script>
-    <script src="../assets/js/reports-public.js?v=20260916"></script>
+    <script src="../assets/js/main.js?v=20261105"></script>
+    <script src="../assets/js/data-source.js?v=20261105"></script>
+    <script src="../assets/js/reports-public.js?v=20261105"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             loadCentroPublicaciones('OPER', 'oper');

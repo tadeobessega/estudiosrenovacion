@@ -4,85 +4,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informe — Centros de Estudios Renovación</title>
+    <title>Informe | Centros de Estudios Renovación</title>
     <meta name="description" content="Informe publicado por la red de Centros de Estudios Renovación.">
     <meta property="og:type" content="article">
-    <meta property="og:title" content="Informe — Centros de Estudios Renovación">
+    <meta property="og:title" content="Informe. Centros de Estudios Renovación">
     <meta property="og:description" content="Informe publicado por la red de Centros de Estudios Renovación.">
+    <script>
+        // Tema: el guardado o, si no hay, el del sistema. Va antes del CSS para no parpadear.
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('cer-theme'); } catch (e) {}
+            if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <link rel="icon" type="image/png" href="../assets/img/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=20260916">
-    <link rel="stylesheet" href="../assets/css/observatorio.css?v=20260916">
+    <link rel="stylesheet" href="../assets/css/styles.css?v=20261105">
+    <link rel="stylesheet" href="../assets/css/observatorio.css?v=20261105">
     <style>
         .informe-page {
-            padding: calc(80px + 3rem) 0 5rem;
-            background: var(--cer-bg);
-            background-image: var(--cer-pattern);
+            padding: 3rem 0 5rem;
+            background: var(--bg);
             min-height: 70vh;
         }
-        .informe-wrap { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+        .informe-wrap { max-width: 860px; margin: 0 auto; padding: 0 1.25rem; }
 
         .informe-back {
             display: inline-flex; align-items: center; gap: .5rem;
-            color: var(--gray-500); font-size: .875rem; font-weight: 500;
+            color: var(--muted); font-size: .875rem; font-weight: 500;
             margin-bottom: 2rem; transition: color .15s;
         }
-        .informe-back:hover { color: var(--cer-cyan); }
+        .informe-back:hover { color: var(--link); }
 
-        .informe-tags { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1.1rem; }
+        .informe-tags { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1rem; }
         .informe-chip {
-            font-size: .74rem; font-weight: 700; letter-spacing: .04em;
-            padding: 3px 12px; border-radius: 999px; text-transform: uppercase;
+            font-size: .72rem; font-weight: 600; letter-spacing: .04em;
+            padding: 2px 8px; border-radius: var(--border-radius-sm); text-transform: uppercase;
         }
-        .informe-chip--centro { background: var(--cer-cyan); color: #04121a; }
-        .informe-chip--tag { background: rgba(255,255,255,.08); color: var(--gray-600); }
-        .informe-chip--date { color: var(--gray-500); font-weight: 500; letter-spacing: 0; text-transform: none; font-size: .82rem; }
+        .informe-chip--centro { background: var(--accent); color: var(--accent-ink); }
+        .informe-chip--tag { background: var(--surface-2); color: var(--text); }
+        .informe-chip--date { color: var(--muted); font-weight: 500; letter-spacing: 0; text-transform: none; font-size: .82rem; }
 
         .informe-h1 {
-            font-size: clamp(1.8rem, 4.2vw, 2.8rem);
-            font-weight: 800; letter-spacing: -.02em; line-height: 1.15;
-            color: var(--white); margin-bottom: 1.1rem;
+            font-size: clamp(1.7rem, 4vw, 2.5rem);
+            font-weight: 700; letter-spacing: -.02em; line-height: 1.18;
+            color: var(--heading); margin-bottom: 1rem;
         }
         .informe-lead {
-            font-size: 1.06rem; line-height: 1.75; color: var(--gray-700);
-            margin-bottom: 2rem;
+            font-size: 1.05rem; line-height: 1.75; color: var(--text);
+            margin-bottom: 2rem; white-space: pre-line;
         }
 
         .informe-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 2.5rem; }
         .informe-btn {
             display: inline-flex; align-items: center; gap: .55rem;
-            padding: .8rem 1.5rem; border-radius: .55rem;
-            font-size: .95rem; font-weight: 700; cursor: pointer;
-            transition: transform .18s, box-shadow .18s, background .18s;
+            padding: .7rem 1.25rem; border-radius: var(--border-radius-md);
+            font-size: .9rem; font-weight: 600; cursor: pointer;
+            border: 1px solid transparent;
+            transition: background .15s, border-color .15s;
         }
-        .informe-btn--primary { background: linear-gradient(135deg, var(--cer-cyan), #0e93b3); color: #04121a; }
-        .informe-btn--primary:hover { transform: translateY(-2px); box-shadow: 0 14px 32px -12px rgba(34,211,238,.6); }
-        .informe-btn--ghost { background: rgba(255,255,255,.06); color: var(--gray-700); border: 1px solid var(--line); }
-        .informe-btn--ghost:hover { background: rgba(255,255,255,.12); color: var(--white); }
+        .informe-btn--primary { background: var(--accent); color: var(--accent-ink); }
+        .informe-btn--primary:hover { background: var(--accent-hover); }
+        .informe-btn--ghost { background: transparent; color: var(--heading); border-color: var(--line-strong); }
+        .informe-btn--ghost:hover { background: var(--accent-soft); }
 
         .informe-viewer {
             position: relative; width: 100%; aspect-ratio: 4 / 5;
-            border-radius: .9rem; overflow: hidden;
-            border: 1px solid var(--line); background: var(--cer-surface);
+            border-radius: var(--border-radius-lg); overflow: hidden;
+            border: 1px solid var(--line); background: var(--surface);
         }
         @media (min-width: 720px) { .informe-viewer { aspect-ratio: 16 / 11; } }
         .informe-viewer iframe { width: 100%; height: 100%; border: 0; }
 
-        .informe-state { text-align: center; padding: 4rem 1rem; color: var(--gray-500); }
+        .informe-state { text-align: center; padding: 4rem 1rem; color: var(--muted); }
         .informe-state .spin {
-            width: 38px; height: 38px; margin: 0 auto 1.2rem;
-            border: 3px solid rgba(255,255,255,.12); border-top-color: var(--cer-cyan);
+            width: 34px; height: 34px; margin: 0 auto 1.2rem;
+            border: 3px solid var(--line); border-top-color: var(--accent);
             border-radius: 50%; animation: cer-spin .8s linear infinite;
         }
         @keyframes cer-spin { to { transform: rotate(360deg); } }
-        .informe-hint { margin-top: 1rem; font-size: .85rem; color: var(--gray-500); }
+        .informe-hint { margin-top: 1rem; font-size: .85rem; color: var(--muted); }
         .toast {
             position: fixed; left: 50%; bottom: 2rem; transform: translateX(-50%) translateY(20px);
-            background: var(--cer-cyan); color: #04121a; font-weight: 700; font-size: .9rem;
-            padding: .7rem 1.3rem; border-radius: .55rem; opacity: 0; pointer-events: none;
+            background: var(--heading); color: var(--bg); font-weight: 600; font-size: .9rem;
+            padding: .7rem 1.2rem; border-radius: var(--border-radius-md); opacity: 0; pointer-events: none;
             transition: opacity .2s, transform .2s; z-index: 9999;
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -94,7 +103,7 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <a href="../index.html#inicio" aria-label="Centros de Estudios Renovación — inicio"><img src="../assets/img/logos.png" alt="Centros de Estudios Renovación" class="logo-img"></a>
+                    <a href="../index.html#inicio" aria-label="Centros de Estudios Renovación, inicio"><img src="../assets/img/logos.png" alt="Centros de Estudios Renovación" class="logo-img"></a>
                 </div>
                 <nav class="nav-desktop" aria-label="Principal">
                     <ul class="nav-list">
@@ -104,6 +113,7 @@
                         <li><a href="../index.html#informes" class="nav-link">Informes</a></li>
                         <li><a href="../index.html#quienes-somos" class="nav-link">¿Quiénes somos?</a></li>
                         <li><a href="../index.html#contacto" class="nav-link">Contacto</a></li>
+                        <li><a href="https://ciclica.com.ar/" class="nav-link nav-link-ciclica" target="_blank" rel="noopener">Cíclica <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a></li>
                     </ul>
                 </nav>
                 <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú" aria-controls="mobileNav" aria-expanded="false">
@@ -118,6 +128,7 @@
                     <li><a href="../index.html#informes" class="nav-mobile-link">Informes</a></li>
                     <li><a href="../index.html#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
                     <li><a href="../index.html#contacto" class="nav-mobile-link">Contacto</a></li>
+                    <li><a href="https://ciclica.com.ar/" class="nav-mobile-link nav-mobile-link-ciclica" target="_blank" rel="noopener">Cíclica</a></li>
                 </ul>
             </nav>
         </div>
@@ -179,8 +190,8 @@
 
     <div class="toast" id="toast">Enlace copiado</div>
 
-    <script src="../assets/js/main.js?v=20260916"></script>
-    <script src="../assets/js/data-source.js?v=20260916"></script>
+    <script src="../assets/js/main.js?v=20261105"></script>
+    <script src="../assets/js/data-source.js?v=20261105"></script>
     <script>
         const CENTRO_SLUG = {
             'CEER': 'ceer', 'CEEIR': 'ceeir', 'CEDHyS': 'cedhys', 'OPER': 'oper',
@@ -243,9 +254,10 @@
             const slug = CENTRO_SLUG[r.centro] || '';
             const centroHref = slug ? `${slug}.html` : '../index.html#informes';
             const fid = driveId(r.pdf_url);
-            const preview = fid ? `https://drive.google.com/file/d/${fid}/preview` : '';
+            const preview = fid ? `https://drive.google.com/file/d/${fid}/preview`
+                : (r.pdf_url && r.pdf_url.startsWith('/files/') ? r.pdf_url : '');
 
-            document.title = `${r.titulo} — Centros de Estudios Renovación`;
+            document.title = `${r.titulo} | Centros de Estudios Renovación`;
             const md = document.querySelector('meta[name="description"]');
             if (md && r.descripcion) md.setAttribute('content', r.descripcion.slice(0, 180));
 
@@ -259,7 +271,7 @@
                 <h1 class="informe-h1">${esc(r.titulo)}</h1>
                 ${r.descripcion ? `<p class="informe-lead">${esc(r.descripcion)}</p>` : ''}
                 <div class="informe-actions">
-                    ${r.pdf_url ? `<a href="${encodeURI(r.pdf_url)}" target="_blank" rel="noopener" class="informe-btn informe-btn--primary"><i class="fas fa-file-arrow-down"></i> Descargar PDF</a>` : ''}
+                    ${r.pdf_url ? `<a href="${r.pdf_url.startsWith('/files/') ? r.pdf_url : encodeURI(r.pdf_url)}" target="_blank" rel="noopener" class="informe-btn informe-btn--primary"><i class="fas fa-file-arrow-down"></i> Descargar PDF</a>` : ''}
                     <button class="informe-btn informe-btn--ghost" onclick="copyLink()"><i class="fas fa-link"></i> Compartir</button>
                 </div>
                 ${preview ? `
