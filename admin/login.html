@@ -4,23 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Centro de Estudios Renovación</title>
+    <title>Iniciar sesión — Panel</title>
     <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-    <link rel="stylesheet" href="../assets/css/admin.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=20260910c">
 </head>
 
 <body>
     <div class="login-container">
         <div class="login-card">
             <div class="login-logo">
-                <a href="../index.html">
-                    <img src="../assets/img/logo-header.png" alt="Centro de Estudios Renovación">
+                <a href="../index.html#inicio" aria-label="Centros de Estudios Renovación — inicio">
+                    <img src="../assets/img/logos.png" alt="Centros de Estudios Renovación">
                 </a>
             </div>
 
-            <h1 class="login-title">Panel de Administración</h1>
+            <h1 class="login-title">Panel de administración</h1>
             <p class="login-subtitle">Ingresá tus credenciales para continuar</p>
 
             <div class="tab-nav">
@@ -54,7 +54,9 @@
                     <div id="registerMessage" class="alert" style="display:none;"></div>
                     <div class="form-group">
                         <label class="form-label" for="registerEmail">Usuario</label>
-                        <input type="text" id="registerEmail" class="form-input" placeholder="nombre.apellido" required>
+                        <input type="text" id="registerEmail" class="form-input" placeholder="tu usuario" required
+                            pattern="[^@\s]+" title="Un nombre de usuario, sin @ ni espacios">
+                        <p style="font-size:.78rem;color:var(--muted);margin-top:.35rem;">Elegí un nombre de usuario (no un email).</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="registerPassword">Contraseña</label>
@@ -72,7 +74,6 @@
                             <option value="OPAL">OPAL - Observatorio para el Análisis Electoral</option>
                             <option value="OPSA">OPSA - Observatorio de Política Social Aplicada</option>
                             <option value="CIREN">CIREN - Centro de Estudios Científicos</option>
-                            <option value="Cíclica">Cíclica - Revista de Opinión</option>
                         </select>
                     </div>
                     <button type="submit" class="btn-admin btn-admin-primary btn-admin-block" id="registerBtn">
@@ -94,7 +95,8 @@
         </div>
     </div>
 
-    <script src="../assets/js/admin-config.js"></script>
+    <script src="../assets/js/data-source.js?v=20260910c"></script>
+    <script src="../assets/js/admin-config.js?v=20260910c"></script>
     <script>
         // Tabs
         document.querySelectorAll('.tab-link').forEach(tab => {

@@ -3,32 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración - Centro de Estudios Renovación</title>
+  <title>Panel de administración — Centros de Estudios Renovación</title>
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-  <link rel="stylesheet" href="../assets/css/admin.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    .badge-featured { background:#f59e0b;color:#fff;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700; }
-    .badge-ciclica  { background:#0099cc;color:#fff;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700; }
-    .tag-pill {
-      display:inline-flex;align-items:center;gap:.4rem;
-      background:var(--admin-bg-card);border:1px solid var(--admin-border);
-      border-radius:999px;padding:.25rem .75rem;font-size:.8rem;
-    }
-    .tag-pill button { background:none;border:none;cursor:pointer;color:#ef4444;line-height:1;font-size:.9rem;padding:0; }
-    .tags-container { display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;min-height:2rem; }
-    .config-add-row { display:flex;gap:.5rem;margin-top:.5rem; }
-    .config-add-row input { flex:1; }
-  </style>
+  <link rel="stylesheet" href="../assets/css/admin.css?v=20260910c">
 </head>
 <body class="admin-page">
 
   <!-- HEADER -->
   <header class="admin-header">
     <div class="admin-header-left">
-      <a href="../index.html" class="admin-header-logo">
-        <img src="../assets/img/logo-header.png" alt="Centro de Estudios Renovación">
+      <a href="../index.html#inicio" class="admin-header-logo" aria-label="Centros de Estudios Renovación — inicio">
+        <img src="../assets/img/logos.png" alt="Centros de Estudios Renovación">
       </a>
       <nav class="admin-nav">
         <button class="admin-nav-link active" data-view="informes"><i class="fas fa-file-alt"></i> Informes</button>
@@ -114,74 +101,100 @@
           <i class="fas fa-arrow-left"></i> Volver a informes
         </button>
         <div class="page-header">
-          <h1 class="page-title" id="uploadPageTitle">Subir Nuevo Informe</h1>
-          <p class="page-subtitle" id="uploadPageSubtitle">Completa los datos y sube el archivo PDF</p>
+          <h1 class="page-title" id="uploadPageTitle">Subir nuevo informe</h1>
+          <p class="page-subtitle" id="uploadPageSubtitle">Completá los datos y subí el archivo PDF</p>
         </div>
 
         <div class="admin-card">
-          <form id="uploadForm" onsubmit="handleUploadSubmit(event)">
+          <form id="uploadForm" onsubmit="handleUploadSubmit(event)" novalidate>
             <div id="formMessage" class="alert" style="display:none;"></div>
 
-            <div class="form-group">
-              <label class="form-label" for="titulo">Título del Informe *</label>
-              <input type="text" id="titulo" class="form-input" placeholder="Ej: Análisis de la Política Exterior Argentina" required>
-            </div>
+            <div class="form-section">
+              <div class="form-section-title"><i class="fas fa-align-left"></i> Contenido</div>
 
-            <div class="form-group">
-              <label class="form-label" for="descripcion">Descripción breve <span style="font-weight:400;color:var(--admin-text-muted);">(máx. 500 caracteres)</span></label>
-              <textarea id="descripcion" class="form-input" rows="3" maxlength="500" placeholder="Breve resumen del informe (opcional pero recomendado)" style="resize:vertical;" oninput="updateDescCounter(this)"></textarea>
-              <div style="text-align:right;font-size:.75rem;color:var(--admin-text-muted);margin-top:.25rem;" id="descCounter">0 / 500</div>
-            </div>
-
-            <div class="form-row">
               <div class="form-group">
-                <label class="form-label" for="centro">Centro de Investigación *</label>
-                <select id="centro" class="form-select" required>
-                  <option value="">Selecciona el centro</option>
-                </select>
+                <label class="form-label" for="titulo">Título del informe <span class="req">*</span></label>
+                <input type="text" id="titulo" class="form-input" maxlength="160"
+                  placeholder="Ej: Análisis de la política exterior argentina" required>
+                <p class="form-hint">Frase clara y descriptiva. Aparece tal cual en la web pública.</p>
               </div>
+
               <div class="form-group">
-                <label class="form-label" for="tag">Tipo de Publicación *</label>
-                <select id="tag" class="form-select" required>
-                  <option value="">Selecciona el tipo</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="fecha">Fecha de Publicación *</label>
-              <input type="date" id="fecha" class="form-input" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Archivo PDF *</label>
-              <div class="file-upload-zone" id="dropZone">
-                <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                <p class="file-upload-text">Arrastrá tu archivo PDF aquí o hacé clic para seleccionar</p>
-                <p class="file-upload-hint">Tamaño máximo: 10MB</p>
-                <input type="file" id="pdfFile" accept=".pdf" style="display:none;">
-              </div>
-              <div id="filePreview" class="file-upload-preview" style="display:none;">
-                <div class="file-upload-preview-icon"><i class="fas fa-file-pdf"></i></div>
-                <div class="file-upload-preview-info">
-                  <div class="file-upload-preview-name" id="fileName"></div>
-                  <div class="file-upload-preview-size" id="fileSize"></div>
-                </div>
-                <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="clearFile()"><i class="fas fa-times"></i></button>
-              </div>
-              <div id="existingPdf" class="file-upload-preview" style="display:none;">
-                <div class="file-upload-preview-icon"><i class="fas fa-file-pdf"></i></div>
-                <div class="file-upload-preview-info">
-                  <div class="file-upload-preview-name">PDF actual</div>
-                  <div class="file-upload-preview-size"><a id="existingPdfLink" href="#" target="_blank" class="link-text">Ver PDF</a></div>
+                <label class="form-label" for="descripcion">Descripción breve</label>
+                <textarea id="descripcion" class="form-textarea" rows="3" maxlength="500"
+                  placeholder="Resumen de 1 o 2 oraciones. Opcional, pero mejora mucho la tarjeta del informe."
+                  oninput="updateDescCounter(this)"></textarea>
+                <div style="display:flex;justify-content:space-between;gap:1rem;">
+                  <p class="form-hint" style="margin:.35rem 0 0;">Se muestra como bajada en la tarjeta pública.</p>
+                  <div class="form-hint" id="descCounter" style="margin-top:.35rem;white-space:nowrap;">0 / 500</div>
                 </div>
               </div>
             </div>
 
-            <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
+            <div class="form-section">
+              <div class="form-section-title"><i class="fas fa-tags"></i> Clasificación</div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="centro">Centro de investigación <span class="req">*</span></label>
+                  <select id="centro" class="form-select" required>
+                    <option value="">Seleccioná el centro</option>
+                  </select>
+                  <p class="form-hint" id="centroLockedHint" style="display:none;">
+                    <i class="fas fa-lock"></i> Tu cuenta sólo puede cargar informes para este centro.
+                  </p>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="tag">Tipo de publicación <span class="req">*</span></label>
+                  <select id="tag" class="form-select" required>
+                    <option value="">Seleccioná el tipo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="fecha">Fecha de publicación <span class="req">*</span></label>
+                <input type="date" id="fecha" class="form-input" required>
+                <p class="form-hint">Determina el orden en la web. No puede ser una fecha futura.</p>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title"><i class="fas fa-file-pdf"></i> Archivo</div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="pdfFile">Archivo PDF <span class="req">*</span></label>
+                <div class="file-upload-zone" id="dropZone" role="button" tabindex="0"
+                  aria-label="Seleccionar archivo PDF">
+                  <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <p class="file-upload-text">Arrastrá el PDF acá o hacé clic para elegirlo</p>
+                  <p class="file-upload-hint">Solo PDF · hasta 10&nbsp;MB</p>
+                  <input type="file" id="pdfFile" accept="application/pdf,.pdf" style="display:none;">
+                </div>
+
+                <div id="filePreview" class="file-upload-preview" style="display:none;">
+                  <div class="file-upload-preview-icon"><i class="fas fa-file-pdf"></i></div>
+                  <div class="file-upload-preview-info">
+                    <div class="file-upload-preview-name" id="fileName"></div>
+                    <div class="file-upload-preview-size" id="fileSize"></div>
+                  </div>
+                  <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" onclick="clearFile()" aria-label="Quitar archivo"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div id="existingPdf" class="file-upload-preview" style="display:none;">
+                  <div class="file-upload-preview-icon"><i class="fas fa-file-pdf"></i></div>
+                  <div class="file-upload-preview-info">
+                    <div class="file-upload-preview-name">PDF actual</div>
+                    <div class="file-upload-preview-size"><a id="existingPdfLink" href="#" target="_blank" rel="noopener" class="link-text">Ver PDF actual</a> · subí uno nuevo para reemplazarlo</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:1rem;justify-content:flex-end;flex-wrap:wrap;margin-top:.5rem;">
               <button type="button" class="btn-admin btn-admin-secondary" onclick="showView('informes')">Cancelar</button>
               <button type="submit" class="btn-admin btn-admin-primary" id="submitBtn">
-                <span class="btn-text" id="submitBtnText">Publicar Informe</span>
+                <span class="btn-text" id="submitBtnText">Publicar informe</span>
                 <span class="spinner" style="display:none;"></span>
               </button>
             </div>
@@ -222,24 +235,20 @@
       <!-- ===== VIEW: NOTAS CÍCLICA ===== -->
       <div id="view-notas" class="view" style="display:none;">
         <div class="page-header">
-          <h1 class="page-title">Cíclica — Notas de Opinión</h1>
-          <p class="page-subtitle">Revisá y aprobá las notas enviadas por los colaboradores</p>
+          <h1 class="page-title">Cíclica — Redacción</h1>
+          <p class="page-subtitle">La gestión de notas de opinión se hace desde el editor de Cíclica</p>
         </div>
-
-        <div class="tab-nav">
-          <button class="tab-link active" data-tab="notas-pending"><i class="fas fa-clock"></i> Pendientes (<span id="notasPendingCount">0</span>)</button>
-          <button class="tab-link" data-tab="notas-approved"><i class="fas fa-check"></i> Aprobadas</button>
-          <button class="tab-link" data-tab="notas-all"><i class="fas fa-list"></i> Todas</button>
-        </div>
-
-        <div id="notas-pending-tab" class="tab-content active">
-          <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Notas Pendientes de Aprobación</h2></div><div id="notasPendingContainer"></div></div>
-        </div>
-        <div id="notas-approved-tab" class="tab-content">
-          <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Notas Aprobadas</h2></div><div id="notasApprovedContainer"></div></div>
-        </div>
-        <div id="notas-all-tab" class="tab-content">
-          <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Todas las Notas</h2></div><div id="notasAllContainer"></div></div>
+        <div class="admin-card">
+          <div style="padding:2rem;text-align:center;">
+            <i class="fas fa-pen-nib" style="font-size:2rem;color:var(--ap);opacity:.7;"></i>
+            <p style="margin:1rem 0 1.5rem;max-width:520px;margin-left:auto;margin-right:auto;color:var(--muted);">
+              Cíclica ahora tiene su propio panel: cargás y formateás las notas (título, subtítulo,
+              cuerpo, imágenes), importás el Word que manda cada autor, y elegís qué se publica y qué se destaca.
+            </p>
+            <a href="ciclica.html" class="btn-admin btn-admin-primary" style="display:inline-flex;">
+              <i class="fas fa-arrow-up-right-from-square"></i> Abrir el editor de Cíclica
+            </a>
+          </div>
         </div>
       </div>
 
@@ -379,7 +388,8 @@
     </div>
   </div>
 
-  <script src="../assets/js/admin-config.js"></script>
+  <script src="../assets/js/data-source.js?v=20260910c"></script>
+  <script src="../assets/js/admin-config.js?v=20260910c"></script>
   <script>
   function isPending(u) {
     const v = u.approved;
@@ -415,13 +425,10 @@
     if (currentUser.role === 'admin') {
       document.getElementById('usersNavLink').style.display  = 'inline-flex';
       document.getElementById('miembrosNavLink').style.display = 'inline-flex';
-      document.getElementById('notasNavLink').style.display  = 'inline-flex';
       document.getElementById('configNavLink').style.display = 'inline-flex';
       document.getElementById('pendingUsersCard').style.display = 'block';
-    } else if (currentUser.centro === 'Cíclica') {
-      // Cíclica users see the notas section but not users/config
-      document.getElementById('notasNavLink').style.display = 'inline-flex';
     }
+    // Cíclica oculto: se gestiona aparte en admin/ciclica.html (no se muestra el link de nav)
 
     // Nav tabs
     document.querySelectorAll('.admin-nav-link[data-view]').forEach(btn => {
@@ -454,8 +461,7 @@
     document.getElementById('filterCentro').addEventListener('change', filterReports);
 
     await loadReports();
-    if (currentUser.role === 'admin') { loadUsers(); loadNotes(); loadFeaturedAdmin(); loadConfigUI(); }
-    else if (currentUser.centro === 'Cíclica') loadNotes();
+    if (currentUser.role === 'admin') { loadUsers(); loadFeaturedAdmin(); loadConfigUI(); }
   });
 
   async function loadDynamicConfig() {
@@ -476,6 +482,7 @@
     document.getElementById('view-' + v).style.display = 'block';
     const btn = document.querySelector(`.admin-nav-link[data-view="${v}"]`);
     if (btn) btn.classList.add('active');
+    if (v === 'upload' && !editMode) resetUploadForm();
     if (v === 'config')   { loadFeaturedAdmin(); loadConfigUI(); }
     if (v === 'miembros') { populateMiembrosCentroFilter(); loadMiembrosAdmin(); }
   }
@@ -486,7 +493,8 @@
       const centro = (currentUser.role === 'admin') ? 'all' : currentUser.centro;
       const response = await apiCall('getReports', { centro });
       if (response.success) {
-        allReports = response.reports;
+        allReports = response.reports.slice().sort((a, b) =>
+          new Date(b.fecha || b.created_at || 0) - new Date(a.fecha || a.created_at || 0));
         updateReportStats();
         renderReports(allReports);
         if (currentUser.role === 'admin') loadPendingUserCount();
@@ -600,22 +608,29 @@
   // ===== UPLOAD / EDIT =====
   function updateDescCounter(el) {
     const counter = document.getElementById('descCounter');
-    counter.textContent = `${el.value.length} / 500`;
-    counter.style.color = el.value.length > 500 ? '#ef4444' : '';
+    const n = el.value.length;
+    counter.textContent = `${n} / 500`;
+    counter.style.color = n >= 500 ? '#fca5a5' : (n >= 450 ? '#fcd34d' : '');
   }
 
   function resetUploadForm() {
     editMode = false; editReportId = null; existingPdfUrl = null; selectedFile = null;
     document.getElementById('uploadForm').reset();
-    document.getElementById('uploadPageTitle').textContent    = 'Subir Nuevo Informe';
+    document.getElementById('uploadPageTitle').textContent    = 'Subir nuevo informe';
     document.getElementById('uploadPageSubtitle').textContent = 'Completá los datos y subí el archivo PDF';
-    document.getElementById('submitBtnText').textContent      = 'Publicar Informe';
+    document.getElementById('submitBtnText').textContent      = 'Publicar informe';
     document.getElementById('formMessage').style.display     = 'none';
     document.getElementById('filePreview').style.display     = 'none';
     document.getElementById('existingPdf').style.display     = 'none';
     document.getElementById('dropZone').style.display        = 'block';
-    document.getElementById('fecha').valueAsDate             = new Date();
+    const fecha = document.getElementById('fecha');
+    fecha.valueAsDate = new Date();
+    fecha.max = new Date().toISOString().split('T')[0];
     document.getElementById('descCounter').textContent       = '0 / 500';
+    // Restaura el botón de envío (evita que quede deshabilitado/con spinner tras un envío previo)
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = false;
+    setLoading(submitBtn, false);
     populateCentroSelects();
     populateTagSelect();
   }
@@ -650,6 +665,9 @@
     const dropZone  = document.getElementById('dropZone');
     const fileInput = document.getElementById('pdfFile');
     dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+    });
     dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
     dropZone.addEventListener('drop', e => {
@@ -660,9 +678,11 @@
   }
 
   function handleFile(file) {
-    if (file.type !== 'application/pdf') { showFormMessage('Solo se permiten archivos PDF', 'danger'); return; }
-    if (file.size > 10*1024*1024)        { showFormMessage('El archivo es muy grande. Máximo 10MB', 'danger'); return; }
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    if (!isPdf)                   { showFormMessage('Solo se permiten archivos PDF', 'danger'); return; }
+    if (file.size > 10*1024*1024) { showFormMessage(`El archivo pesa ${formatFileSize(file.size)}. El máximo es 10 MB.`, 'danger'); return; }
     selectedFile = file;
+    document.getElementById('formMessage').style.display = 'none';
     document.getElementById('dropZone').style.display    = 'none';
     document.getElementById('existingPdf').style.display = 'none';
     document.getElementById('filePreview').style.display = 'flex';
@@ -680,35 +700,46 @@
 
   async function handleUploadSubmit(e) {
     e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    if (btn.disabled) return; // evita envíos duplicados
+
     const titulo      = document.getElementById('titulo').value.trim();
     const centro      = document.getElementById('centro').value;
     const tag         = document.getElementById('tag').value;
     const fecha       = document.getElementById('fecha').value;
     const descripcion = document.getElementById('descripcion').value.trim();
 
-    if (!titulo || !centro || !tag || !fecha) { showFormMessage('Por favor completá todos los campos obligatorios', 'danger'); return; }
-    if (!editMode && !selectedFile)           { showFormMessage('Por favor seleccioná un archivo PDF', 'danger'); return; }
-    if (descripcion.length > 500)             { showFormMessage('La descripción supera los 500 caracteres', 'danger'); return; }
+    const faltan = [];
+    if (!titulo) faltan.push('título');
+    if (!centro) faltan.push('centro');
+    if (!tag)    faltan.push('tipo de publicación');
+    if (!fecha)  faltan.push('fecha');
+    if (faltan.length)               { showFormMessage(`Faltan campos obligatorios: ${faltan.join(', ')}.`, 'danger'); return; }
+    if (fecha > new Date().toISOString().split('T')[0]) { showFormMessage('La fecha de publicación no puede ser futura.', 'danger'); return; }
+    if (!editMode && !selectedFile)  { showFormMessage('Adjuntá el archivo PDF del informe.', 'danger'); return; }
+    if (descripcion.length > 500)    { showFormMessage('La descripción supera los 500 caracteres.', 'danger'); return; }
 
-    const btn = document.getElementById('submitBtn');
     setLoading(btn, true);
     try {
       let pdfUrl = existingPdfUrl;
       if (selectedFile) {
-        showFormMessage('Subiendo PDF...', 'info');
+        showFormMessage('Subiendo el PDF… puede tardar unos segundos.', 'info');
         const upload = await uploadPDF(selectedFile);
-        if (!upload.success) throw new Error(upload.error || 'Error al subir PDF');
+        if (!upload.success) throw new Error(upload.error || 'No se pudo subir el PDF');
         pdfUrl = upload.url;
       }
+      showFormMessage(editMode ? 'Guardando cambios…' : 'Publicando el informe…', 'info');
       const data = { titulo, centro, tag, fecha, pdf_url: pdfUrl, descripcion };
       const res  = editMode
         ? await apiCall('updateReport', { id: editReportId, data: JSON.stringify(data) })
         : await apiCall('createReport', { data: JSON.stringify(data) });
-      if (res.success) {
-        showNotification(editMode ? 'Informe actualizado correctamente' : 'Informe publicado correctamente', 'success');
-        await loadReports();
-        setTimeout(() => showView('informes'), 1000);
-      } else throw new Error(res.error || 'Error al guardar el informe');
+      if (!res.success) throw new Error(res.error || 'No se pudo guardar el informe');
+
+      document.getElementById('formMessage').style.display = 'none';
+      setLoading(btn, false);
+      showNotification(editMode ? 'Informe actualizado correctamente' : 'Informe publicado correctamente', 'success');
+      await loadReports();
+      setTimeout(() => showView('informes'), 800);
     } catch(err) {
       showFormMessage(err.message || 'Error al procesar el formulario', 'danger');
       setLoading(btn, false);
@@ -853,7 +884,7 @@
         <td>${formatDateShort(n.fecha)}</td>
         <td>${n.aprobado ? '<span class="badge badge-success">Aprobada</span>' : '<span class="badge badge-warning">Pendiente</span>'}</td>
         <td><div class="table-actions">
-          ${n.pdf_url ? `<a href="${n.pdf_url}" target="_blank" class="btn-admin btn-admin-secondary btn-admin-sm" title="Ver PDF"><i class="fas fa-eye"></i></a>` : ''}
+          ${n.pdf_url ? `<a href="${n.pdf_url}" target="_blank" rel="noopener" class="btn-admin btn-admin-secondary btn-admin-sm" title="Abrir documento"><i class="fas fa-file-lines"></i></a>` : ''}
           ${(showApproval === true || (showApproval === null && !n.aprobado)) ? `
             <button class="btn-admin btn-admin-success btn-admin-sm" onclick="approveNota('${n.id}')"><i class="fas fa-check"></i> Aprobar</button>
             <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="rejectNota('${n.id}')"><i class="fas fa-times"></i> Rechazar</button>` : ''}
@@ -968,9 +999,11 @@
           <p>No hay informes destacados activos. Activalos desde la <button class="link-text" onclick="showView('informes')" style="background:none;border:none;cursor:pointer;">tabla de informes</button> usando el ⭐.</p>
         </div>`; return;
       }
+      const featured = res.reports.slice().sort((a, b) =>
+        new Date(b.fecha || b.created_at || 0) - new Date(a.fecha || a.created_at || 0));
       container.innerHTML = `<div style="overflow-x:auto;"><table class="admin-table">
         <thead><tr><th>Título</th><th>Centro</th><th>Fecha</th><th>Quitar</th></tr></thead>
-        <tbody>${res.reports.map(r => `<tr>
+        <tbody>${featured.map(r => `<tr>
           <td><strong>${esc(r.titulo)}</strong></td>
           <td><span class="badge-centro badge-${r.centro.toLowerCase()}">${esc(r.centro)}</span></td>
           <td>${formatDateShort(r.fecha)}</td>
@@ -1156,9 +1189,17 @@
 
   function populateCentroSelects() {
     const uploadSelect = document.getElementById('centro');
+    const hint = document.getElementById('centroLockedHint');
     if (currentUser && currentUser.role !== 'admin') {
-      uploadSelect.innerHTML = `<option value="${currentUser.centro}">${currentUser.centro}</option>`;
+      if (currentUser.centro) {
+        uploadSelect.innerHTML = `<option value="${currentUser.centro}">${currentUser.centro}</option>`;
+        hint.innerHTML = `<i class="fas fa-lock"></i> Tu cuenta sólo puede cargar informes para <strong>${esc(currentUser.centro)}</strong>.`;
+      } else {
+        uploadSelect.innerHTML = `<option value="">Sin centro asignado</option>`;
+        hint.innerHTML = `<i class="fas fa-triangle-exclamation"></i> Tu cuenta no tiene un centro asignado — pedile a un administrador que te lo asigne para poder subir informes.`;
+      }
       uploadSelect.disabled = true;
+      hint.style.display = 'block';
     } else {
       uploadSelect.innerHTML = '<option value="">Selecciona el centro</option>' +
         dynamicCentros.map(id => {
@@ -1166,6 +1207,7 @@
           return `<option value="${id}">${id}${info ? ' - ' + info.name : ''}</option>`;
         }).join('');
       uploadSelect.disabled = false;
+      hint.style.display = 'none';
     }
     const editSelect = document.getElementById('editCentro');
     editSelect.innerHTML = '<option value="">Selecciona el centro</option>' +
