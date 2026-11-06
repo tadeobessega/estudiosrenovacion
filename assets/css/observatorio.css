@@ -283,3 +283,21 @@
 @media (min-width: 768px) {
   .herramientas-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ---------- Monitor: grupos y detalle ---------- */
+.indicadores-grupo + .indicadores-grupo { margin-top: var(--spacing-xl); }
+.indicadores-grupo-titulo {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--heading);
+  margin-bottom: .75rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--line);
+}
+.indicador-card { display: flex; flex-direction: column; }
+.indicador-sub { font-size: var(--font-size-sm); color: var(--text); font-variant-numeric: tabular-nums; }
+.indicador-nota { font-size: var(--font-size-xs); color: var(--muted); }
+.indicador-card .indicador-fecha { margin-top: auto; padding-top: .6rem; }
+@media (min-width: 1024px) {
+  .indicadores-grid { grid-template-columns: repeat(4, 1fr); }
+}

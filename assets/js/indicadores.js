@@ -1,72 +1,62 @@
-/**
- * MONITOR ECONÓMICO — CEER
- * Conexión directa con APIs oficiales (BCRA + datos.gob.ar)
- */
+/* ============================================================
+   Monitor económico del CEER
+   Pide los datos ya procesados a la API del sitio (/api, acción
+   getIndicadores), que los arma en el servidor desde la API del
+   INDEC y el BCRA. Acá sólo se formatea y se pinta.
+   ============================================================ */
 (function () {
-  document.addEventListener('DOMContentLoaded', cargarIndicadores);
+  document.addEventListener('DOMContentLoaded', cargar);
 
-  async function cargarIndicadores() {
-    const container = document.getElementById('indicadores-container');
-    if (!container) return;
+  const GRUPOS = [
+    { id: 'indec', titulo: 'Precios, actividad e ingresos' },
+    { id: 'bcra', titulo: 'Mercado cambiario y monetario' }
+  ];
 
-    const resultados = await Promise.allSettled([
-      fetchBCRA(5, 'Tipo de Cambio Mayorista', '$'),
-      fetchBCRA(27, 'Inflación Mensual (IPC)', '', '%', true),
-      fetchBCRA(29, 'Inflación Esperada (REM 12m)', '', '%'),
-      fetchBCRA(1, 'Reservas Internacionales', 'USD ', ' MM'),
-      fetchBCRA(45, 'Tasa TAMAR', '', '%'),
-      fetchBCRA(25, 'M2 Privado (Var. Interanual)', '', '%', true),
-      fetchDatosArgentinaVar('143.3_NO_PR_2004_A_31', 'Actividad (EMAE Desest.) · Var. Mensual')
-    ]);
+  const num = (v, dec = 1) => Number(v).toLocaleString('es-AR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 
-    const cards = resultados
-      .filter(r => r.status === 'fulfilled' && r.value)
-      .map(r => renderCard(r.value));
-
-    container.innerHTML = cards.length
-      ? cards.join('')
-      : '<p class="grid-state grid-state--error" style="grid-column:1/-1;">No se pudo conectar con las fuentes oficiales.</p>';
+  function formatear(it) {
+    const v = Number(it.valor);
+    const signo = it.signo && v > 0 ? '+' : '';
+    if (it.fmt === 'ars') return '$' + num(v, 1);
+    if (it.fmt === 'usd_mm') return 'USD ' + num(v, 0) + ' M';
+    return signo + num(v, 1) + '%';
   }
 
-  function renderCard(data) {
-    let cls = '';
-    if (data.valor.includes('+')) cls = ' is-up';
-    if (data.valor.includes('-')) cls = ' is-down';
+  function clase(it) {
+    if (it.color !== 'dir' || !isFinite(it.valor)) return '';
+    return it.valor > 0 ? ' is-up' : it.valor < 0 ? ' is-down' : '';
+  }
+
+  function tarjeta(it) {
+    if (it.error) return '';
+    const sub = it.sub
+      ? `<span class="indicador-sub">${it.sub.label}${it.sub.plano ? ': ' : ' '}${(!it.sub.plano && it.sub.valor > 0) ? '+' : ''}${num(it.sub.valor)}%</span>`
+      : '';
+    const nota = it.nota ? `<span class="indicador-nota">${it.nota}</span>` : '';
     return `
-      <div class="eje-card fade-in-up">
-        <h3 class="indicador-titulo">${data.titulo}</h3>
-        <div class="indicador-valor${cls}">${data.valor}</div>
-        <span class="indicador-fecha"><i class="far fa-clock"></i> Actualizado: ${data.fecha}</span>
+      <div class="eje-card indicador-card">
+        <h3 class="indicador-titulo">${it.titulo}</h3>
+        <div class="indicador-valor${clase(it)}">${formatear(it)}</div>
+        ${sub}${nota}
+        <span class="indicador-fecha">${it.periodo} · ${it.fuente}</span>
       </div>`;
   }
 
-  async function fetchBCRA(id, titulo, prefijo = '', sufijo = '', mostrarSigno = false) {
-    const res = await fetch(`https://api.bcra.gob.ar/estadisticas/v4.0/monetarias/${id}?limit=1`);
-    if (!res.ok) throw new Error(`BCRA ${id}`);
-    const data = await res.json();
-    const ultimo = data.results[0].detalle[0];
-    const strValor = ultimo.valor.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-    const signo = (mostrarSigno && ultimo.valor > 0) ? '+' : '';
-    return { titulo, valor: signo + prefijo + strValor + sufijo, fecha: formatearFecha(ultimo.fecha) };
-  }
-
-  async function fetchDatosArgentinaVar(idSerie, titulo) {
-    const res = await fetch(`https://apis.datos.gob.ar/series/api/series/?ids=${idSerie}&limit=5000`);
-    if (!res.ok) throw new Error(`INDEC ${idSerie}`);
-    const data = await res.json();
-    const len = data.data.length;
-    const variacion = ((data.data[len - 1][1] / data.data[len - 2][1]) - 1) * 100;
-    const signo = variacion > 0 ? '+' : '';
-    return {
-      titulo,
-      valor: signo + variacion.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%',
-      fecha: formatearFecha(data.data[len - 1][0])
-    };
-  }
-
-  function formatearFecha(fechaStr) {
-    if (!fechaStr) return '';
-    const p = fechaStr.split('-');
-    return p.length >= 3 ? `${p[2]}/${p[1]}/${p[0]}` : fechaStr;
+  async function cargar() {
+    const cont = document.getElementById('indicadores-container');
+    if (!cont) return;
+    try {
+      const r = await fetch('/api?action=getIndicadores');
+      const d = await r.json();
+      if (!d.success) throw new Error(d.error || 'sin datos');
+      const html = GRUPOS.map((g) => {
+        const cards = d.items.filter((i) => i.grupo === g.id).map(tarjeta).join('');
+        return cards ? `<div class="indicadores-grupo"><h3 class="indicadores-grupo-titulo">${g.titulo}</h3><div class="ejes-grid indicadores-grid">${cards}</div></div>` : '';
+      }).join('');
+      cont.classList.remove('ejes-grid');
+      cont.innerHTML = html || '<p class="grid-state grid-state--error">No se pudo conectar con las fuentes oficiales.</p>';
+    } catch (e) {
+      cont.innerHTML = '<p class="grid-state grid-state--error" style="grid-column:1/-1;">No se pudo conectar con las fuentes oficiales.</p>';
+    }
   }
 })();

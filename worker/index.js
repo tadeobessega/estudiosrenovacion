@@ -9,6 +9,7 @@
    así el front cambió lo mínimo. Las escrituras exigen sesión.
    ============================================================ */
 import SEED_SQL from './sql/seed.sql';
+import { getIndicadores, indecMuestra } from './indicadores.js';
 
 const SESSION_DAYS = 14;
 const MAX_PDF_BYTES = 24 * 1024 * 1024; // KV admite hasta 25 MiB por valor
@@ -123,6 +124,8 @@ async function handleApi(request, env, url) {
         const { results } = await q.all();
         return ok({ miembros: results });
       }
+      case 'getIndicadores':
+        return json({ success: true, ...(await getIndicadores(env)) }, 200);
       case 'getConfig': {
         if (p.key === 'seeded') return ok({ key: p.key, value: '' });
         const r = await db.prepare('SELECT value FROM config WHERE key = ?').bind(p.key || '').first();
@@ -255,6 +258,16 @@ async function handleApi(request, env, url) {
         if (!canTouchCentro(prev.centro)) return fail('No podés borrar miembros de otro centro', 403);
         await db.prepare('DELETE FROM miembros WHERE id = ?').bind(p.id).run();
         return ok();
+      }
+
+      /* Monitor económico (sólo admin): refrescar y ver filas crudas del INDEC */
+      case 'refreshIndicadores': {
+        const deny = adminOnly(); if (deny) return deny;
+        return ok(await getIndicadores(env, { fresh: true }));
+      }
+      case 'indecMuestra': {
+        const deny = adminOnly(); if (deny) return deny;
+        return ok({ rows: await indecMuestra(env, String(p.tabla || 'ipc_nacional').replace(/[^a-z0-9_-]/gi, '')) });
       }
 
       /* Usuarios y configuración (sólo admin) */
