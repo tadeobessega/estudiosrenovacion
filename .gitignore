@@ -1,0 +1,9 @@
+# Temporales del bot del dashboard
+pages/monitor/*_temp.xlsx
+
+# Varios
+*.zip
+node_modules/
+.DS_Store
+Thumbs.db
+desktop.ini

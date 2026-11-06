@@ -1,58 +1,19 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-page="home">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centro de Estudios Renovación - Red de Observatorios</title>
+    <title>Centros de Estudios Renovación — Red de Observatorios</title>
     <meta name="description"
-        content="Red de observatorios especializados en investigación y análisis de políticas públicas, relaciones internacionales y desarrollo social.">
+        content="Red de centros y observatorios de investigación y análisis de políticas públicas, relaciones internacionales y desarrollo social.">
     <link rel="icon" type="image/png" href="assets/img/favicon.png">
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/observatorio.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        @media (max-width: 768px) {
-            /* El contenedor de cada placa será nuestra referencia para fijar el botón */
-            .slide {
-                position: relative !important;
-            }
-
-            /* Anulamos posiciones relativas intermedias para que el botón se guíe estrictamente por el slide completo */
-            .slide-content, .slide .container, .slide-text {
-                position: static !important;
-            }
-
-            /* Le damos un margen gigante abajo al texto para que, por más largo que sea, NUNCA tape el botón */
-            .slide-text {
-                padding-bottom: 120px !important; 
-            }
-
-            /* Clavamos el botón en una posición fija abajo, siempre centrado */
-            .slide-text .btn {
-                position: absolute !important;
-                bottom: 50px !important; /* Exactamente arriba de los puntos */
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-                margin: 0 !important;
-                z-index: 50 !important;
-                white-space: nowrap !important;
-            }
-
-            /* Clavamos los puntos al fondo del todo */
-            .slider-dots {
-                position: absolute !important;
-                bottom: 15px !important;
-                left: 0 !important;
-                width: 100% !important;
-                display: flex !important;
-                justify-content: center !important;
-                z-index: 50 !important;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/styles.css?v=20260916">
+    <link rel="stylesheet" href="assets/css/observatorio.css?v=20260916">
 </head>
 
 <body>
@@ -60,15 +21,13 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <a href="#inicio">
-                        <img src="assets/img/logo-header.png" alt="Centro de Estudios Estratégicos" class="logo-img">
-                    </a>
+                    <a href="#inicio" aria-label="Centros de Estudios Renovación — inicio"><img src="assets/img/logos.png" alt="Centros de Estudios Renovación" class="logo-img"></a>
                 </div>
 
-                <nav class="nav-desktop">
+                <nav class="nav-desktop" aria-label="Principal">
                     <ul class="nav-list">
-                        <li><a href="#" class="nav-link">Inicio</a></li>
-                        <li><a href="pages/ciclica.html" class="nav-link nav-link-ciclica">Cíclica</a></li>
+                        
+                        <li><a href="#inicio" class="nav-link">Inicio</a></li>
                         <li><a href="#observatorios" class="nav-link">Observatorios</a></li>
                         <li><a href="#novedades" class="nav-link">Novedades</a></li>
                         <li><a href="#informes" class="nav-link">Informes</a></li>
@@ -77,21 +36,21 @@
                     </ul>
                 </nav>
 
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú" aria-controls="mobileNav" aria-expanded="false">
                     <span class="hamburger"></span>
                     <span class="hamburger"></span>
                     <span class="hamburger"></span>
                 </button>
             </div>
 
-            <nav class="nav-mobile" id="mobileNav">
-                <ul class="nav-mobile-list">
+            <nav class="nav-mobile" id="mobileNav" aria-label="Menú móvil">
+                <ul>
+                    
                     <li><a href="#inicio" class="nav-mobile-link">Inicio</a></li>
-                    <li><a href="pages/ciclica.html" class="nav-mobile-link">Cíclica</a></li>
                     <li><a href="#observatorios" class="nav-mobile-link">Observatorios</a></li>
+                    <li><a href="#novedades" class="nav-mobile-link">Novedades</a></li>
                     <li><a href="#informes" class="nav-mobile-link">Informes</a></li>
                     <li><a href="#quienes-somos" class="nav-mobile-link">¿Quiénes somos?</a></li>
-                    <li><a href="#novedades" class="nav-mobile-link">Novedades</a></li>
                     <li><a href="#contacto" class="nav-mobile-link">Contacto</a></li>
                 </ul>
             </nav>
@@ -99,115 +58,89 @@
     </header>
 
     <main>
-        <section id="hero-slider" class="hero-slider">
+        <section id="inicio" class="hero-slider">
             <div class="slider-container">
                 <div class="slide active" data-center="ceer">
                     <div class="slide-content">
-                        <div class="container">
-                            <div class="slide-text">
-                                <h1>Centro de Estudios Económicos Renovación</h1>
-                                <p>Informes de coyuntura económica </p>
-                                <a href="pages/ceer.html" class="btn btn-primary">Conocer más</a>
-                            </div>
+                        <div class="slide-text">
+                            <h1>Centro de Estudios Económicos Renovación</h1>
+                            <p>Informes de coyuntura económica y monitores en tiempo real.</p>
+                            <a href="pages/ceer.html" class="btn btn-primary">Conocer más</a>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide" data-center="cedhys">
                     <div class="slide-content">
-                        <div class="container">
-                            <div class="slide-text">
-                                <h1>Centro de Estudios de Derechos Humanos y Seguridad</h1>
-                                <p>Pensamos políticas públicas en materia de seguridad y derechos humanos</p>
-                                <a href="pages/cedhys.html" class="btn btn-primary">Conocer más</a>
-                            </div>
+                        <div class="slide-text">
+                            <h1>Centro de Estudios de Derechos Humanos y Seguridad</h1>
+                            <p>Pensamos políticas públicas en materia de seguridad y derechos humanos.</p>
+                            <a href="pages/cedhys.html" class="btn btn-primary">Conocer más</a>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide" data-center="oper">
                     <div class="slide-content">
-                        <div class="container">
-                            <div class="slide-text">
-                                <h1>Observatorio de Políticas Educativas Renovación</h1>
-                                <p>Informes sobre el aula actual y diagnósticos sobre políticas educativas</p>
-                                <a href="pages/oper.html" class="btn btn-primary">Conocer más</a>
-                            </div>
+                        <div class="slide-text">
+                            <h1>Observatorio de Políticas Educativas Renovación</h1>
+                            <p>Informes sobre el aula actual y diagnósticos de políticas educativas.</p>
+                            <a href="pages/oper.html" class="btn btn-primary">Conocer más</a>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide" data-center="ceeir">
                     <div class="slide-content">
-                        <div class="container">
-                            <div class="slide-text">
-                                <h1>Centro de Estudios Estratégicos Internacionales</h1>
-                                <p>Análisis de política exterior como herramienta fundamental para el desarrollo.</p>
-                                <a href="pages/ceeir.html" class="btn btn-primary">Conocer más</a>
-                            </div>
+                        <div class="slide-text">
+                            <h1>Centro de Estudios Estratégicos Internacionales</h1>
+                            <p>Análisis de política exterior como herramienta para el desarrollo.</p>
+                            <a href="pages/ceeir.html" class="btn btn-primary">Conocer más</a>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide" data-center="opal">
                     <div class="slide-content">
-                        <div class="container">
-                            <div class="slide-text">
-                                <h1>Observatorio de Políticas Electorales</h1>
-                                <p>Informes de coyuntura política electoral.</p>
-                                <a href="pages/opal.html" class="btn btn-primary">Conocer más</a>
-                            </div>
+                        <div class="slide-text">
+                            <h1>Observatorio para el Análisis Electoral</h1>
+                            <p>Informes de coyuntura política y electoral.</p>
+                            <a href="pages/opal.html" class="btn btn-primary">Conocer más</a>
                         </div>
                     </div>
                 </div>
+
                 <div class="slide" data-center="ciren">
                     <div class="slide-content">
-                        <div class="container">
-                            <div class="slide-text">
-                                <h1>Centro de Estudios Científicos Renovación</h1>
-                                <p>Investigación sobre ciencia, tecnología e innovación.</p>
-                                <a href="pages/ciren.html" class="btn btn-primary">Conocer más</a>
-                            </div>
+                        <div class="slide-text">
+                            <h1>Centro de Estudios Científicos Renovación</h1>
+                            <p>Investigación sobre ciencia, tecnología e innovación.</p>
+                            <a href="pages/ciren.html" class="btn btn-primary">Conocer más</a>
                         </div>
                     </div>
                 </div>
+
                 <div class="slide" data-center="opsa">
                     <div class="slide-content">
-                        <div class="container">
-                            <div class="slide-text">
-                                <h1>Observatorio de Política Social Aplicada</h1>
-                                <p>Informes sobre políticas de integración socio-urbana.</p>
-                                <a href="pages/opsa.html" class="btn btn-primary">Conocer más</a>
-                            </div>
+                        <div class="slide-text">
+                            <h1>Observatorio de Política Social Aplicada</h1>
+                            <p>Informes sobre políticas de integración socio-urbana.</p>
+                            <a href="pages/opsa.html" class="btn btn-primary">Conocer más</a>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="slider-controls">
-                <button class="prev-btn">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="next-btn">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+                <button class="prev-btn" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
+                <button class="next-btn" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
             </div>
 
-
-            <div class="slider-dots">
-                <span class="dot active" onclick="currentSlide(1)"></span>
-                <span class="dot" onclick="currentSlide(2)"></span>
-                <span class="dot" onclick="currentSlide(3)"></span>
-                <span class="dot" onclick="currentSlide(4)"></span>
-                <span class="dot" onclick="currentSlide(5)"></span>
-                <span class="dot" onclick="currentSlide(6)"></span>
-                <span class="dot" onclick="currentSlide(7)"></span>
-
-            </div>
-
+            <div class="slider-dots" role="tablist" aria-label="Diapositivas"></div>
         </section>
 
         <section class="observatorios" id="observatorios">
+            <span class="cer-orb cer-orb--primary cer-orb--a"></span>
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Observatorios de la Renovación</h2>
@@ -215,120 +148,91 @@
                 </div>
 
                 <div class="observatorios-grid">
-
-                    <div class="observatorio-card" onclick="window.location.href='pages/ceeir.html'">
-                        <div class="card-image">
-                            <img src="assets/img/ceeir-logo.png" alt="CEEIR" class="observatorio-logo">
-                        </div>
+                    <a class="observatorio-card" href="pages/ceeir.html">
+                        <div class="card-image"><img src="assets/img/ceeir-logo.png" alt="CEEIR" class="observatorio-logo"></div>
                         <h3 class="card-title">CEEIR</h3>
-                        <p class="card-description">Centro de Estudios Estratégicos Internacionales </p>
+                        <p class="card-description">Centro de Estudios Estratégicos Internacionales</p>
+                    </a>
 
-                    </div>
-
-                    <div class="observatorio-card" onclick="window.location.href='pages/ceer.html'">
-                        <div class="card-image">
-                            <img src="assets/img/ceer-logo.png" alt="CEER" class="observatorio-logo">
-                        </div>
+                    <a class="observatorio-card" href="pages/ceer.html">
+                        <div class="card-image"><img src="assets/img/ceer-logo.png" alt="CEER" class="observatorio-logo"></div>
                         <h3 class="card-title">CEER</h3>
-                        <p class="card-description">Centro de Estudios Económicos </p>
+                        <p class="card-description">Centro de Estudios Económicos Renovación</p>
+                    </a>
 
-                    </div>
-
-                    <div class="observatorio-card" onclick="window.location.href='pages/cedhys.html'">
-                        <div class="card-image">
-                            <img src="assets/img/cedhys-logo.png" alt="CEDHyS" class="observatorio-logo">
-                        </div>
+                    <a class="observatorio-card" href="pages/cedhys.html">
+                        <div class="card-image"><img src="assets/img/cedhys-logo.png" alt="CEDHyS" class="observatorio-logo"></div>
                         <h3 class="card-title">CEDHyS</h3>
                         <p class="card-description">Centro de Estudios en Derechos Humanos y Seguridad</p>
+                    </a>
 
-                    </div>
-
-                    <div class="observatorio-card" onclick="window.location.href='pages/opsa.html'">
-                        <div class="card-image">
-                            <img src="assets/img/opsa-logo.png" alt="OPSA" class="observatorio-logo">
-                        </div>
+                    <a class="observatorio-card" href="pages/opsa.html">
+                        <div class="card-image"><img src="assets/img/opsa-logo.png" alt="OPSA" class="observatorio-logo"></div>
                         <h3 class="card-title">OPSA</h3>
                         <p class="card-description">Observatorio de Política Social Aplicada</p>
-                    </div>
+                    </a>
 
-                    <div class="observatorio-card" onclick="window.location.href='pages/opal.html'">
-                        <div class="card-image">
-                            <img src="assets/img/opal-logo.png" alt="OPAL" class="observatorio-logo">
-                        </div>
+                    <a class="observatorio-card" href="pages/opal.html">
+                        <div class="card-image"><img src="assets/img/opal-logo.png" alt="OPAL" class="observatorio-logo"></div>
                         <h3 class="card-title">OPAL</h3>
                         <p class="card-description">Observatorio para el Análisis Electoral</p>
+                    </a>
 
-                    </div>
-
-                    <div class="observatorio-card" onclick="window.location.href='pages/oper.html'">
-                        <div class="card-image">
-                            <img src="assets/img/oper-logo.png" alt="OPER" class="observatorio-logo">
-                        </div>
+                    <a class="observatorio-card" href="pages/oper.html">
+                        <div class="card-image"><img src="assets/img/oper-logo.png" alt="OPER" class="observatorio-logo"></div>
                         <h3 class="card-title">OPER</h3>
-                        <p class="card-description">Observatorio de Políticas Educativas </p>
-                    </div>
+                        <p class="card-description">Observatorio de Políticas Educativas</p>
+                    </a>
 
-                    <div class="observatorio-card" onclick="window.location.href='pages/ciren.html'">
-                        <div class="card-image">
-                            <img src="assets/img/ciren-logo.png" alt="CIREN" class="observatorio-logo">
-                        </div>
+                    <a class="observatorio-card" href="pages/ciren.html">
+                        <div class="card-image"><img src="assets/img/ciren-logo.png" alt="CIREN" class="observatorio-logo"></div>
                         <h3 class="card-title">CIREN</h3>
-                        <p class="card-description">Centro de Estudios Científicos </p>
-                    </div>
-
+                        <p class="card-description">Centro de Estudios Científicos Renovación</p>
+                    </a>
                 </div>
             </div>
         </section>
 
-
         <section class="novedades" id="novedades">
+            <span class="cer-orb cer-orb--cyan cer-orb--b"></span>
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Últimas Publicaciones</h2>
-                    <p class="section-subtitle">
-                        Los últimos informes publicados por todos los centros
-                    </p>
+                    <p class="section-subtitle">Los informes más recientes de todos los centros</p>
                 </div>
-
-                <div class="novedades-grid">
-                </div>
+                <div class="novedades-grid"></div>
             </div>
         </section>
 
-
         <section class="informes" id="informes">
+            <span class="cer-orb cer-orb--primary cer-orb--a"></span>
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Informes Destacados</h2>
-                    <p class="section-subtitle">Accede a nuestros estudios y análisis más recientes</p>
+                    <p class="section-subtitle">Nuestros estudios y análisis seleccionados</p>
                 </div>
-
-                <div class="informes-grid">
-                </div>
+                <div class="informes-grid"></div>
             </div>
         </section>
 
-
         <section class="quienes-somos" id="quienes-somos">
+            <span class="cer-orb cer-orb--cyan cer-orb--b"></span>
             <div class="container">
                 <div class="section-content">
                     <div>
                         <h2 class="section-title">¿Quiénes somos?</h2>
                         <p class="section-description">
-                            Somos una red de centros de investigación especializados en el análisis
-                            de políticas públicas, relaciones internacionales y desarrollo social.
-                            Nuestro trabajo se enfoca en generar informes detallados, diagnósticos y propuestas
-                            renovadas para los desafíos actuales de la Argentina.
+                            Centros de Estudios Renovación es una red de centros de investigación especializados en el
+                            análisis de políticas públicas, relaciones internacionales y desarrollo social. Generamos
+                            informes, diagnósticos y propuestas renovadas para los desafíos actuales de la Argentina.
                         </p>
                         <p class="section-description">
-                            Con más de cinco centros y observatorios, nuestro objetivo es contribuir al debate público,
-                            a la formación política de la juventud y a la elaboración de propuestas programáticas de
-                            políticas públicas.
+                            Con más de siete centros y observatorios, aportamos al debate público, a la formación política
+                            de la juventud y a la elaboración de propuestas programáticas de políticas públicas.
                         </p>
                     </div>
-
                     <div>
-                        <img src="assets/img/logo-header.png" alt="Centro de Estudios Estratégicos" class="about-image">
+                        <img src="assets/img/logo-principal.png" alt="Centros de Estudios Renovación" class="about-image">
                     </div>
                 </div>
             </div>
@@ -347,24 +251,21 @@
                             <i class="fas fa-envelope"></i>
                             <div>
                                 <h4>Email</h4>
-                                <p>estudiosrenovacion@gmail.com</p>
+                                <p><a href="mailto:contacto@estudiosrenovacion.com" style="color:inherit;">contacto@estudiosrenovacion.com</a></p>
                             </div>
                         </div>
-
                         <div class="info-item">
                             <i class="fas fa-map-marker-alt"></i>
                             <div>
                                 <h4>Dirección</h4>
-                                <p>México 430, CABA.</p>
+                                <p>México 430, CABA</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="contacto-form">
-                        <p class="form-note">Completa nuestro formulario de contacto y te escribimos.</p>
-                        <a href="https://forms.gle/VniWpEvBexoPXGZJ9" class="btn btn-contact">Sumate</a>
-
-
+                        <p class="form-note">Completá nuestro formulario y te escribimos.</p>
+                        <a href="https://forms.gle/VniWpEvBexoPXGZJ9" class="btn btn-contact" target="_blank" rel="noopener">Sumate</a>
                     </div>
                 </div>
             </div>
@@ -376,21 +277,17 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <div class="footer-logo">
-                        <a href="#inicio">
-                            <img src="assets/img/logos.png" alt="Centro de Estudios Estratégicos"
-                                class="footer-logo-img">
-                        </a>
+                        <img src="assets/img/logos.png" alt="Centros de Estudios Renovación" class="footer-logo-img">
                     </div>
                     <p class="footer-description">
-                        Centro de investigación dedicado al análisis multidisciplinario.
+                        Red de centros y observatorios de investigación y análisis.
                     </p>
                 </div>
 
                 <div class="footer-section">
-                    <h4 class="footer-title">Enlaces Rápidos</h4>
+                    <h4 class="footer-title">Enlaces</h4>
                     <ul class="footer-links">
                         <li><a href="#inicio">Inicio</a></li>
-                        <li><a href="pages/ciclica.html">Cíclica</a></li>
                         <li><a href="#observatorios">Observatorios</a></li>
                         <li><a href="#novedades">Novedades</a></li>
                         <li><a href="#informes">Informes</a></li>
@@ -402,41 +299,40 @@
                 <div class="footer-section">
                     <h4 class="footer-title">Observatorios</h4>
                     <ul class="footer-links">
-                        <li><a href="pages/opal.html">OPAL</a></li>
                         <li><a href="pages/ceeir.html">CEEIR</a></li>
                         <li><a href="pages/ceer.html">CEER</a></li>
-                        <li><a href="pages/opsa.html">OPSA</a></li>
                         <li><a href="pages/cedhys.html">CEDHyS</a></li>
-                        <li><a href="pages/ciren.html">CIREN</a></li>
+                        <li><a href="pages/opsa.html">OPSA</a></li>
+                        <li><a href="pages/opal.html">OPAL</a></li>
                         <li><a href="pages/oper.html">OPER</a></li>
+                        <li><a href="pages/ciren.html">CIREN</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-section">
-                    <h4 class="footer-title">Seguínos</h4>
+                    <h4 class="footer-title">Seguinos</h4>
                     <div class="footer-social">
-                        <a href="https://www.instagram.com/estudiosrenovacion/?hl=es" class="social-link"><i
-                                class="fab fa-instagram"></i></a>
+                        <a href="https://www.instagram.com/estudiosrenovacion/?hl=es" class="social-link" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
             </div>
 
             <div class="footer-bottom">
-                <p><span id="adminTrigger" style="cursor:default;" title="">&copy; 2026 Centros de Estudios Renovación. Todos los derechos reservados.</span></p>
-                <p style="margin-top: 0.5rem;"><a href="admin/login.html" style="color: var(--gray-500); text-decoration: none; font-size: 0.875rem;">Panel de Administración</a></p>
+                <p>&copy; 2026 Centros de Estudios Renovación. Todos los derechos reservados.</p>
+                <p style="margin-top:.5rem;"><a href="admin/login.html">Panel de administración</a></p>
             </div>
         </div>
     </footer>
 
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/reports-public.js"></script>
+    <script src="assets/js/main.js?v=20260916"></script>
+    <script src="assets/js/data-source.js?v=20260916"></script>
+    <script src="assets/js/reports-public.js?v=20260916"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        loadUltimasPublicaciones();
-        loadInformesDestacados();
-      });
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUltimasPublicaciones();
+            loadInformesDestacados();
+        });
     </script>
-
 </body>
 
 </html>

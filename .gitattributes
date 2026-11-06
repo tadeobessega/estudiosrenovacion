@@ -1,0 +1,17 @@
+# Normaliza finales de línea: LF en el repo para todo lo de texto
+* text=auto eol=lf
+
+# El .bat tiene que quedar con CRLF para Windows
+*.bat text eol=crlf
+
+# Binarios (que Git no intente convertirlos)
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.JPG  binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.xlsx binary
+*.woff binary
+*.woff2 binary
