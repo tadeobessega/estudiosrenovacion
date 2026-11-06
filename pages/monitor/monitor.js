@@ -31,7 +31,8 @@
   const mesLargo = (ym) => { const [y, m] = ym.split('-'); return `${MESES[+m - 1]} ${y}`; };
   const mesCorto = (ym) => { const [y, m] = ym.split('-'); return `${MES3[+m - 1]} ${y.slice(2)}`; };
   const trimestre = (ym) => { const [y, m] = ym.split('-'); return `${Math.ceil(+m / 3)}T ${y}`; };
-  const semestre = (ym) => { const [y, m] = ym.split('-'); return `${+m <= 6 ? 1 : 2}S ${y}`; };
+  // La serie semestral de la EPH viene fechada al mes siguiente al cierre del semestre (2025-01 = 2.º semestre 2024).
+  const semestre = (ym) => { let [y, m] = ym.split('-').map(Number); m -= 6; if (m < 1) { m += 12; y -= 1; } return `${m <= 6 ? 1 : 2}S ${y}`; };
   const flecha = (v) => (v > 0 ? '▲' : v < 0 ? '▼' : '');
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -182,7 +183,7 @@
         datasets: [{ label: cfg.serie || cfg.titulo, data: filas.map((f) => f.v), backgroundColor: filas.map((f) => (f.destacar ? C.ambar : (f.v < 0 ? C.rojo : C.azul))), borderWidth: 0, barPercentage: 0.78, categoryPercentage: 0.9 }]
       },
       options: {
-        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 52 } },
         scales: {
           x: { grid: { color: C.grilla }, border: { display: false }, ticks: { font: { family: MONO, size: 11 }, color: C.sec, callback: (v) => pct(v, 0) } },
           y: { grid: { display: false }, border: { color: C.grilla }, ticks: { font: { size: 12 }, color: C.tinta, autoSkip: false } }
@@ -324,7 +325,7 @@
       ${estandar('Regulados y estacionales, mensual', uR ? pct(uR.v) : 's/d', uE ? `estacionales ${pct(uE.v)}` : '', `INDEC / ${uR ? mesLargo(uR.f) : ''}`)}
     </div>`);
     const g = grilla(P);
-    serieTiempo({ id: 'gIpcCat', titulo: 'Inflación mensual por categoría', unidad: 'Variación % mensual', fuente: 'CEER en base a INDEC y BCRA', desde: '2024-01', formatoY: (v) => pct(v, 0),
+    serieTiempo({ id: 'gIpcCat', titulo: 'Inflación mensual por categoría', unidad: 'Variación % mensual', fuente: 'CEER en base a INDEC y BCRA', desde: '2024-07', formatoY: (v) => pct(v, 0),
       series: [{ label: 'Nivel general', data: ipcM, ancho: 2.5 }, { label: 'Núcleo', data: nuc }, { label: 'Regulados', data: reg }, { label: 'Estacionales', data: est }] }, g);
     serieTiempo({ id: 'gIpcIA', titulo: 'Inflación interanual', unidad: 'Variación % interanual', fuente: 'CEER en base a INDEC y BCRA', desde: '2017-01', formatoY: (v) => pct(v, 0),
       series: [{ label: 'Nivel general', data: ipcIA, ancho: 2.5 }, { label: 'Núcleo', data: varIA(ix('ipc_nucleo')) }] }, g);
@@ -363,7 +364,7 @@
       series: [{ label: 'EMAE', data: emaeD, ancho: 2.5 }] }, g);
     serieTiempo({ id: 'gEmaeM', titulo: 'EMAE, variación mensual desestacionalizada', unidad: 'Variación % mensual', fuente: 'CEER en base a INDEC', desde: '2023-01', formatoY: (v) => pct(v, 1), etiquetas: false,
       series: [{ label: 'Variación mensual', data: emM, tipo: 'bar' }] }, g);
-    const SEC = { sec_agro: 'Agro', sec_pesca: 'Pesca', sec_mineria: 'Minería', sec_industria: 'Industria', sec_electricidad: 'Electricidad, gas y agua', sec_construccion: 'Construcción', sec_comercio: 'Comercio', sec_hoteles: 'Hoteles y restaurantes', sec_transporte: 'Transporte y comunicaciones', sec_financiera: 'Intermediación financiera', sec_inmobiliarias: 'Inmobiliarias', sec_admin: 'Administración pública', sec_ensenanza: 'Enseñanza', sec_salud: 'Salud', sec_comunitarios: 'Servicios comunitarios' };
+    const SEC = { sec_agro: 'Agro', sec_pesca: 'Pesca', sec_mineria: 'Minería', sec_industria: 'Industria', sec_electricidad: 'Electricidad, gas y agua', sec_comercio: 'Comercio', sec_hoteles: 'Hoteles y restaurantes', sec_transporte: 'Transporte y comunicaciones', sec_financiera: 'Intermediación financiera', sec_inmobiliarias: 'Inmobiliarias', sec_admin: 'Administración pública', sec_ensenanza: 'Enseñanza', sec_salud: 'Salud' };
     const uSec = ultimo(varIA(ix('sec_comercio')), S.fm);
     if (uSec) {
       const filas = Object.entries(SEC).map(([k, l]) => ({ l, v: varIA(ix(k))[uSec.i] }));
@@ -434,7 +435,7 @@
     serieTiempo({ id: 'gSaldo', titulo: 'Saldo comercial', unidad: 'Millones de dólares por mes', fuente: 'CEER en base a INDEC', desde: '2021-01', formatoY: (v) => num(v, 0), decimales: 0, etiquetas: false,
       series: [{ label: 'Saldo', data: sa, tipo: 'bar' }] }, g);
     serieTiempo({ id: 'gExpoRubros', titulo: 'Exportaciones por gran rubro', unidad: 'Millones de dólares, suma de 12 meses', fuente: 'CEER en base a INDEC', desde: '2017-12', formatoY: (v) => num(v, 0), decimales: 0, ancho: true,
-      series: [{ label: 'Productos primarios', data: suma12(ix('expo_pp')) }, { label: 'MOA', data: suma12(ix('expo_moa')) }, { label: 'MOI', data: suma12(ix('expo_moi')) }] }, g);
+      series: [{ label: 'Productos primarios', data: suma12(ix('expo_pp')) }, { label: 'MOA', data: suma12(ix('expo_moa')) }, { label: 'MOI', data: suma12(ix('expo_moi')) }, { label: 'Combustibles y energía', data: suma12(ix('expo_cye')) }] }, g);
   }
 
   /* ---- Tipo de cambio y riesgo (BCRA y otros) ---- */

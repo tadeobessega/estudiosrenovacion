@@ -6,7 +6,7 @@
    6 horas en KV.
    ============================================================ */
 
-const CACHE_KEY = 'cache:series-indec:v1';
+const CACHE_KEY = 'cache:series-indec:v2';
 const CACHE_TTL = 6 * 60 * 60;
 const API = 'https://apis.datos.gob.ar/series/api/series/';
 const DESDE = '2016-01-01';
@@ -38,7 +38,6 @@ export const CATALOGO = {
   sec_mineria:      ['11.3_ISD_2004_M_26', 'm'],
   sec_industria:    ['11.3_VMASD_2004_M_23', 'm'],
   sec_electricidad: ['11.3_ITC_2004_M_21', 'm'],
-  sec_construccion: ['11.3_VMATC_2004_M_12', 'm'],
   sec_comercio:     ['11.3_AGCS_2004_M_41', 'm'],
   sec_hoteles:      ['11.3_P_2004_M_20', 'm'],
   sec_transporte:   ['11.3_EMC_2004_M_25', 'm'],
@@ -61,15 +60,16 @@ export const CATALOGO = {
   eph_actividad:    ['43.2_ECTAT_0_T_33', 't', 100],
   eph_empleo:       ['44.2_ECTET_0_T_30', 't', 100],
   eph_desocupacion: ['45.2_ECTDT_0_T_33', 't', 100],
-  pobreza_personas: ['64.2_POBLACION_NUA_0_0_34_74', 's'],
-  pobreza_hogares:  ['63.2_HOGARES_PONUA_0_0_33_21', 's'],
+  pobreza_personas: ['64.2_POBLACION_NUA_0_0_34_74', 's', 100],
+  pobreza_hogares:  ['63.2_HOGARES_PONUA_0_0_33_21', 's', 100],
   // Sector externo (millones de USD)
   expo:             ['74.3_IET_0_M_16', 'm'],
   impo:             ['74.3_IIT_0_M_25', 'm'],
   saldo:            ['74.3_ISC_0_M_19', 'm'],
   expo_pp:          ['75.3_IETPP_0_M_43', 'm'],
-  expo_moa:         ['75.3_ITMOA_0_M_13', 'm'],
-  expo_moi:         ['75.3_ITM_0_M_13', 'm']
+  expo_moa:         ['74.3_IEMOA_0_M_48', 'm'],
+  expo_moi:         ['74.3_IEMOI_0_M_46', 'm'],
+  expo_cye:         ['74.3_IECE_0_M_35', 'm']
 };
 
 async function pedir(claves) {
