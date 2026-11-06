@@ -141,7 +141,7 @@
     const datasets = cfg.series.map((s, i) => {
       const color = s.color || SERIE[i % SERIE.length];
       const base = { label: s.label, data: s.data, yAxisID: s.eje || 'y', colorEtiqueta: color, sinEtiqueta: !!s.sinEtiqueta };
-      if (s.tipo === 'bar') return { ...base, type: 'bar', backgroundColor: color, borderWidth: 0, barPercentage: 0.9, categoryPercentage: 0.9, order: 2 };
+      if (s.tipo === 'bar') return { ...base, type: 'bar', backgroundColor: (c) => (c.raw != null && c.raw < 0 ? C.rojo : color), borderWidth: 0, barPercentage: 0.9, categoryPercentage: 0.9, order: 2 };
       return {
         ...base, type: 'line', borderColor: color, borderWidth: s.ancho || 2, borderDash: s.guiones ? [5, 4] : [],
         backgroundColor: s.relleno ? color : 'transparent', fill: s.relleno ? (s.apilar ? (i === 0 ? 'origin' : '-1') : 'origin') : false,
@@ -155,7 +155,22 @@
     };
     if (cfg.eje2) scales.y1 = { position: 'right', grid: { display: false }, border: { display: false }, ticks: { ...ejeTicks, callback: (v) => (cfg.formatoY2 || fmtY)(v) } };
     if (cfg.apilado) scales.x.stacked = true;
+    const plugins = [];
+    if (cfg.valoresBarras) plugins.push({
+      id: 'valoresBarras',
+      afterDatasetsDraw(ch) {
+        const { ctx } = ch;
+        ch.data.datasets.forEach((ds, di) => {
+          if (ds.type !== 'bar') return;
+          const meta = ch.getDatasetMeta(di);
+          ctx.save(); ctx.font = `600 11px ${MONO}`; ctx.fillStyle = C.tinta; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+          meta.data.forEach((bar, i) => { const v = ds.data[i]; if (v != null && bar.x >= ch.chartArea.left && bar.x <= ch.chartArea.right) ctx.fillText(num(v, 1), bar.x, bar.y - 4); });
+          ctx.restore();
+        });
+      }
+    });
     const chart = new Chart(document.getElementById(cfg.id), {
+      plugins,
       data: { labels, datasets },
       options: {
         responsive: true, maintainAspectRatio: false,
@@ -244,15 +259,36 @@
   }
 
   /* ---------------- Descargas ---------------- */
-  function descargarPNG(tarjeta, id) {
-    if (typeof html2canvas === 'undefined') {
-      const a = document.createElement('a'); a.href = document.getElementById(id).toDataURL('image/png'); a.download = `ceer_${id}.png`; a.click(); return;
-    }
-    const herr = tarjeta.querySelector('.herr'); herr.style.visibility = 'hidden';
-    html2canvas(tarjeta, { backgroundColor: '#ffffff', scale: 2 }).then((cv) => {
-      herr.style.visibility = '';
-      const a = document.createElement('a'); a.href = cv.toDataURL('image/png'); a.download = `ceer_${id}.png`; a.click();
-    });
+  const LOGO_PATH = document.querySelector('#logo-ceer path').getAttribute('d');
+  function logoImagen(color, cursor) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 469 110" width="469" height="110"><path fill="${color}" d="${LOGO_PATH}"/><rect fill="${cursor}" x="417" y="87" width="52" height="21"/></svg>`;
+    return new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+  }
+  // PNG armado a mano en alta resolución: título, unidad, gráfico, fuente y logo.
+  async function descargarPNG(tarjeta, id) {
+    const ch = Chart.getChart(id); if (!ch) return;
+    const ESC = 3, PAD = 24;
+    const css = getComputedStyle(tarjeta);
+    const fondo = css.backgroundColor || '#ffffff';
+    const oscuro = temaActual() === 'dark';
+    const prev = ch.options.devicePixelRatio;
+    ch.options.devicePixelRatio = ESC; ch.resize(); ch.update('none');
+    const w = ch.width, h = ch.height;
+    const titulo = tarjeta.querySelector('h3').textContent, unidad = (tarjeta.querySelector('.unidad') || {}).textContent || '';
+    const fuente = tarjeta.querySelector('.pie span').textContent;
+    const top = PAD + 24 + (unidad ? 22 : 0) + 16, alto = top + h + 16 + 20 + PAD, ancho = w + PAD * 2;
+    const cv = document.createElement('canvas'); cv.width = ancho * ESC; cv.height = alto * ESC;
+    const ctx = cv.getContext('2d'); ctx.scale(ESC, ESC);
+    ctx.fillStyle = fondo; ctx.fillRect(0, 0, ancho, alto);
+    ctx.fillStyle = C.tinta; ctx.font = `700 18px ${MONO}`; ctx.textBaseline = 'top'; ctx.fillText(titulo, PAD, PAD);
+    if (unidad) { ctx.fillStyle = C.sec; ctx.font = `400 13px ${SANS}`; ctx.fillText(unidad, PAD, PAD + 26); }
+    ctx.drawImage(ch.canvas, PAD, top, w, h);
+    const yPie = top + h + 16;
+    ctx.fillStyle = C.sec; ctx.font = `400 12px ${SANS}`; ctx.textBaseline = 'alphabetic'; ctx.fillText(fuente, PAD, yPie + 12);
+    const logo = await logoImagen(oscuro ? '#ffffff' : '#2840a5', oscuro ? '#f7ac4d' : '#d6810c');
+    if (logo) { const lh = 12, lw = lh * 469 / 110; ctx.drawImage(logo, ancho - PAD - lw, yPie + 12 - lh * 0.98, lw, lh); }
+    ch.options.devicePixelRatio = prev; ch.resize(); ch.update('none');
+    const a = document.createElement('a'); a.href = cv.toDataURL('image/png'); a.download = `ceer_${id}.png`; a.click();
   }
   function descargarCSV(id) {
     const ch = Chart.getChart(id); if (!ch) return;
@@ -412,23 +448,25 @@
       ${estandar('Salario registrado, mensual', us ? pct(us.v, 1, true) : 's/d', ur ? `real: ${num(ur.v, 1)} (nov 23 = 100)` : '', `INDEC / ${us ? mesLargo(us.f) : ''}`)}
     </div>`);
     const g = grilla(P);
-    serieTiempo({ id: 'gSalReal', titulo: 'Salario real por sector', unidad: 'Índice deflactado por IPC, noviembre 2023 = 100', fuente: 'CEER en base a INDEC', desde: '2017-01', formatoY: (v) => num(v, 0), ancho: true,
+    const sLabels = [...new Set([...pobP.f, ...pobH.f])].sort();
+    const alinS = (s) => sLabels.map((f) => { const i = s.f.indexOf(f); return i < 0 ? null : s.v[i]; });
+    serieTiempo({ id: 'gPobreza', titulo: 'Pobreza en personas y hogares', unidad: 'Porcentaje, total de aglomerados urbanos (EPH), por semestre', fuente: 'CEER en base a INDEC, EPH', labels: sLabels, formatoX: semestre, formatoTitulo: semestre, formatoY: (v) => pct(v, 0), desdeCero: true, ancho: true, alto: true, valoresBarras: true,
+      series: [{ label: 'Personas', data: alinS(pobP), tipo: 'bar' }, { label: 'Hogares', data: alinS(pobH), color: C.ambar, ancho: 2.5 }] }, g);
+    serieTiempo({ id: 'gSalReal', titulo: 'Salario real por sector', unidad: 'Índice deflactado por IPC, noviembre 2023 = 100. No registrado en el eje derecho', fuente: 'CEER en base a INDEC', desde: '2017-01', formatoY: (v) => num(v, 0), ancho: true, eje2: true,
       series: [
         { label: 'Registrado privado', data: rebase(real('sal_privado_reg'), '2023-11', '2023-11') },
         { label: 'Registrado público', data: rebase(real('sal_publico'), '2023-11', '2023-11') },
-        { label: 'No registrado', data: rebase(real('sal_no_registrado'), '2023-11', '2023-11') },
+        { label: 'No registrado (eje der.)', data: rebase(real('sal_no_registrado'), '2023-11', '2023-11'), eje: 'y1' },
         { label: 'Total', data: rebase(real('sal_total'), '2023-11', '2023-11'), color: C.gris }
       ] }, g);
     const tLabels = [...new Set([...act.f, ...emp.f, ...des.f])].sort();
     const alin = (s) => tLabels.map((f) => { const i = s.f.indexOf(f); return i < 0 ? null : s.v[i]; });
+    const desA = alin(des);
+    const pm4 = desA.map((_, i) => { if (i < 3) return null; const w = desA.slice(i - 3, i + 1); return w.some((v) => v == null) ? null : w.reduce((a, b) => a + b, 0) / 4; });
     serieTiempo({ id: 'gEph', titulo: 'Tasas de actividad y empleo', unidad: 'Porcentaje de la población total', fuente: 'CEER en base a INDEC, EPH', labels: tLabels, formatoX: trimestre, formatoTitulo: trimestre, formatoY: (v) => pct(v, 0),
       series: [{ label: 'Actividad', data: alin(act) }, { label: 'Empleo', data: alin(emp) }] }, g);
-    serieTiempo({ id: 'gDesoc', titulo: 'Tasa de desocupación', unidad: 'Porcentaje de la población económicamente activa', fuente: 'CEER en base a INDEC, EPH', labels: tLabels, formatoX: trimestre, formatoTitulo: trimestre, formatoY: (v) => pct(v, 0), etiquetas: false, desdeCero: true,
-      series: [{ label: 'Desocupación', data: alin(des), tipo: 'bar' }] }, g);
-    const sLabels = [...new Set([...pobP.f, ...pobH.f])].sort();
-    const alinS = (s) => sLabels.map((f) => { const i = s.f.indexOf(f); return i < 0 ? null : s.v[i]; });
-    serieTiempo({ id: 'gPobreza', titulo: 'Incidencia de la pobreza', unidad: 'Porcentaje, total de aglomerados urbanos', fuente: 'CEER en base a INDEC, EPH', labels: sLabels, formatoX: semestre, formatoTitulo: semestre, formatoY: (v) => pct(v, 0), desdeCero: true,
-      series: [{ label: 'Personas', data: alinS(pobP) }, { label: 'Hogares', data: alinS(pobH) }] }, g);
+    serieTiempo({ id: 'gDesoc', titulo: 'Tasa de desocupación', unidad: 'Porcentaje de la población económicamente activa', fuente: 'CEER en base a INDEC, EPH', labels: tLabels, formatoX: trimestre, formatoTitulo: trimestre, formatoY: (v) => pct(v, 0), desdeCero: true,
+      series: [{ label: 'Trimestral', data: desA, tipo: 'bar' }, { label: 'Promedio 4 trimestres', data: pm4, color: C.ambar, ancho: 2.5 }] }, g);
   }
 
   /* ---- Sector externo ---- */
@@ -462,6 +500,8 @@
     const g = grilla(P);
     serieTiempo({ id: 'gBandas', titulo: 'Tipo de cambio mayorista y bandas cambiarias', unidad: 'Pesos por dólar, promedio mensual', fuente: 'CEER en base a BCRA', desde: '2025-01', formatoY: (v) => num(v, 0), decimales: 0,
       series: [{ label: 'Mayorista', data: nom('tc_mayorista'), ancho: 2.5 }, { label: 'Banda superior', data: nom('banda_superior'), color: C.gris, guiones: true }, { label: 'Banda inferior', data: nom('banda_inferior'), color: C.gris, guiones: true }] }, g);
+    serieTiempo({ id: 'gDolares', titulo: 'Dólar oficial y cotizaciones paralelas', unidad: 'Pesos por dólar, promedio mensual', fuente: 'CEER en base a BCRA y Ámbito', desde: '2024-01', formatoY: (v) => num(v, 0), decimales: 0, ancho: true,
+      series: [{ label: 'Oficial mayorista', data: nom('tc_mayorista'), ancho: 2.5 }, { label: 'MEP', data: nom('dolar_mep') }, { label: 'CCL', data: nom('dolar_ccl') }, { label: 'Blue', data: nom('dolar_blue') }] }, g);
     serieTiempo({ id: 'gBrecha', titulo: 'Brecha cambiaria', unidad: 'Porcentaje sobre el tipo de cambio oficial', fuente: 'CEER en base a BCRA y Ámbito', formatoY: (v) => pct(v, 0),
       series: [{ label: 'Blue', data: m('brecha_blue') }, { label: 'MEP', data: m('brecha_mep') }, { label: 'CCL', data: m('brecha_ccl') }] }, g);
     serieTiempo({ id: 'gRiesgo', titulo: 'Riesgo país', unidad: 'Puntos básicos', fuente: 'CEER en base a Ámbito y ArgentinaDatos', formatoY: (v) => num(v, 0), decimales: 0,
@@ -486,7 +526,7 @@
     serieTiempo({ id: 'gAgregados', titulo: 'Base monetaria y M2', unidad: 'Pesos constantes', fuente: 'CEER en base a BCRA e INDEC',
       series: [{ label: 'M2', data: m('m2') }, { label: 'Base monetaria', data: m('base_monetaria') }] }, g);
     serieTiempo({ id: 'gTasas', titulo: 'Tasas de interés e inflación', unidad: 'Tasa efectiva anual y variación % interanual', fuente: 'CEER en base a BCRA e INDEC', desde: '2020-01', formatoY: (v) => pct(v, 0),
-      series: [{ label: 'Tasa de política', data: m('tasa_politica_tea') }, { label: 'BADLAR', data: m('badlar_tea') }, { label: 'Inflación i.a.', data: m('ipc_interanual'), color: C.gris }] }, g);
+      series: [{ label: 'TAMAR', data: m('tamar_tea') }, { label: 'BADLAR', data: m('badlar_tea') }, { label: 'Inflación i.a.', data: m('ipc_interanual'), color: C.gris }] }, g);
     serieTiempo({ id: 'gDiario', titulo: 'Tasas BADLAR y TAMAR, diarias', unidad: 'Tasa efectiva anual, %', fuente: 'CEER en base a BCRA', labels: S.fd, ancho: true,
       formatoX: (l) => { const [y, mm, d] = l.split('-'); return `${d}/${mm}/${y.slice(2)}`; }, formatoTitulo: (l) => { const [y, mm, d] = l.split('-'); return `${d}/${mm}/${y}`; }, formatoY: (v) => pct(v, 0),
       series: [{ label: 'BADLAR', data: S.d.badlar_tea || [] }, { label: 'TAMAR', data: S.d.tamar_tea || [] }] }, g);
@@ -535,7 +575,7 @@
       compra_divisas: ['Compras de divisas del BCRA (USD constantes)', () => m('compra_divisas'), 'BCRA'],
       base_monetaria: ['Base monetaria (pesos constantes)', () => m('base_monetaria'), 'BCRA'],
       m2: ['M2 (pesos constantes)', () => m('m2'), 'BCRA'],
-      tasa_politica_tea: ['Tasa de política (TEA %)', () => m('tasa_politica_tea'), 'BCRA'],
+      tamar_tea: ['TAMAR (TEA %)', () => m('tamar_tea'), 'BCRA'],
       badlar_tea: ['BADLAR (TEA %)', () => m('badlar_tea'), 'BCRA'],
       plazo_fijo: ['Plazos fijos (pesos constantes)', () => m('plazo_fijo'), 'BCRA'],
       personales: ['Préstamos personales (pesos constantes)', () => m('personales'), 'BCRA'],
