@@ -5,6 +5,21 @@
    - Series del INDEC: /api?action=getSeriesINDEC (Worker del sitio).
    - Últimos valores diarios: /api?action=getIndicadores.
    ============================================================ */
+/* Estadísticas de visitas: una vista por carga de página, sin cookies. La marca del día en localStorage separa visitantes de vistas.
+   En la página de un informe, la ruta incluye su id. */
+(function () {
+  try {
+    var u = new URL(location.href), ruta = u.pathname.replace(/index\.html$/, '');
+    if (/informe\.html$/.test(ruta) && u.searchParams.get('id')) ruta += '?id=' + encodeURIComponent(u.searchParams.get('id'));
+    if (/^\/(admin|api)/.test(ruta) || location.hostname === 'localhost') return;
+    var dia = new Date().toISOString().slice(0, 10), k = 'cer-visita:' + ruta, nuevo = 1;
+    try { if (localStorage.getItem(k) === dia) nuevo = 0; else localStorage.setItem(k, dia); } catch (e) {}
+    var body = JSON.stringify({ action: 'visita', ruta: ruta, nuevo: nuevo });
+    if (navigator.sendBeacon) navigator.sendBeacon('/api', new Blob([body], { type: 'text/plain' }));
+    else fetch('/api', { method: 'POST', body: body, keepalive: true });
+  } catch (e) {}
+})();
+
 (function () {
   'use strict';
 

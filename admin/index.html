@@ -23,6 +23,7 @@
         <button class="admin-nav-link" data-view="miembros" id="miembrosNavLink" style="display:none;">
           <i class="fas fa-users"></i> Miembros
         </button>
+        <button class="admin-nav-link" data-view="visitas"><i class="fas fa-chart-line"></i> Visitas</button>
         <button class="admin-nav-link" data-view="users" id="usersNavLink" style="display:none;"><i class="fas fa-shield-alt"></i> Usuarios</button>
         <button class="admin-nav-link" data-view="config" id="configNavLink" style="display:none;"><i class="fas fa-cog"></i> Config</button>
       </nav>
@@ -232,6 +233,27 @@
         <div id="all-tab" class="tab-content">
           <div class="admin-card"><div class="admin-card-header"><h2 class="admin-card-title">Todos los Usuarios</h2></div><div id="allContainer"></div></div>
         </div>
+      </div>
+
+      <!-- ===== VIEW: VISITAS ===== -->
+      <div id="view-visitas" class="view" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Estadísticas de visitas</h1>
+          <p class="page-subtitle">Vistas de cada página, centro, informe, descarga de PDF y del monitor económico del CEER. Un visitante es la primera vista del día desde un navegador (sin cookies).</p>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
+          <span style="font-size:.875rem;color:var(--admin-text-muted)">Período:</span>
+          <select id="visitasDias" class="form-select" style="max-width:180px">
+            <option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="365">Último año</option>
+          </select>
+        </div>
+        <div class="stats-grid-admin" id="visitasResumen"></div>
+        <div class="admin-card" style="margin-bottom:1.5rem;">
+          <div class="admin-card-header"><h2 class="admin-card-title">Vistas por día</h2></div>
+          <div id="visitasDia" style="display:flex;align-items:flex-end;gap:2px;height:140px;padding:.5rem 0"></div>
+          <div id="visitasDiaPie" style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--admin-text-muted)"></div>
+        </div>
+        <div id="visitasTablas"></div>
       </div>
 
       <!-- ===== VIEW: CONFIG ===== -->
@@ -482,6 +504,33 @@
     if (v === 'upload' && !editMode) resetUploadForm();
     if (v === 'config')   { loadFeaturedAdmin(); loadConfigUI(); }
     if (v === 'miembros') { populateMiembrosCentroFilter(); loadMiembrosAdmin(); }
+    if (v === 'visitas')  loadVisitas();
+  }
+
+  // ===== VISITAS =====
+  async function loadVisitas() {
+    const sel = document.getElementById('visitasDias');
+    if (!sel.dataset.listo) { sel.addEventListener('change', loadVisitas); sel.dataset.listo = '1'; }
+    const tablas = document.getElementById('visitasTablas');
+    tablas.innerHTML = '<p style="color:var(--admin-text-muted)">Cargando…</p>';
+    const res = await apiCall('getVisitas', { dias: sel.value });
+    if (!res || !res.success) { tablas.innerHTML = '<p>No se pudieron cargar las visitas.</p>'; return; }
+    const n = (v) => Number(v || 0).toLocaleString('es-AR');
+    const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const F = res.filas, tot = (k) => F.reduce((a, r) => a + Number(r[k] || 0), 0);
+    const card = (icon, val, label) => `<div class="stat-card"><div class="stat-card-icon primary"><i class="fas ${icon}"></i></div><div class="stat-card-value">${val}</div><div class="stat-card-label">${label}</div></div>`;
+    const de = (t) => F.filter((r) => r.tipo === t);
+    document.getElementById('visitasResumen').innerHTML =
+      card('fa-eye', n(tot('vistas')), 'Vistas en el período') + card('fa-user', n(tot('visitantes')), 'Visitantes en el período') +
+      card('fa-file-alt', n(de('informe').reduce((a, r) => a + Number(r.vistas || 0), 0)), 'Vistas de informes') + card('fa-download', n(de('pdf').reduce((a, r) => a + Number(r.vistas || 0), 0)), 'Descargas de PDF');
+    const D = res.porDia, mx = Math.max(1, ...D.map((d) => d.vistas));
+    document.getElementById('visitasDia').innerHTML = D.length ? D.map((d) => `<div title="${d.dia}: ${n(d.vistas)} vistas, ${n(d.visitantes)} visitantes" style="flex:1;background:#2840a5;height:${Math.max(2, d.vistas / mx * 100)}%"></div>`).join('') : '<p style="color:var(--admin-text-muted)">Todavía no hay visitas registradas.</p>';
+    document.getElementById('visitasDiaPie').innerHTML = D.length ? `<span>${D[0].dia}</span><span>${D[D.length - 1].dia}</span>` : '';
+    const tabla = (titulo, filas, conCentro) => !filas.length ? '' : `<div class="admin-card" style="margin-bottom:1.5rem;"><div class="admin-card-header"><h2 class="admin-card-title">${titulo}</h2></div>
+      <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Nombre</th>${conCentro ? '<th>Centro</th>' : ''}<th style="text-align:right">Vistas</th><th style="text-align:right">Visitantes</th><th style="text-align:right">Total histórico</th><th>Desde</th></tr></thead>
+      <tbody>${filas.map((r) => `<tr><td>${esc(r.nombre)}</td>${conCentro ? `<td>${esc(r.centro)}</td>` : ''}<td style="text-align:right">${n(r.vistas)}</td><td style="text-align:right">${n(r.visitantes)}</td><td style="text-align:right">${n(r.vistas_total)}</td><td>${esc(r.desde)}</td></tr>`).join('')}</tbody></table></div></div>`;
+    tablas.innerHTML = tabla('Páginas, centros y monitor económico', [...de('tablero'), ...de('pagina')], false) + tabla('Informes', de('informe'), true) + tabla('Descargas de PDF', de('pdf'), true)
+      || '<p style="color:var(--admin-text-muted)">Todavía no hay visitas registradas. Se empiezan a contar desde esta versión del sitio.</p>';
   }
 
   // ===== REPORTS =====

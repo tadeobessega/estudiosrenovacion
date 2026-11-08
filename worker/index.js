@@ -20,7 +20,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === '/api' || url.pathname.startsWith('/api/')) return handleApi(request, env, url);
-    if (url.pathname.startsWith('/files/')) return serveFile(env, url);
+    if (url.pathname.startsWith('/files/')) return serveFile(env, url, request);
     return env.ASSETS.fetch(request);
   }
 };
@@ -91,6 +91,25 @@ async function currentUser(request, db) {
   return row && row.approved ? row : null;
 }
 
+/* ---------------- visitas ----------------
+   Una fila por día y ruta: vistas (cada carga de página o descarga de PDF) y visitantes (primera vista del día en ese navegador,
+   marcada en localStorage, sin cookies ni datos personales). */
+let visitasListas = false;
+async function ensureVisitas(db) {
+  if (visitasListas) return;
+  await db.exec('CREATE TABLE IF NOT EXISTS visitas (dia TEXT NOT NULL, ruta TEXT NOT NULL, vistas INTEGER NOT NULL DEFAULT 0, visitantes INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (dia, ruta))');
+  visitasListas = true;
+}
+const esBot = (request) => /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|headless|lighthouse/i.test(request.headers.get('user-agent') || '');
+async function sumarVisita(db, ruta, nuevo) {
+  await ensureVisitas(db);
+  const dia = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10); // día de Buenos Aires
+  await db.prepare('INSERT INTO visitas (dia, ruta, vistas, visitantes) VALUES (?, ?, 1, ?) ON CONFLICT (dia, ruta) DO UPDATE SET vistas = vistas + 1, visitantes = visitantes + excluded.visitantes')
+    .bind(dia, ruta, nuevo ? 1 : 0).run();
+}
+const NOMBRES_PAGINAS = { '/': 'Inicio', '/pages/ceer.html': 'CEER', '/pages/monitor/': 'Monitor económico del CEER', '/pages/ceeir.html': 'CEEIR', '/pages/cedhys.html': 'CEDHyS',
+  '/pages/ciren.html': 'CIREN', '/pages/opal.html': 'OPAL', '/pages/oper.html': 'OPER', '/pages/opsa.html': 'OPSA', '/pages/Quienes_somos.html': 'Quiénes somos', '/pages/informe.html': 'Informe (sin id)' };
+
 /* ---------------- API ---------------- */
 async function handleApi(request, env, url) {
   const db = env.DB;
@@ -124,6 +143,12 @@ async function handleApi(request, env, url) {
           : db.prepare('SELECT * FROM miembros ORDER BY centro, orden, nombre');
         const { results } = await q.all();
         return ok({ miembros: results });
+      }
+      case 'visita': {
+        const ruta = String(p.ruta || '').slice(0, 200);
+        if (!/^\/[\w\-./?=%]*$/.test(ruta) || ruta.startsWith('/admin') || ruta.startsWith('/api') || esBot(request)) return ok();
+        await sumarVisita(db, ruta, p.nuevo === 1 || p.nuevo === '1' || p.nuevo === true);
+        return ok();
       }
       case 'getSeriesINDEC':
         return json({ success: true, ...(await getSeriesINDEC(env)) }, 200);
@@ -273,6 +298,28 @@ async function handleApi(request, env, url) {
         return ok({ rows: await indecMuestra(env, String(p.tabla || 'ipc_nacional').replace(/[^a-z0-9_-]/gi, '')) });
       }
 
+      /* Estadísticas de visitas: el admin ve todo; cada centro, sus páginas e informes */
+      case 'getVisitas': {
+        await ensureVisitas(db);
+        const dias = Math.min(365, Math.max(7, parseInt(p.dias || '30', 10) || 30));
+        const desde = new Date(Date.now() - 3 * 3600e3 - (dias - 1) * 864e5).toISOString().slice(0, 10);
+        const { results: porRuta } = await db.prepare(`SELECT ruta, SUM(CASE WHEN dia >= ? THEN vistas ELSE 0 END) AS vistas, SUM(CASE WHEN dia >= ? THEN visitantes ELSE 0 END) AS visitantes,
+          SUM(vistas) AS vistas_total, MIN(dia) AS desde FROM visitas GROUP BY ruta ORDER BY vistas DESC`).bind(desde, desde).all();
+        const { results: porDia } = await db.prepare('SELECT dia, SUM(vistas) AS vistas, SUM(visitantes) AS visitantes FROM visitas WHERE dia >= ? GROUP BY dia ORDER BY dia').bind(desde).all();
+        const { results: reps } = await db.prepare('SELECT id, titulo, centro, pdf_url FROM reports').all();
+        const porId = new Map(reps.map((r) => [r.id, r]));
+        const filas = porRuta.map((r) => {
+          let tipo = 'pagina', nombre = NOMBRES_PAGINAS[r.ruta] || r.ruta, centro = '';
+          const id = (/[?&]id=([^&]+)/.exec(r.ruta) || [])[1];
+          if (id) { const rep_ = porId.get(decodeURIComponent(id)); tipo = 'informe'; nombre = rep_ ? rep_.titulo : 'Informe ' + id; centro = rep_ ? rep_.centro : ''; }
+          else if (r.ruta.startsWith('/files/')) { const key = r.ruta.slice(7), rep_ = reps.find((x) => (x.pdf_url || '').includes(key)); tipo = 'pdf'; nombre = rep_ ? rep_.titulo : decodeURIComponent(key); centro = rep_ ? rep_.centro : ''; }
+          else if (/^\/pages\/(\w+)\.html$/.test(r.ruta)) centro = nombre;
+          if (r.ruta.startsWith('/pages/monitor')) { tipo = 'tablero'; centro = 'CEER'; }
+          return { ...r, tipo, nombre, centro };
+        }).filter((r) => isAdmin || !r.centro || r.centro === me.centro || (me.centro && r.nombre === me.centro));
+        return ok({ dias, desde, filas, porDia });
+      }
+
       /* Usuarios y configuración (sólo admin) */
       case 'getUsers': {
         const deny = adminOnly(); if (deny) return deny;
@@ -310,8 +357,9 @@ async function handleApi(request, env, url) {
 }
 
 /* ---------------- archivos ---------------- */
-async function serveFile(env, url) {
+async function serveFile(env, url, request) {
   const key = decodeURIComponent(url.pathname.slice('/files/'.length));
+  if (request && !esBot(request) && !request.headers.get('range')) { try { await sumarVisita(env.DB, '/files/' + encodeURIComponent(key), true); } catch (e) { /* las estadísticas no frenan la descarga */ } }
   const { value, metadata } = await env.FILES.getWithMetadata(key, { type: 'arrayBuffer' });
   if (!value) return new Response('No encontrado', { status: 404 });
   const name = (metadata && metadata.name) || key;
