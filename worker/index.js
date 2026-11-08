@@ -107,8 +107,8 @@ async function sumarVisita(db, ruta, nuevo) {
   await db.prepare('INSERT INTO visitas (dia, ruta, vistas, visitantes) VALUES (?, ?, 1, ?) ON CONFLICT (dia, ruta) DO UPDATE SET vistas = vistas + 1, visitantes = visitantes + excluded.visitantes')
     .bind(dia, ruta, nuevo ? 1 : 0).run();
 }
-const NOMBRES_PAGINAS = { '/': 'Inicio', '/pages/ceer.html': 'CEER', '/pages/monitor/': 'Monitor económico del CEER', '/pages/ceeir.html': 'CEEIR', '/pages/cedhys.html': 'CEDHyS',
-  '/pages/ciren.html': 'CIREN', '/pages/opal.html': 'OPAL', '/pages/oper.html': 'OPER', '/pages/opsa.html': 'OPSA', '/pages/Quienes_somos.html': 'Quiénes somos', '/pages/informe.html': 'Informe (sin id)' };
+const NOMBRES_PAGINAS = { '/': 'Inicio', '/pages/ceer': 'CEER', '/pages/monitor/': 'Monitor económico del CEER', '/pages/ceeir': 'CEEIR', '/pages/cedhys': 'CEDHyS',
+  '/pages/ciren': 'CIREN', '/pages/opal': 'OPAL', '/pages/oper': 'OPER', '/pages/opsa': 'OPSA', '/pages/Quienes_somos': 'Quiénes somos', '/pages/informe': 'Informe (sin id)' };
 
 /* ---------------- API ---------------- */
 async function handleApi(request, env, url) {
@@ -313,7 +313,7 @@ async function handleApi(request, env, url) {
           const id = (/[?&]id=([^&]+)/.exec(r.ruta) || [])[1];
           if (id) { const rep_ = porId.get(decodeURIComponent(id)); tipo = 'informe'; nombre = rep_ ? rep_.titulo : 'Informe ' + id; centro = rep_ ? rep_.centro : ''; }
           else if (r.ruta.startsWith('/files/')) { const key = r.ruta.slice(7), rep_ = reps.find((x) => (x.pdf_url || '').includes(key)); tipo = 'pdf'; nombre = rep_ ? rep_.titulo : decodeURIComponent(key); centro = rep_ ? rep_.centro : ''; }
-          else if (/^\/pages\/(\w+)\.html$/.test(r.ruta)) centro = nombre;
+          else if (/^\/pages\/\w+$/.test(r.ruta) && NOMBRES_PAGINAS[r.ruta]) centro = nombre;
           if (r.ruta.startsWith('/pages/monitor')) { tipo = 'tablero'; centro = 'CEER'; }
           return { ...r, tipo, nombre, centro };
         }).filter((r) => isAdmin || !r.centro || r.centro === me.centro || (me.centro && r.nombre === me.centro));
