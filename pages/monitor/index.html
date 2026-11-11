@@ -19,8 +19,10 @@
         (function () { var t = null; try { t = localStorage.getItem('cer-theme'); } catch (e) {}
           if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
           document.documentElement.setAttribute('data-theme', t); })();
+        // Panel inicial según el hash: el encabezado grande solo se muestra en "Resumen" (sin parpadeo al cargar).
+        document.documentElement.setAttribute('data-panel', (location.hash || '').slice(1) || 'resumen');
     </script>
-    <link rel="stylesheet" href="monitor.css?v=20261106a">
+    <link rel="stylesheet" href="monitor.css?v=20261111a">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
 </head>
@@ -60,7 +62,7 @@
     </header>
 
     <main>
-        <section class="apertura">
+        <section class="apertura" id="apertura">
             <div class="wrap">
                 <p class="volanta">Fuentes: INDEC, BCRA, Reserva Federal de Nueva York, BLS y Ámbito <span class="barra">/</span> <span id="fechaCorte">noviembre 2026</span></p>
                 <h1 class="titulo">Indicadores macroeconómicos de Argentina</h1>
@@ -92,6 +94,6 @@
         </div>
     </footer>
 
-    <script src="monitor.js?v=20261108"></script>
+    <script src="monitor.js?v=20261111a"></script>
 </body>
 </html>

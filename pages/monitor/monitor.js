@@ -87,6 +87,7 @@
 
   /* ---------------- Gráficos (Chart.js) ---------------- */
   const graficos = [];
+  const tieneDatos = (a) => Array.isArray(a) && a.some((v) => v != null && isFinite(v));
 
   // Etiquetas al final de cada línea, en el color de la serie, separadas >= 14 px.
   const etiquetasFinales = {
@@ -211,6 +212,9 @@
    * opts: { labels, formatoX, formatoY, desde, apilado, eje2 }
    */
   function serieTiempo(cfg, cont) {
+    // Lo que no tiene datos no se muestra: ni la serie, ni la leyenda, ni el gráfico entero.
+    cfg = { ...cfg, series: cfg.series.filter((s) => tieneDatos(s.data)) };
+    if (!cfg.series.length) return null;
     cont.appendChild(tarjetaGrafico(cfg));
     const labels = cfg.labels || S.fm;
     const finales = cfg.etiquetas !== false;
@@ -225,12 +229,19 @@
         pointRadius: 0, pointHoverRadius: 3, spanGaps: true, tension: 0, order: 1, stack: s.apilar ? 'pila' : undefined
       };
     });
-    const ejeTicks = { font: { family: MONO, size: 11 }, color: C.sec, maxTicksLimit: 6, callback: (v) => fmtY(v) };
+    // Si con el formato pedido dos marcas del eje quedan iguales (rango chico: 34%, 34%, 33%…), se agregan decimales.
+    const cbEje = (fmt) => (v, i, ticks) => {
+      const t = fmt(v);
+      if (!ticks || ticks.length < 2 || new Set(ticks.map((k) => fmt(k.value))).size === ticks.length) return t;
+      const paso = Math.abs(ticks[1].value - ticks[0].value), d = paso < 0.1 ? 2 : 1, base = num(v, d);
+      return /%/.test(t) ? base + '%' : base;
+    };
+    const ejeTicks = { font: { family: MONO, size: 11 }, color: C.sec, maxTicksLimit: 6, callback: cbEje(fmtY) };
     const scales = {
       x: { type: 'category', grid: { display: false }, border: { color: C.grilla }, ticks: { font: { family: MONO, size: 11 }, color: C.sec, maxRotation: 0, autoSkip: true, maxTicksLimit: 8, callback: function (v) { const l = this.getLabelForValue(v); return (cfg.formatoX || mesCorto)(l); } } },
       y: { stacked: !!cfg.apilado, grid: { color: C.grilla }, border: { display: false }, ticks: ejeTicks, beginAtZero: !!cfg.desdeCero }
     };
-    if (cfg.eje2) scales.y1 = { position: 'right', grid: { display: false }, border: { display: false }, ticks: { ...ejeTicks, callback: (v) => (cfg.formatoY2 || fmtY)(v) } };
+    if (cfg.eje2) scales.y1 = { position: 'right', grid: { display: false }, border: { display: false }, ticks: { ...ejeTicks, callback: cbEje(cfg.formatoY2 || fmtY) } };
     if (cfg.apilado) scales.x.stacked = true;
     const plugins = [];
     if (cfg.valoresBarras) plugins.push({
@@ -274,8 +285,9 @@
 
   // Barras horizontales (un corte: último mes), con una barra destacada en ámbar.
   function barrasH(cfg, cont) {
-    cont.appendChild(tarjetaGrafico(cfg));
     const filas = cfg.filas.filter((f) => f.v != null && isFinite(f.v)).sort((a, b) => b.v - a.v);
+    if (!filas.length) return null;
+    cont.appendChild(tarjetaGrafico(cfg));
     const chart = new Chart(document.getElementById(cfg.id), {
       type: 'bar',
       data: {
@@ -321,14 +333,16 @@
       const cfg = ch.$cfg;
       if (!cfg.serieTiempo) return;
       const labels = ch.data.labels;
-      const inicioDatos = Math.max(0, ...ch.data.datasets.map((ds) => ds.data.findIndex((v) => v != null)).filter((i) => i >= 0));
+      const primeros = ch.data.datasets.map((ds) => ds.data.findIndex((v) => v != null)).filter((i) => i >= 0);
+      const inicioDatos = Math.max(0, ...primeros), primero = Math.min(...primeros, labels.length - 1);
       const desde = d || cfg.desde || labels[inicioDatos];
       let i0 = labels.findIndex((l) => l >= desde.slice(0, l.length));
       if (i0 < 0) i0 = 0;
-      i0 = Math.max(i0, d ? 0 : inicioDatos);
-      let i1 = labels.length - 1;
-      if (h) { const j = labels.map((l) => l <= h.slice(0, l.length)).lastIndexOf(true); if (j >= 0) i1 = j; }
-      else { const ult = Math.max(...ch.data.datasets.map((ds) => { for (let i = ds.data.length - 1; i >= 0; i--) if (ds.data[i] != null) return i; return -1; })); if (ult >= 0) i1 = ult; }
+      i0 = Math.max(i0, d ? primero : inicioDatos);
+      // El eje termina en el último dato disponible, aunque "hasta" pida más.
+      const ult = Math.max(...ch.data.datasets.map((ds) => { for (let i = ds.data.length - 1; i >= 0; i--) if (ds.data[i] != null) return i; return -1; }));
+      let i1 = ult >= 0 ? ult : labels.length - 1;
+      if (h) { const j = labels.map((l) => l <= h.slice(0, l.length)).lastIndexOf(true); if (j >= 0) i1 = Math.min(j, i1); }
       ch.options.scales.x.min = i0;
       ch.options.scales.x.max = Math.max(i0, i1);
       ch.update('none');
@@ -386,6 +400,7 @@
     return `<div class="clave"><span class="rotulo">${rotulo}</span><span class="cifra${destacada ? ' destacada' : ''}">${cifra}</span><span class="var">${varTxt || ''}</span><span class="pie">${pie}</span></div>`;
   }
   function estandar(rotulo, cifra, variacion, fuente) {
+    if (cifra === 's/d') return '';
     return `<div class="std"><span class="rotulo">${rotulo}</span><span class="cifra">${cifra}</span><span class="var">${variacion || ''}</span><span class="fuente">${fuente}</span></div>`;
   }
   const varSpan = (v, sufijo, invertir) => {
@@ -396,14 +411,15 @@
 
   /* ---------------- Paneles ---------------- */
   const PANELES = [
-    { id: 'precios', nombre: 'Precios' },
-    { id: 'actividad', nombre: 'Actividad' },
-    { id: 'trabajo', nombre: 'Trabajo e ingresos' },
-    { id: 'externo', nombre: 'Sector externo' },
-    { id: 'cambio', nombre: 'Tipo de cambio' },
-    { id: 'monetaria', nombre: 'Política monetaria' },
-    { id: 'bancos', nombre: 'Bancos' },
-    { id: 'generador', nombre: 'Generador de gráficos', aparte: true }
+    { id: 'resumen', nombre: 'Resumen' },
+    { id: 'precios', nombre: 'Precios', desc: 'Inflación mensual e interanual, núcleo, regulados y estacionales, divisiones del IPC y canastas básicas.' },
+    { id: 'actividad', nombre: 'Actividad', desc: 'EMAE, industria, construcción y actividad por sector.' },
+    { id: 'trabajo', nombre: 'Trabajo e ingresos', desc: 'Desocupación, empleo, pobreza y salarios reales.' },
+    { id: 'externo', nombre: 'Sector externo', desc: 'Exportaciones, importaciones y saldo comercial.' },
+    { id: 'cambio', nombre: 'Tipo de cambio', desc: 'Dólar oficial y paralelos, brecha, bandas, reservas, riesgo país y expectativas.' },
+    { id: 'monetaria', nombre: 'Política monetaria', desc: 'Base monetaria, M2 y tasas de interés.' },
+    { id: 'bancos', nombre: 'Bancos', desc: 'Préstamos y depósitos del sector privado.' },
+    { id: 'generador', nombre: 'Generador de gráficos', desc: 'Armá tu propio gráfico cruzando series, por sector.', aparte: true }
   ];
 
   function crearPaneles() {
@@ -426,6 +442,8 @@
   }
   function mostrar(id) {
     const p = PANELES.find((x) => x.id === id) || PANELES[0];
+    id = p.id;
+    document.documentElement.setAttribute('data-panel', id);
     document.getElementById('seccionActual').textContent = p.nombre;
     document.getElementById('btnGenerador').classList.toggle('activa', id === 'generador');
     document.querySelectorAll('.pestana').forEach((b) => b.classList.toggle('activa', b.dataset.panel === id));
@@ -435,11 +453,20 @@
     if (b) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (window._actFlechas) window._actFlechas();
     graficos.forEach((c) => c.resize());
-    window.scrollTo({ top: Math.min(window.scrollY, document.getElementById('paneles').offsetTop - 120), behavior: 'smooth' });
+    // Al cambiar de solapa se vuelve arriba: cada panel empieza con su propio título.
+    window.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' });
   }
   const bloque = (panel, html) => { const d = document.createElement('div'); d.innerHTML = html; while (d.firstChild) panel.appendChild(d.firstChild); };
   const grilla = (panel) => { const g = document.createElement('div'); g.className = 'graficos'; panel.appendChild(g); return g; };
   const titulo = (panel, t, intro) => bloque(panel, `<h2>${t}</h2>${intro ? `<p class="intro">${intro}</p>` : ''}`);
+
+  /* ---- Resumen: el encabezado grande (apertura) es de esta solapa; acá van los accesos a cada sección ---- */
+  function panelResumen() {
+    const P = document.getElementById('resumen');
+    titulo(P, 'Secciones', 'Elegí una sección para ver sus indicadores y gráficos.');
+    bloque(P, `<div class="secciones">${PANELES.filter((p) => p.desc).map((p) => `<button type="button" class="seccion" data-ir="${p.id}"><h3>${esc(p.nombre)}</h3><p>${esc(p.desc)}</p><span class="ir">Ver ${p.id === 'generador' ? 'el generador' : 'la sección'} →</span></button>`).join('')}</div>`);
+    P.querySelectorAll('[data-ir]').forEach((b) => b.addEventListener('click', () => mostrar(b.dataset.ir)));
+  }
 
   /* ---- Precios ---- */
   function panelPrecios() {
@@ -622,87 +649,249 @@
       series: [{ label: 'Depósitos', data: nom('depositos_usd') }, { label: 'Préstamos', data: nom('prestamos_usd') }] }, g);
   }
 
-  /* ---- Generador ---- */
-  function diccionario() {
-    const D = {
-      ipc_mensual: ['Inflación mensual (%)', () => m('ipc_mensual'), 'INDEC'],
-      ipc_interanual: ['Inflación interanual (%)', () => m('ipc_interanual'), 'INDEC'],
-      ipc_nucleo: ['Inflación núcleo mensual (%)', () => varM(ix('ipc_nucleo')), 'INDEC'],
-      ipc_regulados: ['Inflación de regulados mensual (%)', () => varM(ix('ipc_regulados')), 'INDEC'],
-      ipc_estacionales: ['Inflación de estacionales mensual (%)', () => varM(ix('ipc_estacionales')), 'INDEC'],
-      rem_interanual: ['Inflación esperada a 12 meses, REM (%)', () => m('rem_interanual'), 'BCRA'],
-      cbt_ia: ['Canasta básica total, var. interanual (%)', () => varIA(ix('linea_pobreza')), 'INDEC'],
-      emae: ['EMAE desestacionalizado (índice)', () => ix('emae_desest'), 'INDEC'],
-      emae_ia: ['EMAE, var. interanual (%)', () => varIA(ix('emae_original')), 'INDEC'],
-      ipi_ia: ['Industria (IPI), var. interanual (%)', () => varIA(ix('ipi_original')), 'INDEC'],
-      isac_ia: ['Construcción (ISAC), var. interanual (%)', () => varIA(ix('isac_original')), 'INDEC'],
-      sal_reg_ia: ['Salario registrado, var. interanual (%)', () => varIA(ix('sal_registrado')), 'INDEC'],
-      expo: ['Exportaciones (millones de USD)', () => ix('expo'), 'INDEC'],
-      impo: ['Importaciones (millones de USD)', () => ix('impo'), 'INDEC'],
-      saldo: ['Saldo comercial (millones de USD)', () => ix('saldo'), 'INDEC'],
-      tc_mayorista: ['Tipo de cambio mayorista (nominal)', () => nom('tc_mayorista'), 'BCRA'],
-      tc_mayorista_var: ['Devaluación mensual (%)', () => m('tc_mayorista_var'), 'BCRA'],
-      dolar_blue: ['Dólar blue (nominal)', () => nom('dolar_blue'), 'Ámbito'],
-      dolar_mep: ['Dólar MEP (nominal)', () => nom('dolar_mep'), 'Ámbito'],
-      dolar_ccl: ['Dólar CCL (nominal)', () => nom('dolar_ccl'), 'Ámbito'],
-      brecha_blue: ['Brecha blue (%)', () => m('brecha_blue'), 'BCRA y Ámbito'],
-      itcrm: ['Tipo de cambio real multilateral', () => m('itcrm'), 'BCRA'],
-      riesgo_pais: ['Riesgo país (pb)', () => m('riesgo_pais'), 'Ámbito'],
-      reservas: ['Reservas brutas (USD constantes)', () => m('reservas'), 'BCRA'],
-      compra_divisas: ['Compras de divisas del BCRA (USD constantes)', () => m('compra_divisas'), 'BCRA'],
-      base_monetaria: ['Base monetaria (pesos constantes)', () => m('base_monetaria'), 'BCRA'],
-      m2: ['M2 (pesos constantes)', () => m('m2'), 'BCRA'],
-      tamar_tea: ['TAMAR (TEA %)', () => m('tamar_tea'), 'BCRA'],
-      badlar_tea: ['BADLAR (TEA %)', () => m('badlar_tea'), 'BCRA'],
-      plazo_fijo: ['Plazos fijos (pesos constantes)', () => m('plazo_fijo'), 'BCRA'],
-      personales: ['Préstamos personales (pesos constantes)', () => m('personales'), 'BCRA'],
-      tarjetas: ['Préstamos con tarjeta (pesos constantes)', () => m('tarjetas'), 'BCRA'],
-      depositos_usd: ['Depósitos en dólares (nominal)', () => nom('depositos_usd'), 'BCRA'],
-      tasa_fed: ['Tasa de la FED (%)', () => m('tasa_fed'), 'NY Fed']
+  /* ---- Generador ----
+     El catálogo se arma por sector y grupo. Cada serie ofrece las transformaciones que tienen sentido
+     (valor original, variación mensual, variación interanual, acumulado de 12 meses, real) y solo
+     aparecen las series y transformaciones que tienen datos. */
+  const TRANSFORMACIONES = {
+    nivel:     { nombre: 'Valor original', corta: '', f: (a) => a },
+    mensual:   { nombre: 'Variación mensual (%)', corta: 'var. mensual (%)', f: varM },
+    interanual:{ nombre: 'Variación interanual (%)', corta: 'var. interanual (%)', f: varIA },
+    acum12:    { nombre: 'Acumulado de 12 meses', corta: 'acumulado 12 meses', f: suma12 },
+    real:      { nombre: 'Real, deflactado por IPC (nov 2023 = 100)', corta: 'real (nov 2023 = 100)', f: (a) => { const ipc = ix('ipc'); return rebase(a.map((v, i) => (v != null && ipc[i] != null ? v / ipc[i] : null)), '2023-11', '2023-11'); } }
+  };
+  const VAR = ['mensual', 'interanual'], FLUJO = ['mensual', 'interanual', 'acum12'];
+
+  function catalogo() {
+    // e(id, nombre, unidad, fuente, datos, transformaciones, reemplazos)
+    const e = (id, nombre, unidad, fuente, g, t = [], o = {}) => ({ id, nombre, unidad, fuente, t, o, vars: [{ id: '', nombre: '', g }] });
+    // Series del BCRA que existen a valores constantes (deflactados) y corrientes: un solo ítem con selector "Valores".
+    const par = (k, nombre, unidad, fuente, t = VAR, primero = 'c') => {
+      const c = { id: 'c', nombre: 'constantes', g: () => m(k) }, n = { id: 'n', nombre: 'corrientes', g: () => S.m[k + '_corriente'] || [] };
+      const x = e(k, nombre, unidad, fuente, null, t); x.vars = primero === 'n' ? [n, c] : [c, n];
+      return [x];
     };
-    return D;
+    const eph = (k) => () => alinear(S.ind && S.ind[k]);
+    const DIV = [['alimentos', 'Alimentos y bebidas'], ['bebidas', 'Bebidas alcohólicas y tabaco'], ['vivienda', 'Vivienda y servicios'], ['salud', 'Salud'], ['transporte', 'Transporte'], ['comunicacion', 'Comunicación'], ['recreacion', 'Recreación y cultura'], ['educacion', 'Educación'], ['restaurantes', 'Restaurantes y hoteles'], ['varios', 'Bienes y servicios varios']];
+    const SEC = [['agro', 'Agro'], ['pesca', 'Pesca'], ['mineria', 'Minería'], ['industria', 'Industria'], ['electricidad', 'Electricidad, gas y agua'], ['comercio', 'Comercio'], ['hoteles', 'Hoteles y restaurantes'], ['transporte', 'Transporte y comunicaciones'], ['financiera', 'Intermediación financiera'], ['inmobiliarias', 'Inmobiliarias'], ['admin', 'Administración pública'], ['ensenanza', 'Enseñanza'], ['salud', 'Salud'], ['comunitarios', 'Servicios comunitarios y personales']];
+    const TCR = [['usa', 'Estados Unidos'], ['brasil', 'Brasil'], ['zona_euro', 'Zona euro'], ['china', 'China'], ['chile', 'Chile'], ['uruguay', 'Uruguay'], ['mexico', 'México'], ['canada', 'Canadá'], ['japon', 'Japón'], ['reino_unido', 'Reino Unido'], ['suiza', 'Suiza'], ['india', 'India'], ['vietnam', 'Vietnam']];
+    const idx = (k) => () => ix(k);
+    return [
+      { sector: 'Precios', grupos: [
+        { grupo: 'Inflación', series: [
+          e('ipc', 'IPC, nivel general', 'índice dic 2016 = 100', 'INDEC', idx('ipc'), VAR, { mensual: () => m('ipc_mensual'), interanual: () => m('ipc_interanual') }),
+          e('ipc_nucleo', 'IPC, inflación núcleo', 'índice dic 2016 = 100', 'INDEC', idx('ipc_nucleo'), VAR),
+          e('ipc_regulados', 'IPC, regulados', 'índice dic 2016 = 100', 'INDEC', idx('ipc_regulados'), VAR),
+          e('ipc_estacionales', 'IPC, estacionales', 'índice dic 2016 = 100', 'INDEC', idx('ipc_estacionales'), VAR)
+        ] },
+        { grupo: 'IPC por división', series: DIV.map(([k, l]) => e('div_' + k, 'IPC, ' + l, 'índice dic 2016 = 100', 'INDEC', idx('div_' + k), VAR)) },
+        { grupo: 'Canastas y expectativas', series: [
+          e('linea_pobreza', 'Canasta básica total (línea de pobreza)', '$ por adulto equivalente', 'INDEC', idx('linea_pobreza'), VAR),
+          e('linea_indigencia', 'Canasta básica alimentaria (línea de indigencia)', '$ por adulto equivalente', 'INDEC', idx('linea_indigencia'), VAR),
+          e('rem_interanual', 'Inflación esperada a 12 meses (REM)', '%', 'BCRA', () => m('rem_interanual'))
+        ] }
+      ] },
+      { sector: 'Actividad', grupos: [
+        { grupo: 'EMAE', series: [
+          e('emae_desest', 'EMAE, desestacionalizado', 'índice 2004 = 100', 'INDEC', idx('emae_desest'), VAR),
+          e('emae_original', 'EMAE, serie original', 'índice 2004 = 100', 'INDEC', idx('emae_original'), VAR)
+        ] },
+        { grupo: 'Industria y construcción', series: [
+          e('ipi_desest', 'Industria (IPI manufacturero), desestacionalizado', 'índice', 'INDEC', idx('ipi_desest'), VAR),
+          e('ipi_original', 'Industria (IPI manufacturero), serie original', 'índice', 'INDEC', idx('ipi_original'), VAR),
+          e('isac_desest', 'Construcción (ISAC), desestacionalizado', 'índice', 'INDEC', idx('isac_desest'), VAR),
+          e('isac_original', 'Construcción (ISAC), serie original', 'índice', 'INDEC', idx('isac_original'), VAR)
+        ] },
+        { grupo: 'EMAE por sector', series: SEC.map(([k, l]) => e('sec_' + k, 'EMAE, ' + l, 'índice 2004 = 100', 'INDEC', idx('sec_' + k), VAR)) }
+      ] },
+      { sector: 'Trabajo e ingresos', grupos: [
+        { grupo: 'Salarios', series: [['total', 'Salarios, nivel general', 'sal_total'], ['registrado', 'Salarios registrados', 'sal_registrado'], ['privado', 'Salarios registrados del sector privado', 'sal_privado_reg'], ['publico', 'Salarios del sector público', 'sal_publico'], ['noreg', 'Salarios no registrados', 'sal_no_registrado']]
+          .map(([, n, k]) => e(k, n, 'índice oct 2016 = 100', 'INDEC', idx(k), [...VAR, 'real'])) },
+        { grupo: 'Mercado de trabajo y pobreza (EPH)', series: [
+          e('eph_actividad', 'Tasa de actividad (trimestral)', '%', 'INDEC, EPH', eph('eph_actividad')),
+          e('eph_empleo', 'Tasa de empleo (trimestral)', '%', 'INDEC, EPH', eph('eph_empleo')),
+          e('eph_desocupacion', 'Tasa de desocupación (trimestral)', '%', 'INDEC, EPH', eph('eph_desocupacion')),
+          e('pobreza_personas', 'Pobreza en personas (semestral)', '%', 'INDEC, EPH', eph('pobreza_personas')),
+          e('pobreza_hogares', 'Pobreza en hogares (semestral)', '%', 'INDEC, EPH', eph('pobreza_hogares'))
+        ] }
+      ] },
+      { sector: 'Sector externo', grupos: [
+        { grupo: 'Intercambio comercial', series: [
+          e('expo', 'Exportaciones', 'millones de USD', 'INDEC', idx('expo'), FLUJO),
+          e('impo', 'Importaciones', 'millones de USD', 'INDEC', idx('impo'), FLUJO),
+          e('saldo', 'Saldo comercial', 'millones de USD', 'INDEC', idx('saldo'), ['acum12'])
+        ] },
+        { grupo: 'Exportaciones por gran rubro', series: [['pp', 'productos primarios'], ['moa', 'manufacturas de origen agropecuario (MOA)'], ['moi', 'manufacturas de origen industrial (MOI)'], ['cye', 'combustibles y energía']]
+          .map(([k, l]) => e('expo_' + k, 'Exportaciones, ' + l, 'millones de USD', 'INDEC', idx('expo_' + k), FLUJO)) }
+      ] },
+      { sector: 'Tipo de cambio y reservas', grupos: [
+        { grupo: 'Dólar', series: [
+          ...par('tc_mayorista', 'Tipo de cambio mayorista', '$ por USD', 'BCRA', VAR, 'n'),
+          ...par('tc_minorista', 'Tipo de cambio minorista', '$ por USD', 'BCRA', VAR, 'n'),
+          ...par('dolar_blue', 'Dólar blue', '$ por USD', 'Ámbito', VAR, 'n'),
+          ...par('dolar_mep', 'Dólar MEP', '$ por USD', 'Ámbito', VAR, 'n'),
+          ...par('dolar_ccl', 'Dólar CCL', '$ por USD', 'Ámbito', VAR, 'n')
+        ] },
+        { grupo: 'Brecha y bandas cambiarias', series: [
+          e('brecha_blue', 'Brecha cambiaria, blue', '%', 'BCRA y Ámbito', () => m('brecha_blue')),
+          e('brecha_mep', 'Brecha cambiaria, MEP', '%', 'BCRA y Ámbito', () => m('brecha_mep')),
+          e('brecha_ccl', 'Brecha cambiaria, CCL', '%', 'BCRA y Ámbito', () => m('brecha_ccl')),
+          ...par('banda_superior', 'Banda cambiaria superior', '$ por USD', 'BCRA', [], 'n'),
+          ...par('banda_inferior', 'Banda cambiaria inferior', '$ por USD', 'BCRA', [], 'n')
+        ] },
+        { grupo: 'Tipo de cambio real', series: [
+          e('itcrm', 'Tipo de cambio real multilateral', 'índice 17-12-2015 = 100', 'BCRA', () => m('itcrm'), VAR),
+          ...TCR.map(([k, l]) => e('tcr_' + k, 'Tipo de cambio real con ' + l, 'índice 17-12-2015 = 100', 'BCRA', () => m('tcr_' + k), VAR))
+        ] },
+        { grupo: 'Reservas y riesgo país', series: [
+          ...par('reservas', 'Reservas brutas', 'millones de USD', 'BCRA'),
+          ...par('compra_divisas', 'Compras de divisas del BCRA', 'millones de USD', 'BCRA', ['acum12']),
+          e('riesgo_pais', 'Riesgo país', 'puntos básicos', 'Ámbito', () => m('riesgo_pais'), VAR)
+        ] }
+      ] },
+      { sector: 'Política monetaria', grupos: [
+        { grupo: 'Agregados monetarios', series: [
+          ...par('base_monetaria', 'Base monetaria', 'pesos', 'BCRA'),
+          ...par('m2', 'M2', 'pesos', 'BCRA'),
+          ...par('m2_transaccional', 'M2 transaccional', 'pesos', 'BCRA'),
+          ...par('circulacion_monetaria', 'Circulación monetaria', 'pesos', 'BCRA'),
+          ...par('billetes_monedas', 'Billetes y monedas en poder del público', 'pesos', 'BCRA'),
+          ...par('pases_pasivos', 'Pases pasivos', 'pesos', 'BCRA'),
+          ...par('lefi', 'LEFI', 'pesos', 'BCRA')
+        ] },
+        { grupo: 'Tasas de interés', series: [
+          e('tasa_politica_tea', 'Tasa de política monetaria (TEA)', '%', 'BCRA', () => m('tasa_politica_tea')),
+          e('tamar_tea', 'TAMAR (TEA)', '%', 'BCRA', () => m('tamar_tea')),
+          e('badlar_tea', 'BADLAR (TEA)', '%', 'BCRA', () => m('badlar_tea')),
+          e('baibar_tea', 'BAIBAR (TEA)', '%', 'BCRA', () => m('baibar_tea')),
+          e('tm20_tea', 'TM20 (TEA)', '%', 'BCRA', () => m('tm20_tea'))
+        ] }
+      ] },
+      { sector: 'Bancos', grupos: [
+        { grupo: 'Préstamos en pesos', series: [
+          ...par('adelantos', 'Préstamos, adelantos', 'pesos', 'BCRA'),
+          ...par('documentos', 'Préstamos, documentos', 'pesos', 'BCRA'),
+          ...par('hipotecarios', 'Préstamos hipotecarios', 'pesos', 'BCRA'),
+          ...par('prendarios', 'Préstamos prendarios', 'pesos', 'BCRA'),
+          ...par('personales', 'Préstamos personales', 'pesos', 'BCRA'),
+          ...par('tarjetas', 'Préstamos con tarjeta', 'pesos', 'BCRA')
+        ] },
+        { grupo: 'Depósitos en pesos', series: [
+          ...par('plazo_fijo', 'Depósitos a plazo fijo', 'pesos', 'BCRA'),
+          ...par('ca', 'Depósitos en cajas de ahorro', 'pesos', 'BCRA'),
+          ...par('cc', 'Depósitos en cuentas corrientes', 'pesos', 'BCRA')
+        ] },
+        { grupo: 'En dólares', series: [
+          ...par('depositos_usd', 'Depósitos en dólares', 'millones de USD', 'BCRA'),
+          ...par('prestamos_usd', 'Préstamos en dólares', 'millones de USD', 'BCRA')
+        ] }
+      ] },
+      { sector: 'Internacional', grupos: [
+        { grupo: 'Estados Unidos', series: [
+          e('tasa_fed', 'Tasa de fondos federales (EFFR)', '%', 'NY Fed', () => m('tasa_fed')),
+          e('us_cpi', 'IPC de EE.UU.', 'índice', 'BLS', () => m('us_cpi'), VAR)
+        ] }
+      ] }
+    ];
   }
+
+  // Deja solo las series, valuaciones y transformaciones con datos; arma un índice por id.
+  function prepararCatalogo() {
+    const ENT = {};
+    const cat = catalogo().map((sec) => ({
+      sector: sec.sector,
+      grupos: sec.grupos.map((g) => ({
+        grupo: g.grupo,
+        series: g.series.filter((e) => {
+          e.vars = e.vars.filter((vr) => {
+            vr.opts = ['nivel', ...e.t].map((tr) => {
+              const data = e.o[tr] ? e.o[tr]() : TRANSFORMACIONES[tr].f(vr.g());
+              return { tr, data, nombre: tr === 'nivel' ? `Valor original${e.unidad ? ` (${e.unidad})` : ''}` : TRANSFORMACIONES[tr].nombre };
+            }).filter((o) => tieneDatos(o.data));
+            return vr.opts.length > 0;
+          });
+          if (e.vars.length) ENT[e.id] = e;
+          return e.vars.length > 0;
+        })
+      })).filter((g) => g.series.length)
+    })).filter((sec) => sec.grupos.length);
+    return { cat, ENT };
+  }
+  const etiquetaSerie = (e, vr, tr) => `${e.nombre}${vr.nombre ? `, valores ${vr.nombre}` : ''}${tr === 'nivel' ? (e.unidad ? ` (${e.unidad})` : '') : `, ${TRANSFORMACIONES[tr].corta}`}`;
 
   function panelGenerador() {
     const P = document.getElementById('generador');
-    const D = diccionario();
-    const opciones = '<option value="">Elegí una serie</option>' + Object.entries(D).map(([k, [l]]) => `<option value="${k}">${esc(l)}</option>`).join('');
-    titulo(P, 'Generador de gráficos', 'Elegí una o dos series para verlas juntas en el tiempo o en un diagrama de dispersión con su recta de regresión.');
-    bloque(P, `<div class="generador">
+    const { cat, ENT } = prepararCatalogo();
+    P._ent = ENT;
+    titulo(P, 'Generador de gráficos', 'Elegí una o dos series, por sector, para verlas juntas en el tiempo o en un diagrama de dispersión con su recta de regresión.');
+    const caja = (n, titulo_) => `<div class="gen-caja" id="genCaja${n}"><h4>${titulo_}</h4>
+          <label for="genSec${n}">Sector</label><select id="genSec${n}"><option value="">Elegí un sector</option>${cat.map((s) => `<option value="${esc(s.sector)}">${esc(s.sector)}</option>`).join('')}</select>
+          <label for="genS${n}">Serie</label><select id="genS${n}" disabled><option value="">Primero elegí un sector</option></select>
+          <label for="genV${n}" class="gen-valores" hidden>Valores</label><select id="genV${n}" class="gen-valores" hidden><option value="c">Constantes</option></select>
+          <label for="genTr${n}">Transformación</label><select id="genTr${n}" disabled><option value="">Primero elegí una serie</option></select>
+          <label for="genT${n}" class="gen-tipo">Tipo de gráfico</label><select id="genT${n}" class="gen-tipo"><option value="linea">Línea</option><option value="barras">Barras</option></select></div>`;
+    bloque(P, `<div class="generador" id="genForm">
       <div class="gen-opciones">
         <label><input type="radio" name="genModo" value="tiempo" checked> Serie de tiempo</label>
         <label><input type="radio" name="genModo" value="dispersion"> Dispersión (X contra Y)</label>
         <label><input type="checkbox" id="genDos" checked> Comparar con una segunda serie</label>
       </div>
-      <div class="gen-fila">
-        <div class="gen-caja"><h4>Serie 1 (eje Y)</h4><label for="genS1">Serie</label><select id="genS1">${opciones}</select>
-          <label for="genT1">Tipo</label><select id="genT1"><option value="linea">Línea</option><option value="barras">Barras</option></select></div>
-        <div class="gen-caja" id="genCaja2"><h4>Serie 2 (eje derecho o X)</h4><label for="genS2">Serie</label><select id="genS2">${opciones}</select>
-          <label for="genT2">Tipo</label><select id="genT2"><option value="linea">Línea</option><option value="barras">Barras</option></select></div>
-      </div>
+      <div class="gen-fila">${caja(1, 'Serie 1 (eje Y)')}${caja(2, 'Serie 2 (eje derecho o X)')}</div>
+      <p class="gen-ayuda">Cada serie ofrece las transformaciones que tienen sentido (valor original, variación mensual o interanual, acumulado de 12 meses, real). Solo se listan las que tienen datos.</p>
       <button type="button" class="btn" id="genDibujar">Dibujar</button>
     </div><div class="graficos" id="genSalida"></div>`);
-    const caja2 = document.getElementById('genCaja2');
+    const $ = (id) => document.getElementById(id);
+    [1, 2].forEach((n) => {
+      const sec = $('genSec' + n), sr = $('genS' + n), tr = $('genTr' + n), vl = document.querySelectorAll('#genCaja' + n + ' .gen-valores');
+      const vsel = $('genV' + n);
+      const llenarTr = () => {
+        const e = ENT[sr.value], vr = e && (e.vars.find((x) => x.id === vsel.value) || e.vars[0]);
+        tr.disabled = !vr || vr.opts.length < 2;
+        tr.innerHTML = vr ? vr.opts.map((o) => `<option value="${o.tr}">${esc(o.nombre)}</option>`).join('') : '<option value="">Primero elegí una serie</option>';
+      };
+      sec.addEventListener('change', () => {
+        const s = cat.find((x) => x.sector === sec.value);
+        sr.disabled = !s;
+        sr.innerHTML = s ? '<option value="">Elegí una serie</option>' + s.grupos.map((g) => `<optgroup label="${esc(g.grupo)}">${g.series.map((e) => `<option value="${esc(e.id)}">${esc(e.nombre)}</option>`).join('')}</optgroup>`).join('') : '<option value="">Primero elegí un sector</option>';
+        sr.dispatchEvent(new Event('change'));
+      });
+      sr.addEventListener('change', () => {
+        const e = ENT[sr.value], dosV = !!e && e.vars.length > 1;
+        vl.forEach((el) => { el.hidden = !dosV; });
+        vsel.innerHTML = dosV ? e.vars.map((x) => `<option value="${x.id}">${x.nombre[0].toUpperCase() + x.nombre.slice(1)}</option>`).join('') : '';
+        llenarTr();
+      });
+      vsel.addEventListener('change', llenarTr);
+    });
+    const caja2 = $('genCaja2'), form = $('genForm');
     const sync = () => {
       const disp = document.querySelector('input[name="genModo"]:checked').value === 'dispersion';
-      if (disp) document.getElementById('genDos').checked = true;
-      document.getElementById('genDos').disabled = disp;
-      caja2.classList.toggle('apagada', !document.getElementById('genDos').checked);
+      if (disp) $('genDos').checked = true;
+      $('genDos').disabled = disp;
+      caja2.classList.toggle('apagada', !$('genDos').checked);
+      form.classList.toggle('es-disp', disp);
     };
     P.querySelectorAll('input').forEach((i) => i.addEventListener('change', sync));
-    document.getElementById('genDibujar').addEventListener('click', () => dibujarGenerador(D));
+    $('genDibujar').addEventListener('click', () => dibujarGenerador(ENT));
   }
 
-  function dibujarGenerador(D) {
-    const k1 = document.getElementById('genS1').value, k2 = document.getElementById('genS2').value;
+  function dibujarGenerador(ENT) {
     const dos = document.getElementById('genDos').checked;
     const disp = document.querySelector('input[name="genModo"]:checked').value === 'dispersion';
-    if (!k1 || (dos && !k2)) { alert('Elegí las series que querés graficar.'); return; }
+    const leer = (n) => {
+      const e = ENT[document.getElementById('genS' + n).value];
+      if (!e) return null;
+      const vr = e.vars.find((x) => x.id === document.getElementById('genV' + n).value) || e.vars[0];
+      const o = vr.opts.find((x) => x.tr === document.getElementById('genTr' + n).value) || vr.opts[0];
+      return { label: etiquetaSerie(e, vr, o.tr), data: o.data, fuente: e.fuente, tipo: document.getElementById('genT' + n).value };
+    };
+    const s1 = leer(1), s2 = dos ? leer(2) : null;
+    if (!s1 || (dos && !s2)) { alert('Elegí las series que querés graficar.'); return; }
     const out = document.getElementById('genSalida');
     const prev = Chart.getChart('gGen'); if (prev) { graficos.splice(graficos.indexOf(prev), 1); prev.destroy(); }
     out.innerHTML = '';
-    const fuentes = [...new Set([D[k1][2], dos ? D[k2][2] : null].filter(Boolean))].join(', ');
-    const a = D[k1][1](), b = dos ? D[k2][1]() : null;
+    const fuentes = [...new Set([s1.fuente, s2 ? s2.fuente : null].filter(Boolean))].join(', ');
+    const a = s1.data, b = s2 ? s2.data : null;
     if (disp) {
       const pts = [];
       a.forEach((v, i) => { if (v != null && b[i] != null) pts.push({ x: b[i], y: v, f: S.fm[i] }); });
@@ -712,7 +901,7 @@
       const pend = (n * sxy - sx * sy) / (n * sxx - sx * sx), ord = (sy - pend * sx) / n;
       const r2 = Math.pow((n * sxy - sx * sy) / Math.sqrt((n * sxx - sx * sx) * (n * syy - sy * sy)), 2) || 0;
       const xs = pts.map((p) => p.x), x0 = Math.min(...xs), x1 = Math.max(...xs);
-      const tarjeta = tarjetaGrafico({ id: 'gGen', titulo: `${D[k1][0]} y ${D[k2][0]}`, unidad: 'Observaciones mensuales y recta de regresión', fuente: `CEER en base a ${fuentes}`, ancho: true, alto: true });
+      const tarjeta = tarjetaGrafico({ id: 'gGen', titulo: `${s1.label} y ${s2.label}`, unidad: 'Observaciones mensuales y recta de regresión', fuente: `CEER en base a ${fuentes}`, ancho: true, alto: true });
       tarjeta.querySelector('.lienzo').insertAdjacentHTML('beforebegin', `<div class="gen-resumen"><div><span>R²</span><b data-r2>0</b></div><div><span>Pendiente</span><b data-pend>0</b></div><div><span>Observaciones</span><b data-n>0</b></div></div>`);
       out.appendChild(tarjeta);
       const ch = new Chart(document.getElementById('gGen'), {
@@ -722,7 +911,7 @@
           { type: 'line', label: 'Regresión', data: [{ x: x0, y: pend * x0 + ord }, { x: x1, y: pend * x1 + ord }], borderColor: C.ambar, borderWidth: 2, pointRadius: 0 }
         ] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, etiquetasFinales: { activo: false }, tooltip: { backgroundColor: C.tooltip, cornerRadius: 0, callbacks: { label: (it) => (it.raw.f ? ` ${mesLargo(it.raw.f)}: (${num(it.raw.x, 2)}; ${num(it.raw.y, 2)})` : '') } } },
-          scales: { x: { title: { display: true, text: D[k2][0] }, grid: { color: C.grilla }, ticks: { font: { family: MONO, size: 11 }, callback: (v) => compacto(v) } }, y: { title: { display: true, text: D[k1][0] }, grid: { color: C.grilla }, ticks: { font: { family: MONO, size: 11 }, callback: (v) => compacto(v) } } } }
+          scales: { x: { title: { display: true, text: s2.label }, grid: { color: C.grilla }, ticks: { font: { family: MONO, size: 11 }, callback: (v) => compacto(v) } }, y: { title: { display: true, text: s1.label }, grid: { color: C.grilla }, ticks: { font: { family: MONO, size: 11 }, callback: (v) => compacto(v) } } } }
       });
       ch.$cfg = { serieTiempo: false }; graficos.push(ch);
       // reproductor: los puntos aparecen en orden cronológico y la recta se recalcula
@@ -750,9 +939,10 @@
         contar(tarjeta.querySelector('[data-n]'), n, (v) => num(Math.round(v), 0));
       });
     } else {
-      const series = [{ label: D[k1][0], data: a, tipo: document.getElementById('genT1').value === 'barras' ? 'bar' : undefined }];
-      if (dos) series.push({ label: D[k2][0], data: b, eje: 'y1', tipo: document.getElementById('genT2').value === 'barras' ? 'bar' : undefined });
-      const ch = serieTiempo({ id: 'gGen', titulo: dos ? `${D[k1][0]} y ${D[k2][0]}` : D[k1][0], unidad: dos ? 'Serie 1 en el eje izquierdo, serie 2 en el derecho' : '', fuente: `CEER en base a ${fuentes}`, ancho: true, alto: true, eje2: dos, etiquetas: false, series }, out);
+      const series = [{ label: s1.label, data: a, tipo: s1.tipo === 'barras' ? 'bar' : undefined }];
+      if (dos) series.push({ label: s2.label, data: b, eje: 'y1', tipo: s2.tipo === 'barras' ? 'bar' : undefined });
+      const ch = serieTiempo({ id: 'gGen', titulo: dos ? `${s1.label} y ${s2.label}` : s1.label, unidad: dos ? 'Serie 1 en el eje izquierdo, serie 2 en el derecho' : '', fuente: `CEER en base a ${fuentes}`, ancho: true, alto: true, eje2: dos, etiquetas: false, series }, out);
+      if (!ch) { alert('Esas series no tienen datos para graficar.'); return; }
       aplicarFechas();
       const tarjeta = ch.canvas.closest('.grafico');
       // reproductor: la serie avanza mes a mes con los ejes fijos
@@ -782,12 +972,13 @@
     const tc = items.find((i) => i.id === 'tc'), res = items.find((i) => i.id === 'reservas');
     const riesgo = ultimo(S.d.riesgo_pais || [], S.fd);
     const fd = (iso) => { const [y, mm, d] = iso.split('-'); return `${d}/${mm}/${y}`; };
+    // Solo se muestran los indicadores que tienen dato.
     const html = [
-      clave('Inflación mensual (IPC)', u ? pct(u.v) : '<span class="sin-dato">sin datos aún</span>', uia ? `Interanual: ${pct(uia.v)}` : '', `INDEC / ${u ? mesLargo(u.f) : ''}`, true),
-      clave('Actividad económica (EMAE)', ue ? pct(ue.v, 1, true) : '<span class="sin-dato">sin datos aún</span>', ue && emM[ue.i] != null ? `Interanual. Mensual desestacionalizada: ${pct(emM[ue.i], 1, true)}` : 'Variación interanual', `INDEC / ${ue ? mesLargo(ue.f) : ''}`),
-      clave('Tipo de cambio mayorista', tc && !tc.error ? '$ ' + num(tc.valor, 0) : '<span class="sin-dato">sin datos aún</span>', res && !res.error ? `Reservas: USD ${num(res.valor, 0)} M` : '', `BCRA / ${tc && tc.periodo ? tc.periodo : ''}`),
-      clave('Riesgo país', riesgo ? num(riesgo.v, 0) : '<span class="sin-dato">sin datos aún</span>', 'Puntos básicos', `Ámbito / ${riesgo ? fd(riesgo.f) : ''}`)
-    ];
+      u && clave('Inflación mensual (IPC)', pct(u.v), uia ? `Interanual: ${pct(uia.v)}` : '', `INDEC / ${mesLargo(u.f)}`, true),
+      ue && clave('Actividad económica (EMAE)', pct(ue.v, 1, true), emM[ue.i] != null ? `Interanual. Mensual desestacionalizada: ${pct(emM[ue.i], 1, true)}` : 'Variación interanual', `INDEC / ${mesLargo(ue.f)}`),
+      tc && !tc.error && tc.valor != null && clave('Tipo de cambio mayorista', '$ ' + num(tc.valor, 0), res && !res.error && res.valor != null ? `Reservas: USD ${num(res.valor, 0)} M` : '', `BCRA${tc.periodo ? ' / ' + tc.periodo : ''}`),
+      riesgo && clave('Riesgo país', num(riesgo.v, 0), 'Puntos básicos', `Ámbito / ${fd(riesgo.f)}`)
+    ].filter(Boolean);
     document.getElementById('claves').innerHTML = html.join('');
     const ahora = new Date();
     document.getElementById('fechaCorte').textContent = `${MESES[ahora.getMonth()]} ${ahora.getFullYear()}`;
@@ -795,17 +986,24 @@
 
   /* ---------------- Carga ---------------- */
   function renderizar() {
-    const activo = (location.hash || '#precios').slice(1);
+    const activo = (location.hash || '#resumen').slice(1);
     graficos.splice(0).forEach((c) => c.destroy());
     aplicarPaleta();
     crearPaneles();
     claves();
-    [panelPrecios, panelActividad, panelTrabajo, panelExterno, panelCambio, panelMonetaria, panelBancos, panelGenerador].forEach((fn) => {
+    [panelResumen, panelPrecios, panelActividad, panelTrabajo, panelExterno, panelCambio, panelMonetaria, panelBancos, panelGenerador].forEach((fn) => {
       try { fn(); } catch (e) { console.error(fn.name, e); }
+    });
+    // Nada vacío: sin tarjetas ni gráficos con datos, el bloque no aparece.
+    document.querySelectorAll('.estandar').forEach((el) => { if (!el.querySelector('.std')) el.remove(); });
+    document.querySelectorAll('.graficos').forEach((el) => { if (!el.children.length && !el.id) el.remove(); });
+    document.querySelectorAll('.panel').forEach((el) => {
+      if (el.id === 'resumen' || el.id === 'generador' || el.querySelector('.std, .grafico, .estado')) return;
+      bloque(el, '<p class="estado">Todavía no hay datos disponibles para esta sección.</p>');
     });
     aplicarFechas();
     if (!S.indecOk) bloque(document.getElementById('precios'), '<p class="estado error">No se pudieron cargar las series del INDEC. Probá de nuevo en unos minutos.</p>');
-    mostrar(PANELES.some((p) => p.id === activo) ? activo : 'precios');
+    mostrar(PANELES.some((p) => p.id === activo) ? activo : 'resumen');
   }
 
   async function cargar() {
@@ -849,6 +1047,11 @@
   }
 
   document.getElementById('btnGenerador').addEventListener('click', () => mostrar('generador'));
+  // Botón "atrás" o enlaces con #sección: el panel y el encabezado siguen al hash.
+  window.addEventListener('hashchange', () => {
+    const id = location.hash.slice(1);
+    if (S.fm.length && PANELES.some((p) => p.id === id) && document.documentElement.getAttribute('data-panel') !== id) mostrar(id);
+  });
   // Flechas para deslizar las pestañas cuando no entran (como en el IPCEER)
   (function () {
     const nav = document.getElementById('pestanas');
