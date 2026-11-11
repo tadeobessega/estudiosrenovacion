@@ -5,15 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar sesión — Panel</title>
-    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <script>
+    /* Tema: el guardado o el del sistema, como en el sitio. Va antes del CSS para no parpadear. */
+    (function () { var t = null; try { t = localStorage.getItem('cer-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t); })();
+  </script>
+  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/admin.css?v=20261105">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=20261111">
 </head>
 
 <body>
     <div class="login-container">
         <div class="login-card">
+            <button type="button" class="theme-toggle login-theme" id="themeToggle" aria-label="Cambiar el tema" title="Cambiar el tema"><i class="fas fa-sun" aria-hidden="true"></i><i class="fas fa-moon" aria-hidden="true"></i></button>
             <div class="login-logo">
                 <a href="../index.html#inicio" aria-label="Centros de Estudios Renovación — inicio">
                     <img src="../assets/img/logos.png" alt="Centros de Estudios Renovación">
@@ -46,6 +53,15 @@
                         <span class="spinner" style="display:none;"></span>
                     </button>
                 </form>
+                <p class="login-recuperar"><a href="#" id="abrirRecuperar">¿Perdiste el acceso?</a></p>
+                <form id="recuperarForm" style="display:none;">
+                    <div id="recuperarMsg" class="alert" style="display:none;"></div>
+                    <p class="login-subtitle" style="margin:0 0 .75rem">Con el código de recuperación que te pasa el administrador del sitio podés poner una contraseña nueva.</p>
+                    <div class="form-group"><label class="form-label" for="recUsuario">Usuario</label><input type="text" id="recUsuario" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label" for="recCodigo">Código de recuperación</label><input type="password" id="recCodigo" class="form-input" required autocomplete="off"></div>
+                    <div class="form-group"><label class="form-label" for="recNueva">Contraseña nueva</label><input type="password" id="recNueva" class="form-input" required minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div>
+                    <button type="submit" class="btn-admin btn-admin-primary btn-admin-block">Guardar contraseña</button>
+                </form>
             </div>
 
             <!-- Register -->
@@ -61,7 +77,7 @@
                     <div class="form-group">
                         <label class="form-label" for="registerPassword">Contraseña</label>
                         <input type="password" id="registerPassword" class="form-input"
-                            placeholder="Mínimo 6 caracteres" required minlength="6">
+                            placeholder="Mínimo 8 caracteres" required minlength="8">
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="registerCentro">Centro de Investigación</label>
@@ -180,6 +196,16 @@
             btn.disabled = false;
         });
     </script>
+<script>
+    document.getElementById('abrirRecuperar').addEventListener('click', function (e) { e.preventDefault(); var f = document.getElementById('recuperarForm'); f.style.display = f.style.display === 'none' ? 'block' : 'none'; });
+    document.getElementById('recuperarForm').addEventListener('submit', async function (e) { e.preventDefault(); var m = document.getElementById('recuperarMsg');
+      var r = await apiCall('recuperar', { email: document.getElementById('recUsuario').value, codigo: document.getElementById('recCodigo').value, nueva: document.getElementById('recNueva').value });
+      m.className = 'alert ' + (r.success ? 'alert-success' : 'alert-danger'); m.textContent = r.success ? r.message : (r.error || 'No se pudo cambiar la contraseña'); m.style.display = 'block';
+      if (r.success) { document.getElementById('loginEmail').value = document.getElementById('recUsuario').value; this.reset(); } });
+    (function () { var b = document.getElementById('themeToggle'); if (!b) return;
+      b.addEventListener('click', function () { var r = document.documentElement, n = r.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        r.setAttribute('data-theme', n); try { localStorage.setItem('cer-theme', n); } catch (e) {} }); })();
+  </script>
 </body>
 
 </html>

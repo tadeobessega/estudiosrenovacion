@@ -48,7 +48,7 @@ function authHeaders() {
 
 async function handleAuthError(res, data) {
   // Sesión vencida: volvemos al login (salvo que ya estemos ahí).
-  if (res.status === 401 && !/login\.html$/.test(location.pathname)) {
+  if (res.status === 401 && !/\/login(\.html)?$/.test(location.pathname)) {
     localStorage.removeItem('adminUser');
     location.href = 'login.html';
   }

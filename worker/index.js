@@ -174,6 +174,21 @@ async function handleApi(request, env, url) {
         ]);
         return ok({ user: { ...toUser(u), token } });
       }
+      case 'recuperar': {
+        /* Recuperar el acceso con el código que el administrador del sitio guarda como secreto CODIGO_RECUPERACION en Cloudflare */
+        const codigo = String(p.codigo || ''), email = String(p.email || '').trim().toLowerCase(), nueva = String(p.nueva || '');
+        if (!env.CODIGO_RECUPERACION) return fail('La recuperación no está habilitada. Pedile a un administrador que configure el código.', 403);
+        if (!safeEqual(codigo, String(env.CODIGO_RECUPERACION))) return fail('Código incorrecto', 401);
+        if (nueva.length < 8) return fail('La nueva contraseña debe tener al menos 8 caracteres');
+        const u = await db.prepare('SELECT email FROM users WHERE lower(email) = ?').bind(email).first();
+        if (!u) return fail('Ese usuario no existe');
+        const salt = randomHex(16);
+        await db.batch([
+          db.prepare('UPDATE users SET password_hash = ?, salt = ?, approved = 1 WHERE email = ?').bind(await hashPassword(nueva, salt), salt, u.email),
+          db.prepare('DELETE FROM sessions WHERE email = ?').bind(u.email)
+        ]);
+        return ok({ message: 'Listo: ya podés entrar con la contraseña nueva.' });
+      }
       case 'register': {
         const email = String(p.email || '').trim();
         const password = String(p.password || '');
@@ -337,6 +352,19 @@ async function handleApi(request, env, url) {
           db.prepare('DELETE FROM users WHERE email = ?').bind(p.email || '')
         ]);
         return ok();
+      }
+      case 'resetUserPassword': {
+        /* un administrador le pone una contraseña nueva a otro usuario (que después puede cambiarla desde la llave) */
+        const no = adminOnly(); if (no) return no;
+        const nueva = String(p.nueva || ''); if (nueva.length < 8) return fail('La contraseña debe tener al menos 8 caracteres');
+        const u = await db.prepare('SELECT email FROM users WHERE lower(email) = lower(?)').bind(String(p.email || '')).first();
+        if (!u) return fail('Ese usuario no existe');
+        const salt = randomHex(16);
+        await db.batch([
+          db.prepare('UPDATE users SET password_hash = ?, salt = ? WHERE email = ?').bind(await hashPassword(nueva, salt), salt, u.email),
+          db.prepare('DELETE FROM sessions WHERE email = ?').bind(u.email)
+        ]);
+        return ok({ message: 'Contraseña actualizada' });
       }
       case 'updateUserCentro': {
         const deny = adminOnly(); if (deny) return deny;

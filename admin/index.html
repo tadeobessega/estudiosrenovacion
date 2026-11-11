@@ -4,10 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de administración — Centros de Estudios Renovación</title>
+  <script>
+    /* Tema: el guardado o el del sistema, como en el sitio. Va antes del CSS para no parpadear. */
+    (function () { var t = null; try { t = localStorage.getItem('cer-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t); })();
+  </script>
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../assets/css/admin.css?v=20261105">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=20261111">
 </head>
 <body class="admin-page">
 
@@ -29,6 +35,7 @@
       </nav>
     </div>
     <div class="admin-header-right">
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Cambiar el tema" title="Cambiar el tema"><i class="fas fa-sun" aria-hidden="true"></i><i class="fas fa-moon" aria-hidden="true"></i></button>
       <div class="admin-user-info">
         <div class="admin-user-avatar" id="userAvatar">U</div>
         <div>
@@ -846,6 +853,7 @@
             <button class="btn-admin btn-admin-success btn-admin-sm" onclick="approveUser('${u.email}')"><i class="fas fa-check"></i> Aprobar</button>
             <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="rejectUser('${u.email}')"><i class="fas fa-times"></i> Rechazar</button>` : ''}
           <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="openEditUserModal('${u.email}','${u.centro||''}')"><i class="fas fa-edit"></i></button>
+          <button class="btn-admin btn-admin-secondary btn-admin-sm" onclick="resetUserPassword('${u.email}')" title="Poner una contraseña nueva"><i class="fas fa-key"></i></button>
           <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="openDeleteUserModal('${u.email}')"><i class="fas fa-trash"></i></button>
         </div></td>
       </tr>`).join('')}</tbody></table></div>`;
@@ -888,6 +896,12 @@
     openModal('deleteUserModal');
   }
 
+  async function resetUserPassword(email) {
+    const nueva = prompt('Contraseña nueva para ' + email + ' (mínimo 8 caracteres). Pasásela a esa persona por un canal privado; después la puede cambiar desde la llave.');
+    if (!nueva) return;
+    const res = await apiCall('resetUserPassword', { email, nueva });
+    showNotification(res.success ? 'Contraseña actualizada' : (res.error || 'No se pudo cambiar'), res.success ? 'success' : 'error');
+  }
   async function confirmDeleteUser() {
     if (!userToDelete) return;
     const btn = document.getElementById('confirmDeleteUserBtn');
@@ -1315,5 +1329,10 @@
   </div>
 
 
+<script>
+    (function () { var b = document.getElementById('themeToggle'); if (!b) return;
+      b.addEventListener('click', function () { var r = document.documentElement, n = r.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        r.setAttribute('data-theme', n); try { localStorage.setItem('cer-theme', n); } catch (e) {} }); })();
+  </script>
 </body>
 </html>
